@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.scaffold/
+pnpm-lock.yaml
+next-env.d.ts
+coverage/
+playwright-report/
+test-results/
+.env*
+docs/conceptual/
+docs/DESIGN.md
+docs/CI_CD.md

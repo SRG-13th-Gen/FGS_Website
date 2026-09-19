@@ -1,0 +1,62 @@
+# Documentation index
+
+## Status and authority
+
+The repository now has an executable development scaffold: Next.js, Tailwind, the full selected shadcn registry, local WordPress/MariaDB Compose services, and quality tooling. Product features remain **Unimplemented**; scaffold checks do not establish product acceptance. See [SPEC-006](specs/006-repository-scaffold.md) for implementation evidence.
+
+- **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
+- **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
+- **Open**: a question without a selected answer. **Deferred**: intentionally outside the current delivery phase.
+
+Record acceptance evidence in [DECISIONS.md](DECISIONS.md). The owner's requests approve documentation, v1 scope, and repository scaffolding with delegated library choices, not every proposed product detail in these documents.
+
+Authority for future work:
+
+1. Current explicit owner instructions, with resulting specification changes recorded.
+2. Accepted decisions and accepted requirements in the maintained documentation.
+3. Accepted feature specifications and their architecture, security, and contract constraints.
+4. Implementation and tests as evidence of actual behavior, not permission to override requirements.
+5. Proposed specifications, historical conceptual material, and external examples.
+
+[AGENTS.md](../AGENTS.md) governs contributor conduct. If authoritative documents conflict, surface the conflict and resolve the affected decision rather than silently choosing one. The [original draft](conceptual/IMPLEMENTATION_PLAN.md) stays unchanged; its accepted architecture is carried into the maintained documents below.
+
+## Document map
+
+Owners below are responsibilities to assign, not named people already appointed.
+
+| Document                                           | Purpose                                                                  | Responsible role                   |
+| -------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------- |
+| [FRS_NFRS.md](FRS_NFRS.md)                         | Requirement IDs, status, acceptance criteria                             | Product owner with engineering     |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                 | Boundaries, ownership, topology, flows                                   | Technical lead                     |
+| [TECH_STACK.md](TECH_STACK.md)                     | Baseline stack and recommended alternatives                              | Technical lead                     |
+| [FRONTEND.md](FRONTEND.md)                         | Installed primitives, custom-component ownership, and developer commands | Engineering with frontend designer |
+| [DESIGN.md](DESIGN.md)                             | Intentionally empty; future visual design authority                      | Frontend designer                  |
+| [DOCKER.md](DOCKER.md)                             | Local services, setup, and operational safeguards                        | Engineering                        |
+| [CI_CD.md](CI_CD.md)                               | Intentionally empty; CI/CD deferred                                      | Engineering                        |
+| [DATA_API_CONTRACTS.md](DATA_API_CONTRACTS.md)     | Resource mappings and proposed interfaces                                | Engineering                        |
+| [SECURITY.md](SECURITY.md)                         | Trust boundaries, access, secrets, privacy                               | Engineering with school owner      |
+| [TESTING.md](TESTING.md)                           | Verification strategy and traceability matrix                            | Engineering/QA                     |
+| [SPEC_WORKFLOW.md](SPEC_WORKFLOW.md)               | Specification lifecycle and change process                               | All contributors                   |
+| [DECISIONS.md](DECISIONS.md)                       | Accepted, proposed, open, and deferred decisions                         | Decision owner per entry           |
+| [ROADMAP.md](ROADMAP.md)                           | Delivery phases and dependencies                                         | Product owner with engineering     |
+| [Feature index](specs/README.md)                   | Planned features and future accepted specifications                      | Feature owners                     |
+| [Feature template](specs/_TEMPLATE.md)             | Reusable specification structure                                         | All contributors                   |
+| [Initial draft](conceptual/IMPLEMENTATION_PLAN.md) | Preserved historical blueprint                                           | Reference only                     |
+
+## Read only what the task needs
+
+| Task                             | Reading path                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| New contributor                  | Root README, AGENTS, this index, then relevant rules                              |
+| Requirements or feature proposal | FRS_NFRS, DECISIONS, SPEC_WORKFLOW, feature index                                 |
+| CMS/public content               | ARCHITECTURE, DATA_API_CONTRACTS, SECURITY, relevant requirements                 |
+| Admin/authentication             | SECURITY, DECISIONS, contracts, admin requirements                                |
+| Inquiry forms                    | Inquiry requirements, contracts, SECURITY, delivery/privacy decisions             |
+| Frontend design                  | DESIGN (currently empty), approved content requirements; coordinate with designer |
+| Local setup                      | DOCKER, TECH_STACK, architecture hosting constraints                              |
+| Testing                          | TESTING and the affected requirement/specification                                |
+| Commits or PRs                   | Git rules and repository-local GitHub PR skill via AGENTS                         |
+
+## Keeping this index useful
+
+Link every added engineering document here or through the feature index. Keep requirements in FRS_NFRS, decision status in DECISIONS, wire contracts in DATA_API_CONTRACTS, and visual decisions in DESIGN. Other documents link to those sources instead of maintaining competing copies. See [SPEC_WORKFLOW.md](SPEC_WORKFLOW.md) for changes and traceability.

@@ -1,0 +1,47 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+
+# Next.js, TypeScript, coverage and browser-test output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+coverage/
+playwright-report/
+test-results/
+.cache/
+.scaffold/
+
+# Local configuration and secrets; only sanitized examples are committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local service data and exports
+.data/
+backups/
+*.sql
+*.sql.gz
+
+# Logs and machine/editor state
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.vercel/
+
+# Do not introduce competing lockfiles
+package-lock.json
+yarn.lock
+bun.lock
+bun.lockb
