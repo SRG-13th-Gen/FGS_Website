@@ -36,7 +36,8 @@ const CATEGORIES: Array<{
   {
     id: "announcements",
     name: "Announcements",
-    description: "Official school advisories, enrollment updates, schedule alerts",
+    description:
+      "Official school advisories, enrollment updates, schedule alerts",
     icon: Megaphone,
     color: "border-blue-500/30 bg-blue-50 text-blue-700",
   },
@@ -93,7 +94,9 @@ export default function AdminPage() {
   // Caption update handler
   const handleCaptionChange = (id: string, newCaption: string) => {
     setPictures((prev) =>
-      prev.map((pic) => (pic.id === id ? { ...pic, caption: newCaption } : pic)),
+      prev.map((pic) =>
+        pic.id === id ? { ...pic, caption: newCaption } : pic,
+      ),
     );
   };
 
@@ -124,11 +127,17 @@ export default function AdminPage() {
 
     // Validation
     if (!title.trim()) {
-      setFeedback({ type: "error", message: "Please provide an article title." });
+      setFeedback({
+        type: "error",
+        message: "Please provide an article title.",
+      });
       return;
     }
     if (!body.trim()) {
-      setFeedback({ type: "error", message: "Please provide the article body content." });
+      setFeedback({
+        type: "error",
+        message: "Please provide the article body content.",
+      });
       return;
     }
 
@@ -219,7 +228,10 @@ export default function AdminPage() {
           <div className="space-y-6 lg:col-span-2">
             {/* Title Input */}
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-              <label htmlFor="article-title" className="block text-sm font-bold text-neutral-800">
+              <label
+                htmlFor="article-title"
+                className="block text-sm font-bold text-neutral-800"
+              >
                 Article Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -228,7 +240,7 @@ export default function AdminPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Annual Science Fair & Robotics Exhibition 2026"
-                className="mt-2.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:outline-none focus:ring-2 focus:ring-school-green/20"
+                className="mt-2.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
                 required
               />
             </div>
@@ -253,7 +265,7 @@ export default function AdminPage() {
                       onClick={() => setCategory(cat.id)}
                       className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
                         isSelected
-                          ? "border-school-green bg-school-green-light/40 ring-2 ring-school-green/20 shadow-sm"
+                          ? "border-school-green bg-school-green-light/40 shadow-sm ring-2 ring-school-green/20"
                           : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"
                       }`}
                     >
@@ -263,7 +275,9 @@ export default function AdminPage() {
                         >
                           <Icon className="h-4 w-4" />
                         </span>
-                        <span className="font-semibold text-neutral-900">{cat.name}</span>
+                        <span className="font-semibold text-neutral-900">
+                          {cat.name}
+                        </span>
                       </div>
                       <p className="mt-2 text-xs leading-relaxed text-neutral-500">
                         {cat.description}
@@ -276,7 +290,10 @@ export default function AdminPage() {
 
             {/* Body Content */}
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-              <label htmlFor="article-body" className="block text-sm font-bold text-neutral-800">
+              <label
+                htmlFor="article-body"
+                className="block text-sm font-bold text-neutral-800"
+              >
                 Article Body <span className="text-red-500">*</span>
               </label>
               <p className="mt-1 text-xs text-neutral-500">
@@ -288,7 +305,7 @@ export default function AdminPage() {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Share the full details of this announcement or story..."
-                className="mt-3.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-sm text-neutral-900 leading-relaxed placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:outline-none focus:ring-2 focus:ring-school-green/20"
+                className="mt-3.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-sm leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
                 required
               />
               <div className="mt-2 flex items-center justify-between text-xs text-neutral-400">
@@ -305,7 +322,8 @@ export default function AdminPage() {
                     Article Pictures &amp; Captions
                   </h2>
                   <p className="text-xs text-neutral-500">
-                    Upload photos for your article. Each photo can have its own custom caption.
+                    Upload photos for your article. Each photo can have its own
+                    custom caption.
                   </p>
                 </div>
                 <button
@@ -364,7 +382,7 @@ export default function AdminPage() {
                             className="object-cover"
                           />
                           {isCover && (
-                            <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded bg-school-green px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                            <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded bg-school-green px-2 py-0.5 text-[10px] font-bold text-white shadow">
                               <Star className="h-3 w-3 fill-current" />
                               Cover Image
                             </span>
@@ -405,12 +423,15 @@ export default function AdminPage() {
                             id={`caption-${pic.id}`}
                             type="text"
                             value={pic.caption}
-                            onChange={(e) => handleCaptionChange(pic.id, e.target.value)}
+                            onChange={(e) =>
+                              handleCaptionChange(pic.id, e.target.value)
+                            }
                             placeholder="Add a caption for this picture (e.g., Grade 3 students showcasing their science models)..."
-                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:outline-none focus:ring-1 focus:ring-school-green"
+                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:ring-1 focus:ring-school-green focus:outline-none"
                           />
                           <p className="text-[10px] text-neutral-400">
-                            {pic.file.name} • {(pic.file.size / (1024 * 1024)).toFixed(2)} MB
+                            {pic.file.name} •{" "}
+                            {(pic.file.size / (1024 * 1024)).toFixed(2)} MB
                           </p>
                         </div>
                       </div>
@@ -435,24 +456,29 @@ export default function AdminPage() {
           <div className="space-y-6">
             {/* Publishing Action Card */}
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-              <h2 className="text-base font-bold text-neutral-900">Publishing</h2>
+              <h2 className="text-base font-bold text-neutral-900">
+                Publishing
+              </h2>
 
               <div className="mt-4 space-y-3 divide-y divide-neutral-100 text-xs text-neutral-600">
                 <div className="flex items-center justify-between pb-2">
                   <span className="text-neutral-500">Selected Category:</span>
-                  <span className="font-semibold text-neutral-900 uppercase tracking-wide">
+                  <span className="font-semibold tracking-wide text-neutral-900 uppercase">
                     {category}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 pb-2">
                   <span className="text-neutral-500">Photos Attached:</span>
                   <span className="font-semibold text-neutral-900">
-                    {pictures.length} {pictures.length === 1 ? "photo" : "photos"}
+                    {pictures.length}{" "}
+                    {pictures.length === 1 ? "photo" : "photos"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-neutral-500">Destination:</span>
-                  <span className="font-semibold text-neutral-900">WordPress CMS</span>
+                  <span className="font-semibold text-neutral-900">
+                    WordPress CMS
+                  </span>
                 </div>
               </div>
 
@@ -489,14 +515,23 @@ export default function AdminPage() {
             <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50/80 p-6 shadow-sm">
               <div className="flex items-center gap-2 text-neutral-900">
                 <Info className="h-4 w-4 text-school-green" />
-                <h2 className="text-xs font-bold uppercase tracking-wider">
+                <h2 className="text-xs font-bold tracking-wider uppercase">
                   Publishing Tips
                 </h2>
               </div>
               <ul className="mt-3 space-y-2 text-xs leading-relaxed text-neutral-600">
-                <li>• <strong>Cover Photo:</strong> The first picture will be shown as the main hero thumbnail on the website.</li>
-                <li>• <strong>Captions:</strong> Adding captions provides context for parents and students viewing the pictures.</li>
-                <li>• <strong>Categories:</strong> Pick the appropriate category so visitors can easily filter news on the landing page.</li>
+                <li>
+                  • <strong>Cover Photo:</strong> The first picture will be
+                  shown as the main hero thumbnail on the website.
+                </li>
+                <li>
+                  • <strong>Captions:</strong> Adding captions provides context
+                  for parents and students viewing the pictures.
+                </li>
+                <li>
+                  • <strong>Categories:</strong> Pick the appropriate category
+                  so visitors can easily filter news on the landing page.
+                </li>
               </ul>
             </div>
           </div>
@@ -505,7 +540,7 @@ export default function AdminPage() {
         /* Tab: Live Article Preview */
         <div className="mx-auto max-w-4xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-10">
           <div className="mb-6 flex items-center gap-2">
-            <span className="rounded-full bg-school-green/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-school-green">
+            <span className="rounded-full bg-school-green/10 px-3 py-1 text-xs font-bold tracking-wider text-school-green uppercase">
               {category}
             </span>
             <span className="text-xs text-neutral-400">• Preview Mode</span>
@@ -516,7 +551,12 @@ export default function AdminPage() {
           </h2>
 
           <div className="mt-3 text-xs text-neutral-400">
-            Published on {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            Published on{" "}
+            {new Date().toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
           </div>
 
           {/* Featured Cover Image if any */}
@@ -531,7 +571,7 @@ export default function AdminPage() {
                 />
               </div>
               {pictures[0].caption && (
-                <figcaption className="bg-neutral-50 px-4 py-2.5 text-center text-xs italic text-neutral-600">
+                <figcaption className="bg-neutral-50 px-4 py-2.5 text-center text-xs text-neutral-600 italic">
                   {pictures[0].caption}
                 </figcaption>
               )}
@@ -539,14 +579,17 @@ export default function AdminPage() {
           )}
 
           {/* Article Body */}
-          <div className="mt-8 whitespace-pre-wrap text-base leading-relaxed text-neutral-700">
-            {body || "No body content entered yet. Switch back to the Editor tab to write your story."}
+          <div className="mt-8 text-base leading-relaxed whitespace-pre-wrap text-neutral-700">
+            {body ||
+              "No body content entered yet. Switch back to the Editor tab to write your story."}
           </div>
 
           {/* Gallery / Additional Photos with Captions */}
           {pictures.length > 1 && (
             <div className="mt-10 border-t border-neutral-100 pt-8">
-              <h3 className="text-lg font-bold text-neutral-900">Photo Gallery</h3>
+              <h3 className="text-lg font-bold text-neutral-900">
+                Photo Gallery
+              </h3>
               <div className="mt-4 grid gap-6 sm:grid-cols-2">
                 {pictures.slice(1).map((pic, idx) => (
                   <figure
@@ -562,7 +605,7 @@ export default function AdminPage() {
                       />
                     </div>
                     {pic.caption && (
-                      <figcaption className="bg-neutral-50 px-3 py-2 text-center text-xs italic text-neutral-600">
+                      <figcaption className="bg-neutral-50 px-3 py-2 text-center text-xs text-neutral-600 italic">
                         {pic.caption}
                       </figcaption>
                     )}

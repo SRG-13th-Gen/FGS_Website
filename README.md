@@ -23,7 +23,9 @@ pnpm dev
 - WordPress setup/admin: [localhost:8080/wp-admin](http://localhost:8080/wp-admin).
 - The database stays inside the Compose network; it has no published host port.
 
-`setup:env` creates an ignored `.env.local` with random development passwords and never overwrites it. It does not print the secrets. Complete WordPress's local installer to create your school-editor account, then select a permalink structure for `/wp-json` routes. A dedicated integration account is separate and will be used when CMS features are implemented.
+`setup:env` creates an ignored `.env.local` with random development values and tops up any keys it manages that are missing, without overwriting values already set; it does not print secrets. Complete WordPress's local installer to create your school-editor account, then select a permalink structure for `/wp-json` routes. A dedicated integration account is separate and will be used when CMS features are implemented.
+
+`setup:env` also seeds `ADMIN_DEV_EMAIL`, `ADMIN_DEV_PASSWORD`, and `ADMIN_DEV_SESSION_SECRET` in `.env.local` for the temporary dev-only `/admin` login (see [SPEC-003](docs/specs/003-team-admin.md)). Check `.env.local` yourself for the generated email/password — they are never printed to the terminal. This login only works outside production and is scaffolding for FR-005, not the accepted DEC-103 team sign-in.
 
 The placeholder runs without Docker or CMS credentials, so frontend work can begin with `pnpm install --frozen-lockfile` and `pnpm dev`. Docker is local-only; no production deployment is configured.
 
@@ -50,6 +52,7 @@ See [DOCKER.md](docs/DOCKER.md) for local service details and [TESTING.md](docs/
 - `src/components/ui`: installed shadcn primitives; custom public/admin components follow approved designs.
 - `src/components/providers.tsx`: theme, tooltip, and toast wiring.
 - `src/lib/env`: server-only configuration boundary and pure validation.
+- `src/lib/auth`: server-only session/authorization helpers, including the temporary dev-only admin login (`dev-login.ts`).
 - `scripts`: cross-platform local environment and Docker commands.
 - `tests`: unit and production browser smoke tests.
 - `docs`: requirements, decisions, architecture, contracts, and feature specifications.
