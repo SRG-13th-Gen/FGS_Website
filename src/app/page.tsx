@@ -14,13 +14,21 @@ import { NewsSection } from "@/components/public/news-section";
 import { ClubsSection } from "@/components/public/clubs-section";
 import { GallerySection } from "@/components/public/gallery-section";
 import { getPublishedArticles } from "@/lib/wordpress/reads";
+import {
+  heroContent,
+  schoolInfoContent,
+} from "@/lib/wordpress/sections/content";
 
 export default async function Home() {
-  const articlesResult = await getPublishedArticles();
+  const [articlesResult, hero, schoolInfo] = await Promise.all([
+    getPublishedArticles(),
+    heroContent.get(),
+    schoolInfoContent.get(),
+  ]);
 
   return (
     <>
-      <Navbar />
+      <Navbar schoolInfo={schoolInfo} />
 
       <main>
         {/* ───────────────────── HERO ───────────────────── */}
@@ -30,8 +38,8 @@ export default async function Home() {
         >
           {/* Background image */}
           <Image
-            src="/images/hero/fgs-website-e1760252687123.png"
-            alt="Flor de Grace School graduation ceremony"
+            src={hero.backgroundImage.url}
+            alt={hero.backgroundImage.alt}
             fill
             className="object-cover"
             priority
@@ -44,16 +52,19 @@ export default async function Home() {
           {/* Centered content */}
           <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
             <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              Welcome to
-              <br />
-              Flor de Grace School Inc.
+              {hero.heading.split("\n").map((line, index, lines) => (
+                <span key={index}>
+                  {line}
+                  {index < lines.length - 1 && <br />}
+                </span>
+              ))}
             </h1>
 
             {/* Green divider */}
             <div className="mx-auto mt-6 h-1 w-32 rounded-full bg-school-green sm:w-40" />
 
             <p className="mt-6 text-lg text-white/90 italic sm:text-xl md:text-2xl">
-              &ldquo;Where Excellence Blooms and Futures Begin.&rdquo;
+              {hero.tagline}
             </p>
           </div>
         </section>
@@ -503,7 +514,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <Footer />
+      <Footer schoolInfo={schoolInfo} />
     </>
   );
 }

@@ -23,6 +23,7 @@
     "docker:down": "node scripts/docker.mjs down",
     "docker:status": "node scripts/docker.mjs ps",
     "docker:logs": "node scripts/docker.mjs logs --tail 100",
+    "wp:seed-content": "tsx scripts/seed-content.ts",
     "ui:add": "shadcn add",
     "ui:all": "shadcn add --all"
   },
@@ -70,6 +71,7 @@
     "prettier": "3.9.8",
     "prettier-plugin-tailwindcss": "0.8.1",
     "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vitest": "5.0.1"
   },

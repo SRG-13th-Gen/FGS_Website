@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 const wordpressUrl = new URL(
   process.env.WORDPRESS_URL || "http://localhost:8080",
 );
+const isLoopbackHost = ["localhost", "127.0.0.1", "::1"].includes(
+  wordpressUrl.hostname,
+);
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -16,6 +19,9 @@ const nextConfig: NextConfig = {
         pathname: "/wp-content/uploads/**",
       },
     ],
+    // Local WordPress runs on loopback; the image optimizer otherwise refuses
+    // local IPs as an SSRF guard. Never true for a non-loopback WORDPRESS_URL.
+    dangerouslyAllowLocalIP: isLoopbackHost,
   },
   experimental: {
     serverActions: {

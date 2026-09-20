@@ -38,6 +38,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
+      - ./wordpress/mu-plugins:/var/www/html/wp-content/mu-plugins:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     healthcheck:

@@ -1,6 +1,6 @@
 # Data and API contracts
 
-Status: WordPress is the accepted integration boundary. Resource mappings below describe upstream API concepts. The **public content read** and **SPEC-003 admin post/media write** contracts are implemented and verified locally (`src/lib/wordpress/`; see [SPEC-003](specs/003-team-admin.md#verification-and-evidence)). The category, media, and revalidation-endpoint contracts below remain **Proposed**/**Unimplemented** except where a row says otherwise — select versions and settle feature decisions before making the rest executable.
+Status: WordPress is the accepted integration boundary. Resource mappings below describe upstream API concepts. The **public content read**, **SPEC-003 admin post/media write**, and **SPEC-007 site section content** (Hero/School Info built; About/Admission/Contact/Clubs/Gallery pending) contracts are implemented and verified locally (`src/lib/wordpress/`; see [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence)). The category, media, and revalidation-endpoint contracts below remain **Proposed**/**Unimplemented** except where a row says otherwise — select versions and settle feature decisions before making the rest executable.
 
 ## WordPress resource mapping
 
@@ -37,6 +37,26 @@ Proposed admin operations use Server Actions; explicit external callbacks use Ro
 For edits, decide concurrent-write detection and editor compatibility in SPEC-003. Preserve Gutenberg content unless an approved editor can round-trip it; route unsupported block edits to WordPress. Proposed post deletion means trash, not forced permanent deletion. WordPress remains the canonical result after mutations.
 
 An internal result should distinguish validation failure, unauthorized/forbidden, missing resource, conflict, dependency failure, and uncertain outcome. Translate WordPress failures into safe UI messages and correlation IDs. Do not publish raw upstream responses or invent wire codes for Server Actions prematurely.
+
+## Site section content (SPEC-007, partially implemented)
+
+Public site sections (Hero, About, Admission, Clubs, Gallery, Contact, School Info) are
+**implemented** on top of the WordPress `pages` resource, distinct from the article
+(`posts`) contract above:
+
+| Concept          | WordPress field/endpoint                                                                                                    | Adapter responsibility                                                                                                                                                                                                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Section content  | `page.meta.fgs_section_data` (JSON string)                                                                                  | Registered via `register_post_meta()` in a must-use plugin (`wordpress/mu-plugins/fgs-site-content.php`), `show_in_rest: true`, `auth_callback` requires `edit_pages`. Validated both ways against the section's zod schema — the schema, not the WordPress-registered REST schema, is authoritative. |
+| Section identity | `page.slug` (`site-hero`, `site-about`, `site-admission`, `site-clubs`, `site-gallery`, `site-contact`, `site-school-info`) | Fixed slugs created once by the seed script; never created ad hoc by a save action                                                                                                                                                                                                                    |
+| Section images   | `{ mediaId, alt }` inside the JSON, resolved against `/media/<id>`                                                          | Never a hand-typed URL; resolved to a live `source_url` at read time (same missing-media fallback as the article cover image)                                                                                                                                                                         |
+| Last-updated     | `page.modified_gmt`                                                                                                         | Shown on the admin dashboard's per-section card                                                                                                                                                                                                                                                       |
+
+Reads: `GET /wp/v2/pages?slug=<slug>&status=publish` (public, unauthenticated — the meta
+field is readable to anyone who can view the published page). Writes:
+`POST /wp/v2/pages/<id>` with `{ meta: { fgs_section_data: "<json>" } }`, authenticated,
+after `requireAdmin()` and zod validation. A missing page is a configuration error ("run the
+seed script"), not a normal not-found — section pages are only ever created by
+`pnpm wp:seed-content`, never by a save action.
 
 ## Proposed revalidation endpoint
 

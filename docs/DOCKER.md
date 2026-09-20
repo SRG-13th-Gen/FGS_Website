@@ -60,6 +60,24 @@ confirm the new limits with:
 docker exec fgs-website-local-wordpress-1 php -i | grep -E "upload_max_filesize|post_max_size"
 ```
 
+## Site content must-use plugin (SPEC-007)
+
+`compose.yaml` mounts `wordpress/mu-plugins` read-only into the WordPress container's
+`wp-content/mu-plugins`. WordPress auto-loads every PHP file placed directly in that
+directory with no activation step ("must-use" plugins are always active). Currently:
+
+- `fgs-site-content.php` — registers the `fgs_section_data` post meta field on the `page`
+  post type (`register_post_meta`, `show_in_rest: true`, `auth_callback` requiring
+  `edit_pages`), which the SPEC-007 site section content model depends on entirely. Without
+  it, section reads/writes fail (public reads fall back to defaults; admin saves error with
+  "run the seed script").
+
+**Production requirement**: whatever hosts WordPress in production (DEC-107, still
+unverified) must also have this file present at `wp-content/mu-plugins/fgs-site-content.php`
+— it is not something WordPress ships with, and there is no fallback if it's missing.
+Deploying the CMS without it is a functional regression for every site section, not a
+degraded-but-working state.
+
 ## Operations
 
 | Command              | Effect                                                                          |

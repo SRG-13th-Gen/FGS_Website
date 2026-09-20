@@ -45,3 +45,9 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 - Scope: application/toolchain, full shadcn primitives, local Docker services, environment safety and quality checks; custom design remains designer-owned.
 - Requirements: NFR-001 (configuration only), NFR-008, NFR-009 (local/toolchain only).
 - Evidence: T-023 plus partial T-014/T-021; product integration tests remain pending.
+
+## [SPEC-007 Site content management](007-site-content-management.md)
+
+- Scope: WordPress-backed structured content for every public site section (Hero, About, Admission, Clubs, Gallery, Contact, School Info), the admin CMS shell/dashboard, and section editors. Fixed fields only — no page-layout/block editing.
+- Dependencies: SPEC-001 (WordPress adapter), SPEC-003 (admin shell/auth base), DEC-114 (narrowed).
+- Evidence: see the spec's own verification table. Partially implemented — Hero and School Info editors built and verified; About/Admission/Contact/Clubs/Gallery editors and the articles list/edit/trash flow remain pending.

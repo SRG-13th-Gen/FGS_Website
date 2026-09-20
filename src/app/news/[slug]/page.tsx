@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Tag, Phone, Mail } from "lucide-react";
 
 import { getArticleBySlug, getPublishedArticles } from "@/lib/wordpress/reads";
+import { schoolInfoContent } from "@/lib/wordpress/sections/content";
 import {
   ARTICLE_CATEGORY_LABELS,
   formatArticleDate,
@@ -46,7 +47,10 @@ export async function generateMetadata({
 
 export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const result = await getArticleBySlug(slug);
+  const [result, schoolInfo] = await Promise.all([
+    getArticleBySlug(slug),
+    schoolInfoContent.get(),
+  ]);
 
   if (result.status === "not-found") {
     notFound();
@@ -55,7 +59,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   if (result.status === "unavailable") {
     return (
       <>
-        <Navbar />
+        <Navbar schoolInfo={schoolInfo} />
         <main className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28">
           <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
             <p className="rounded-2xl border border-neutral-200 bg-white p-10 text-sm font-medium text-neutral-600 shadow-sm">
@@ -70,7 +74,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             </Link>
           </div>
         </main>
-        <Footer />
+        <Footer schoolInfo={schoolInfo} />
       </>
     );
   }
@@ -84,7 +88,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
   return (
     <>
-      <Navbar />
+      <Navbar schoolInfo={schoolInfo} />
 
       <main className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28">
         <article className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -154,22 +158,22 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-base font-bold text-neutral-900">
-                    Flor de Grace School Inc.
+                    {schoolInfo.schoolName}
                   </h2>
                   <p className="mt-1 text-xs text-neutral-600 sm:text-sm">
-                    74 Gold St, Quezon City, 1121 Metro Manila
+                    {schoolInfo.address}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-school-green-dark">
                   <a
-                    href="tel:09682200677"
+                    href={`tel:${schoolInfo.phone}`}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm transition-colors hover:bg-neutral-50"
                   >
                     <Phone className="h-3.5 w-3.5 text-school-green" />
-                    <span>09682200677</span>
+                    <span>{schoolInfo.phone}</span>
                   </a>
                   <a
-                    href="mailto:flordegrace.school2001@gmail.com"
+                    href={`mailto:${schoolInfo.email}`}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm transition-colors hover:bg-neutral-50"
                   >
                     <Mail className="h-3.5 w-3.5 text-school-green" />
@@ -222,7 +226,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         </article>
       </main>
 
-      <Footer />
+      <Footer schoolInfo={schoolInfo} />
     </>
   );
 }

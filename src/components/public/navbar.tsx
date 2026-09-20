@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
+import type { SchoolInfoView } from "@/lib/wordpress/sections/school-info";
+
 /** Navigation items — each `href` targets a section id on the landing page. */
 const NAV_ITEMS = [
   { label: "Home", href: "#home" },
@@ -15,7 +17,7 @@ const NAV_ITEMS = [
   { label: "Contact Us", href: "#contact" },
 ] as const;
 
-export function Navbar() {
+export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pastHero, setPastHero] = useState(false);
@@ -70,9 +72,7 @@ export function Navbar() {
     <header
       id="main-navbar"
       className={`fixed top-0 right-0 left-0 z-50 transition-shadow duration-300 ${
-        scrolled
-          ? "bg-white/95 shadow-md backdrop-blur-sm"
-          : "bg-white"
+        scrolled ? "bg-white/95 shadow-md backdrop-blur-sm" : "bg-white"
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -83,8 +83,8 @@ export function Navbar() {
           className="flex items-center gap-2.5 text-lg font-normal tracking-tight"
         >
           <Image
-            src="/images/logo/fgs-logo-website-1.webp"
-            alt="Flor de Grace School logo"
+            src={schoolInfo.logo.url}
+            alt={schoolInfo.logo.alt}
             width={40}
             height={40}
             className="h-10 w-10 shrink-0 object-contain"
@@ -93,14 +93,12 @@ export function Navbar() {
           <div
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ${
               pastHero || (activeSection !== "#home" && scrolled)
-                ? "max-w-[260px] opacity-100 translate-x-0"
-                : "max-w-0 opacity-0 -translate-x-2"
+                ? "max-w-[260px] translate-x-0 opacity-100"
+                : "max-w-0 -translate-x-2 opacity-0"
             }`}
           >
-            <span className="hidden sm:inline">
-              Flor de Grace School Inc.
-            </span>
-            <span className="sm:hidden">FGS</span>
+            <span className="hidden sm:inline">{schoolInfo.schoolName}</span>
+            <span className="sm:hidden">{schoolInfo.shortName}</span>
           </div>
         </a>
 
@@ -137,17 +135,23 @@ export function Navbar() {
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
       </nav>
 
       {/* Mobile slide-down menu */}
       <div
         className={`overflow-hidden border-b border-border/50 bg-white transition-all duration-300 ease-in-out md:hidden ${
-          mobileOpen ? "max-h-[28rem] opacity-100" : "max-h-0 opacity-0 border-transparent"
+          mobileOpen
+            ? "max-h-[28rem] opacity-100"
+            : "max-h-0 border-transparent opacity-0"
         }`}
       >
-        <ul className="space-y-1 px-4 pb-4 pt-2">
+        <ul className="space-y-1 px-4 pt-2 pb-4">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
               <a

@@ -10,7 +10,7 @@ vi.mock("next/cache", () => ({
 }));
 
 const { publishArticleAction } =
-  await import("@/app/admin/(protected)/publish-actions");
+  await import("@/app/admin/(protected)/articles/new/publish-actions");
 const { requireAdmin } = await import("@/lib/auth/require-admin");
 
 const BASE = "http://localhost:8080";
