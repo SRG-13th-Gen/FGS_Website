@@ -37,6 +37,7 @@ services:
         define('DISALLOW_FILE_EDIT', true);
     volumes:
       - wordpress_data:/var/www/html
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
     extra_hosts:
       - host.docker.internal:host-gateway
     healthcheck:

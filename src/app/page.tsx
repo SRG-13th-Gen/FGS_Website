@@ -1,21 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ClipboardCheck,
-  Calendar,
-  Image as ImageIcon,
   Mail,
   Phone,
   MapPin,
   BookOpen,
-  Users,
-  Trophy,
-  Compass,
-  Eye,
   CheckCircle2,
-  FileText,
   Blocks,
-  ArrowRight,
 } from "lucide-react";
 
 import { Navbar } from "@/components/public/navbar";
@@ -23,8 +13,11 @@ import { Footer } from "@/components/public/footer";
 import { NewsSection } from "@/components/public/news-section";
 import { ClubsSection } from "@/components/public/clubs-section";
 import { GallerySection } from "@/components/public/gallery-section";
+import { getPublishedArticles } from "@/lib/wordpress/reads";
 
-export default function Home() {
+export default async function Home() {
+  const articlesResult = await getPublishedArticles();
+
   return (
     <>
       <Navbar />
@@ -50,7 +43,7 @@ export default function Home() {
 
           {/* Centered content */}
           <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               Welcome to
               <br />
               Flor de Grace School Inc.
@@ -59,7 +52,7 @@ export default function Home() {
             {/* Green divider */}
             <div className="mx-auto mt-6 h-1 w-32 rounded-full bg-school-green sm:w-40" />
 
-            <p className="mt-6 text-lg italic text-white/90 sm:text-xl md:text-2xl">
+            <p className="mt-6 text-lg text-white/90 italic sm:text-xl md:text-2xl">
               &ldquo;Where Excellence Blooms and Futures Begin.&rdquo;
             </p>
           </div>
@@ -68,19 +61,19 @@ export default function Home() {
         {/* ───────────────────── MONTESSORI QUOTE ───────────────────── */}
         <section className="bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-            <blockquote className="text-lg italic leading-relaxed text-neutral-700 sm:text-xl md:text-2xl">
+            <blockquote className="text-lg leading-relaxed text-neutral-700 italic sm:text-xl md:text-2xl">
               &ldquo;It is true that we cannot make a genius.
-              <br className="hidden sm:inline" />
-              {" "}We can only give the child the chance to fulfil his potential possibilities.&rdquo;
+              <br className="hidden sm:inline" /> We can only give the child the
+              chance to fulfil his potential possibilities.&rdquo;
             </blockquote>
-            <cite className="mt-4 block text-sm font-normal not-italic text-neutral-500 sm:text-base">
+            <cite className="mt-4 block text-sm font-normal text-neutral-500 not-italic sm:text-base">
               ~ Maria Montessori ~
             </cite>
           </div>
         </section>
 
         {/* ───────────────────── CLASSROOM FEATURE BANNER ───────────────────── */}
-        <section className="relative min-h-[460px] overflow-hidden sm:min-h-[520px] lg:min-h-[580px] flex items-center">
+        <section className="relative flex min-h-[460px] items-center overflow-hidden sm:min-h-[520px] lg:min-h-[580px]">
           {/* Background image */}
           <Image
             src="/images/general/classroom.webp"
@@ -96,11 +89,13 @@ export default function Home() {
           {/* Content */}
           <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
             <div className="max-w-2xl">
-              <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Nurturing Young Minds Through Curiosity, Critical Thinking, and a Love for Learning
+              <h2 className="text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Nurturing Young Minds Through Curiosity, Critical Thinking, and
+                a Love for Learning
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-white/90 sm:text-lg sm:max-w-xl">
-                Join our community where children develop strong foundations through exploration, thoughtful learning, and academic growth.
+              <p className="mt-6 text-base leading-relaxed text-white/90 sm:max-w-xl sm:text-lg">
+                Join our community where children develop strong foundations
+                through exploration, thoughtful learning, and academic growth.
               </p>
             </div>
           </div>
@@ -111,43 +106,87 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="mx-auto max-w-3xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-widest text-school-green">
+              <span className="text-sm font-semibold tracking-widest text-school-green uppercase">
                 About Us
               </span>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl text-neutral-900">
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
                 Building Futures, One Student at a Time
               </h2>
               <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-school-green" />
             </div>
 
             {/* Two-Column Story Paragraphs */}
-            <div className="mt-14 grid gap-8 text-neutral-600 md:grid-cols-2 lg:gap-12 leading-relaxed text-base">
+            <div className="mt-14 grid gap-8 text-base leading-relaxed text-neutral-600 md:grid-cols-2 lg:gap-12">
               {/* Column 1 */}
               <div className="space-y-6">
                 <p>
-                  For over two decades, since its establishment in 2001, <strong className="font-semibold text-neutral-800">Flor de Grace School Inc.</strong> has stood as a nurturing ground, diligently cultivating the seeds of potential within each student. Rooted in a profound mission to provide a quality education through a holistic approach that fosters academic excellence, character development, and lifelong learning, the school has become an integral part of our community, shaping not just minds, but also hearts and souls.
+                  For over two decades, since its establishment in 2001,{" "}
+                  <strong className="font-semibold text-neutral-800">
+                    Flor de Grace School Inc.
+                  </strong>{" "}
+                  has stood as a nurturing ground, diligently cultivating the
+                  seeds of potential within each student. Rooted in a profound
+                  mission to provide a quality education through a holistic
+                  approach that fosters academic excellence, character
+                  development, and lifelong learning, the school has become an
+                  integral part of our community, shaping not just minds, but
+                  also hearts and souls.
                 </p>
                 <p>
-                  Flor de Grace School’s vision is ambitious and inspiring: to become a model institution of learning that shapes well-rounded individuals—academically excellent, morally upright, and committed to lifelong growth and service to others. This is not merely a statement etched on a wall; it is a living ethos that permeates every classroom, every interaction, and every activity within the school’s vibrant walls.
+                  Flor de Grace School’s vision is ambitious and inspiring: to
+                  become a model institution of learning that shapes
+                  well-rounded individuals—academically excellent, morally
+                  upright, and committed to lifelong growth and service to
+                  others. This is not merely a statement etched on a wall; it is
+                  a living ethos that permeates every classroom, every
+                  interaction, and every activity within the school’s vibrant
+                  walls.
                 </p>
                 <p>
-                  The commitment to a holistic approach is particularly noteworthy. Education at Flor de Grace School extends far beyond the acquisition of facts and figures. It recognizes the intricate tapestry of a child&apos;s development, weaving together intellectual rigor with the cultivation of strong moral principles and a genuine thirst for knowledge.
+                  The commitment to a holistic approach is particularly
+                  noteworthy. Education at Flor de Grace School extends far
+                  beyond the acquisition of facts and figures. It recognizes the
+                  intricate tapestry of a child&apos;s development, weaving
+                  together intellectual rigor with the cultivation of strong
+                  moral principles and a genuine thirst for knowledge.
                 </p>
               </div>
 
               {/* Column 2 */}
               <div className="space-y-6">
                 <p>
-                  Academic excellence is undoubtedly a cornerstone. Flor de Grace School strives to equip its students with the critical thinking skills, problem-solving abilities, and subject matter mastery necessary to thrive in an increasingly complex world. However, these pursuits of knowledge are never at the expense of character development.
+                  Academic excellence is undoubtedly a cornerstone. Flor de
+                  Grace School strives to equip its students with the critical
+                  thinking skills, problem-solving abilities, and subject matter
+                  mastery necessary to thrive in an increasingly complex world.
+                  However, these pursuits of knowledge are never at the expense
+                  of character development.
                 </p>
                 <p>
-                  The school understands that true success lies not just in what one knows, but in who one becomes. Through its programs and guidance, Flor de Grace School instills values such as integrity, respect, responsibility, and empathy, nurturing individuals who will contribute positively to society.
+                  The school understands that true success lies not just in what
+                  one knows, but in who one becomes. Through its programs and
+                  guidance, Flor de Grace School instills values such as
+                  integrity, respect, responsibility, and empathy, nurturing
+                  individuals who will contribute positively to society.
                 </p>
                 <p>
-                  Furthermore, the emphasis on lifelong learning is crucial in today’s rapidly evolving landscape. Flor de Grace School empowers its students to become active and engaged learners, fostering curiosity, adaptability, and a passion for continuous growth. This ensures that graduates are equipped with the mindset and skills to navigate the challenges and opportunities of their future endeavors.
+                  Furthermore, the emphasis on lifelong learning is crucial in
+                  today’s rapidly evolving landscape. Flor de Grace School
+                  empowers its students to become active and engaged learners,
+                  fostering curiosity, adaptability, and a passion for
+                  continuous growth. This ensures that graduates are equipped
+                  with the mindset and skills to navigate the challenges and
+                  opportunities of their future endeavors.
                 </p>
                 <p>
-                  As Flor de Grace School continues its journey, it remains steadfast in its commitment to its mission and vision. It is a place where academic excellence flourishes alongside moral fortitude, and where the seeds of lifelong learning are sown with care and intention. Flor de Grace School is not just an institution of learning; it is a community that nurtures well-rounded individuals ready to make their mark on the world.
+                  As Flor de Grace School continues its journey, it remains
+                  steadfast in its commitment to its mission and vision. It is a
+                  place where academic excellence flourishes alongside moral
+                  fortitude, and where the seeds of lifelong learning are sown
+                  with care and intention. Flor de Grace School is not just an
+                  institution of learning; it is a community that nurtures
+                  well-rounded individuals ready to make their mark on the
+                  world.
                 </p>
               </div>
             </div>
@@ -155,22 +194,31 @@ export default function Home() {
             {/* Mission & Vision Cards */}
             <div className="mt-16 grid gap-8 md:grid-cols-2">
               {/* Mission */}
-              <div className="relative overflow-hidden rounded-2xl border border-school-green/25 bg-gradient-to-br from-school-green/15 via-school-green/[0.07] to-white/60 p-8 sm:p-10 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl border border-school-green/25 bg-gradient-to-br from-school-green/15 via-school-green/[0.07] to-white/60 p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-lg sm:p-10">
                 <div className="flex items-center justify-center gap-3">
-                  <h3 className="text-2xl font-bold tracking-tight text-school-green-dark">Our Mission</h3>
+                  <h3 className="text-2xl font-bold tracking-tight text-school-green-dark">
+                    Our Mission
+                  </h3>
                 </div>
                 <p className="mt-5 text-base leading-relaxed text-neutral-700 sm:text-lg">
-                  We are committed to providing quality education through a holistic approach that fosters academic excellence, character development, and lifelong learning.
+                  We are committed to providing quality education through a
+                  holistic approach that fosters academic excellence, character
+                  development, and lifelong learning.
                 </p>
               </div>
 
               {/* Vision */}
-              <div className="relative overflow-hidden rounded-2xl border border-school-yellow/50 bg-gradient-to-br from-school-yellow/25 via-school-yellow/[0.12] to-white/60 p-8 sm:p-10 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-school-yellow/70 hover:shadow-lg">
+              <div className="relative overflow-hidden rounded-2xl border border-school-yellow/50 bg-gradient-to-br from-school-yellow/25 via-school-yellow/[0.12] to-white/60 p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-school-yellow/70 hover:shadow-lg sm:p-10">
                 <div className="flex items-center justify-center gap-3">
-                  <h3 className="text-2xl font-bold tracking-tight text-amber-900">Our Vision</h3>
+                  <h3 className="text-2xl font-bold tracking-tight text-amber-900">
+                    Our Vision
+                  </h3>
                 </div>
                 <p className="mt-5 text-base leading-relaxed text-neutral-700 sm:text-lg">
-                  Our vision is to become a model institution of learning that shapes well-rounded individuals—academically excellent, morally upright, and committed to lifelong growth and service to others.
+                  Our vision is to become a model institution of learning that
+                  shapes well-rounded individuals—academically excellent,
+                  morally upright, and committed to lifelong growth and service
+                  to others.
                 </p>
               </div>
             </div>
@@ -178,7 +226,10 @@ export default function Home() {
         </section>
 
         {/* ───────────────────── ADMISSION ───────────────────── */}
-        <section id="admission" className="relative overflow-hidden py-20 lg:py-28">
+        <section
+          id="admission"
+          className="relative overflow-hidden py-20 lg:py-28"
+        >
           {/* Background image */}
           <Image
             src="/images/general/Admission.webp"
@@ -193,7 +244,7 @@ export default function Home() {
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-widest text-school-green">
+              <span className="text-sm font-semibold tracking-widest text-school-green uppercase">
                 Admission
               </span>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
@@ -201,32 +252,49 @@ export default function Home() {
               </h2>
               <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-school-green" />
               <p className="mt-4 text-neutral-600">
-                We welcome young learners who are eager to explore, discover, and grow.
-                Here&apos;s everything you need to join the FGS family.
+                We welcome young learners who are eager to explore, discover,
+                and grow. Here&apos;s everything you need to join the FGS
+                family.
               </p>
             </div>
 
             {/* Programs offered (Preschool & Elementary only) */}
             <div className="mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2">
-              <div className="group rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:border-school-green/40 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-md">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                  <Blocks className="h-10 w-10 text-school-green" strokeWidth={2.2} />
+                  <Blocks
+                    className="h-10 w-10 text-school-green"
+                    strokeWidth={2.2}
+                  />
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-neutral-900">Preschool</h3>
-                <p className="mt-1 text-sm font-medium text-school-green">Kinder 1–2 / Preparatory</p>
-                <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
-                  A play-based, nurturing environment designed to build foundational social, emotional, and cognitive skills.
+                <h3 className="mt-4 text-xl font-bold text-neutral-900">
+                  Preschool
+                </h3>
+                <p className="mt-1 text-sm font-medium text-school-green">
+                  Kinder 1–2 / Preparatory
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+                  A play-based, nurturing environment designed to build
+                  foundational social, emotional, and cognitive skills.
                 </p>
               </div>
 
-              <div className="group rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:border-school-green/40 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-md">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                  <BookOpen className="h-10 w-10 text-amber-500" strokeWidth={2.2} />
+                  <BookOpen
+                    className="h-10 w-10 text-amber-500"
+                    strokeWidth={2.2}
+                  />
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-neutral-900">Elementary</h3>
-                <p className="mt-1 text-sm font-medium text-amber-500">Grades 1–6</p>
-                <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
-                  A strong academic curriculum emphasizing critical thinking, values formation, and a genuine love for learning.
+                <h3 className="mt-4 text-xl font-bold text-neutral-900">
+                  Elementary
+                </h3>
+                <p className="mt-1 text-sm font-medium text-amber-500">
+                  Grades 1–6
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+                  A strong academic curriculum emphasizing critical thinking,
+                  values formation, and a genuine love for learning.
                 </p>
               </div>
             </div>
@@ -238,7 +306,8 @@ export default function Home() {
                   Admission Requirements
                 </h3>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Please prepare the following documents upon application according to your student category.
+                  Please prepare the following documents upon application
+                  according to your student category.
                 </p>
               </div>
 
@@ -249,9 +318,11 @@ export default function Home() {
                     <span className="inline-block rounded-full bg-school-green/10 px-3 py-1 text-xs font-semibold text-school-green">
                       Returning
                     </span>
-                    <h4 className="mt-2 text-lg font-bold text-neutral-900">Old Students</h4>
+                    <h4 className="mt-2 text-lg font-bold text-neutral-900">
+                      Old Students
+                    </h4>
                   </div>
-                  <ul className="mt-5 space-y-3.5 text-sm text-neutral-700 flex-1">
+                  <ul className="mt-5 flex-1 space-y-3.5 text-sm text-neutral-700">
                     <li className="flex items-start gap-2.5">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-school-green" />
                       <span>Form 137 (Kinder / Preschool)</span>
@@ -262,12 +333,14 @@ export default function Home() {
                 {/* New Students */}
                 <div className="flex flex-col rounded-2xl border-2 border-school-green/30 bg-white p-6 shadow-sm transition-all hover:shadow-md">
                   <div className="border-b border-neutral-100 pb-4">
-                    <span className="inline-block rounded-full bg-school-green text-white px-3 py-1 text-xs font-semibold">
+                    <span className="inline-block rounded-full bg-school-green px-3 py-1 text-xs font-semibold text-white">
                       New Enrollment
                     </span>
-                    <h4 className="mt-2 text-lg font-bold text-neutral-900">New Students</h4>
+                    <h4 className="mt-2 text-lg font-bold text-neutral-900">
+                      New Students
+                    </h4>
                   </div>
-                  <ul className="mt-5 space-y-3.5 text-sm text-neutral-700 flex-1">
+                  <ul className="mt-5 flex-1 space-y-3.5 text-sm text-neutral-700">
                     <li className="flex items-start gap-2.5">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-school-green" />
                       <span>Birth Certificate</span>
@@ -289,9 +362,11 @@ export default function Home() {
                     <span className="inline-block rounded-full bg-school-yellow/30 px-3 py-1 text-xs font-semibold text-neutral-800">
                       All Levels
                     </span>
-                    <h4 className="mt-2 text-lg font-bold text-neutral-900">Transferees</h4>
+                    <h4 className="mt-2 text-lg font-bold text-neutral-900">
+                      Transferees
+                    </h4>
                   </div>
-                  <ul className="mt-5 space-y-3.5 text-sm text-neutral-700 flex-1">
+                  <ul className="mt-5 flex-1 space-y-3.5 text-sm text-neutral-700">
                     <li className="flex items-start gap-2.5">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-school-green" />
                       <span>Birth Certificate</span>
@@ -343,7 +418,7 @@ export default function Home() {
                     key={item.step}
                     className="relative rounded-2xl border border-neutral-200 bg-white p-6 pl-8 shadow-sm"
                   >
-                    <span className="absolute left-0 top-6 flex h-12 w-1 rounded-r-full bg-school-green" />
+                    <span className="absolute top-6 left-0 flex h-12 w-1 rounded-r-full bg-school-green" />
                     <span className="text-3xl font-black text-school-green/20">
                       {item.step}
                     </span>
@@ -361,7 +436,7 @@ export default function Home() {
         </section>
 
         {/* ───────────────────── NEWS & EVENTS ───────────────────── */}
-        <NewsSection />
+        <NewsSection result={articlesResult} />
 
         {/* ───────────────────── CLUBS ───────────────────── */}
         <ClubsSection />
@@ -376,15 +451,15 @@ export default function Home() {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-widest text-school-yellow">
+              <span className="text-sm font-semibold tracking-widest text-school-yellow uppercase">
                 Contact Us
               </span>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 Get in Touch
               </h2>
               <p className="mt-4 text-white/70">
-                Have questions? We&apos;d love to hear from you. Reach
-                out to us through any of the channels below.
+                Have questions? We&apos;d love to hear from you. Reach out to us
+                through any of the channels below.
               </p>
             </div>
 

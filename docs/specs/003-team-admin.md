@@ -1,14 +1,14 @@
 # SPEC-003: Team Admin & Article Management
 
-| Field                 | Value                                                                       |
-| --------------------- | --------------------------------------------------------------------------- |
-| Feature ID            | SPEC-003                                                                    |
-| Approval status       | Accepted (per owner instruction 2026-09-20)                                 |
-| Implementation status | Unimplemented                                                               |
-| Responsible owner     | Engineering                                                                 |
-| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md) |
-| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                |
-| Acceptance evidence   | Pending implementation                                                      |
+| Field                 | Value                                                                                                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature ID            | SPEC-003                                                                                                                                                                                                                                       |
+| Approval status       | Accepted (per owner instruction 2026-09-20)                                                                                                                                                                                                    |
+| Implementation status | Partially implemented — public reads and admin publishing (FR-007/FR-008/FR-009) built and verified locally; team authentication (FR-005) remains the temporary dev-only login pending DEC-103; FR-006 role enforcement is deferred to DEC-111 |
+| Responsible owner     | Engineering                                                                                                                                                                                                                                    |
+| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md)                                                                                                                                                            |
+| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                                                                                                                                                                                   |
+| Acceptance evidence   | See [Verification and evidence](#verification-and-evidence) below                                                                                                                                                                              |
 
 ## Outcome and scope
 
@@ -77,51 +77,109 @@ An authenticated administrator can visit `/admin`, create a new article with a t
 
 ---
 
-## Interfaces and data ownership
+## Public reads (FR-009, implemented)
+
+`src/lib/wordpress/reads.ts` is the server-only public read adapter used by the
+home page news section and `/news/[slug]`:
+
+- Category slugs (`clubs`, `events`, `announcements`) are resolved to live
+  WordPress category IDs at runtime (`categories.ts`); IDs are never hardcoded.
+  Only published posts in those three categories are returned — a post outside
+  them (e.g. `uncategorized`) is excluded from both the listing and direct slug
+  lookup.
+- `featured_media` becomes the article's cover image; missing or deleted media
+  degrades to no cover image rather than an error.
+- Post `content.rendered` is sanitized server-side (`sanitize.ts`, using
+  `sanitize-html`) against a strict allowlist — paragraphs, lists, emphasis,
+  links (`http`/`https`/`mailto`/`tel` only, no `javascript:`), headings
+  (h2–h4), figures, images, and captions. Images are additionally restricted to
+  the configured `WORDPRESS_URL` origin.
+- Every read returns a typed result: `{status: "ok", ...}`,
+  `{status: "not-found"}` (confirmed absent, or outside the allowed
+  categories), or `{status: "unavailable"}` (upstream unreachable/rejected —
+  including `env/schema.ts` rejecting a non-HTTPS `WORDPRESS_URL` outside
+  development). The UI shows a calm "unavailable"/"no news yet" state, never a
+  false not-found or fabricated sample content.
+- **Interim revalidation (not DEC-105)**: no CMS webhook producer exists yet, so
+  reads use a 60-second `fetch` `revalidate` window as a stopgap for native
+  WordPress edits. Admin-published articles additionally get an immediate
+  `revalidatePath("/")` + `revalidatePath("/news/<slug>")` call. This interim
+  window is not a substitute for the accepted DEC-105 webhook design.
+
+## Admin publishing (FR-007/FR-008, implemented)
 
 ### Application Input Contract (Server Action)
 
+Implemented in `src/lib/wordpress/types.ts`, orchestrated by
+`src/lib/wordpress/publish.ts` (pure business logic, no Next.js APIs) and
+wrapped by `src/app/admin/(protected)/publish-actions.ts` (`requireAdmin()`,
+`FormData` parsing, cache revalidation):
+
 ```typescript
-export interface ArticleMediaItem {
+export interface ArticleImageInput {
+  clientId: string;
   file: File;
-  caption?: string;
-  altText?: string;
+  caption: string;
+  altText: string;
+  existingMediaId: number | null; // set on retry to reuse an already-uploaded image
 }
 
-export type ArticleCategory = "clubs" | "events" | "announcements";
-
-export interface CreateArticleInput {
+export interface PublishArticleInput {
   title: string;
-  category: ArticleCategory;
+  category: string; // validated against ARTICLE_CATEGORIES
   body: string;
-  media?: ArticleMediaItem[];
+  images: ArticleImageInput[];
 }
 
-export interface CreateArticleResult {
-  success: boolean;
-  postId?: number;
-  postUrl?: string;
-  error?: string;
-  fieldErrors?: Partial<Record<keyof CreateArticleInput, string>>;
-}
+export type PublishArticleResult =
+  | {
+      status: "success";
+      slug: string;
+      articlePath: string;
+      cacheWarning: boolean;
+    }
+  | {
+      status: "validation_error";
+      fieldErrors: Partial<
+        Record<"title" | "category" | "body" | "images", string>
+      >;
+      uploadedImages: UploadedImageRef[];
+    }
+  | { status: "error"; message: string; uploadedImages: UploadedImageRef[] }
+  | {
+      status: "uncertain";
+      message: string;
+      uploadedImages: UploadedImageRef[];
+    };
 ```
 
 ### WordPress Upstream Mapping
 
-| Application Field  | Upstream Endpoint / Field               | Notes                                                                     |
-| ------------------ | --------------------------------------- | ------------------------------------------------------------------------- |
-| `title`            | `POST /wp/v2/posts` -> `title`          | Set as post title                                                         |
-| `category`         | `POST /wp/v2/posts` -> `categories`     | Mapped to WordPress Category ID for `clubs`, `events`, or `announcements` |
-| `body`             | `POST /wp/v2/posts` -> `content`        | Stored as rendered content along with image blocks / gallery              |
-| `media[i].file`    | `POST /wp/v2/media` -> Binary body      | Media upload with `Content-Disposition`                                   |
-| `media[i].caption` | `POST /wp/v2/media` -> `caption`        | Stored directly in WordPress media object                                 |
-| `media[0]`         | `POST /wp/v2/posts` -> `featured_media` | First image assigned as featured cover image                              |
+| Application Field           | Upstream Endpoint / Field                  | Notes                                                                                                                                                                             |
+| --------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`                     | `POST /wp/v2/posts` -> `title`             | Sent as a plain string                                                                                                                                                            |
+| `category`                  | `POST /wp/v2/posts` -> `categories`        | Resolved at runtime to the matching WordPress category ID; never hardcoded                                                                                                        |
+| `body`                      | `POST /wp/v2/posts` -> `content`           | Built into Gutenberg block markup: paragraph blocks (blank-line split, HTML-escaped) followed by image blocks for every image **after** the first (`src/lib/wordpress/blocks.ts`) |
+| `images[0]`                 | `POST /wp/v2/media`, then `featured_media` | First image is uploaded and set as the post's featured/cover image; **not** duplicated inline in the body                                                                         |
+| `images[i].file`            | `POST /wp/v2/media` (multipart)            | Content sniffed by magic bytes (jpeg/png/webp/avif), not the extension or browser MIME type; 10 MB per file                                                                       |
+| `images[i].caption`         | `POST /wp/v2/media` -> `caption`           | Also rendered as the image block's `<figcaption>` for images after the cover                                                                                                      |
+| `images[i].altText`         | `POST /wp/v2/media` -> `alt_text`          | Falls back to caption, then article title, when left blank                                                                                                                        |
+| `images[i].existingMediaId` | `GET /wp/v2/media/<id>`                    | On retry, confirms and reuses a previously uploaded image instead of re-uploading it                                                                                              |
+
+Retries never duplicate uploads: a partial-failure result includes
+`uploadedImages` (client id → WordPress media ID + URL); the admin form resends
+these as `existingMediaId` so already-uploaded slots are skipped. A timeout or
+unparseable response from post creation returns `status: "uncertain"` — the
+admin is told to check wp-admin before retrying, and nothing is auto-retried.
+On success, a failed `revalidatePath` call is reported as
+`cacheWarning: true` ("Published, but the site may take a few minutes to
+update"), distinct from a publish failure.
 
 ---
 
 ## Security and credentials
 
-- All privileged communication with WordPress uses server-side environment variables (`WP_APPLICATION_USERNAME`, `WP_APPLICATION_PASSWORD`).
+- All privileged communication with WordPress uses server-side environment variables (`WORDPRESS_USERNAME`, `WORDPRESS_APPLICATION_PASSWORD`), read only through `src/lib/wordpress/client.ts`.
 - No CMS credentials or private tokens are ever exposed to the client or browser bundle (enforcing [NFR-001](../FRS_NFRS.md)).
 - Direct access to `/admin` requires authenticated session validation.
 
@@ -150,10 +208,20 @@ solution.
 
 ## Verification and evidence
 
-| Criterion                                               | Verification Type | Procedure                                                                  | Result  |
-| ------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------- | ------- |
-| Form validation (title, category, body)                 | Unit test         | Submit invalid/empty payloads to article validation schema                 | Planned |
-| Category allowlist (`clubs`, `events`, `announcements`) | Unit test         | Verify only allowed category slugs are accepted                            | Planned |
-| Image upload and caption attachment                     | Integration test  | Mock WP REST API media and post endpoints; verify caption payload          | Planned |
-| Form resilience on error                                | E2E test          | Trigger simulated 500 error; assert form fields and files remain populated | Planned |
-| Authentication gate on `/admin`                         | E2E test          | Assert unauthenticated request to `/admin` is redirected                   | Planned |
+All results below are from this repository's own test run against local Docker
+WordPress (`pnpm test`, `pnpm test:e2e`) plus one manual publish, not a
+hosted/CI run — see [TESTING.md](../TESTING.md) for scope.
+
+| Criterion                                                           | Verification Type | Procedure                                                                                                                                                                         | Result              |
+| ------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Form validation (title, category, body)                             | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
+| Category allowlist (`clubs`, `events`, `announcements`)             | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
+| Image content-type sniffing and 10 MB limit                         | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
+| Gutenberg block content builder (escaping, paragraph split, images) | Unit test         | `tests/unit/wordpress-blocks.test.ts`                                                                                                                                             | Passed              |
+| Public HTML sanitizer allowlist                                     | Unit test         | `tests/unit/wordpress-sanitize.test.ts`                                                                                                                                           | Passed              |
+| Upstream post/media mapping, incl. missing media                    | Unit test         | `tests/unit/wordpress-reads.test.ts`                                                                                                                                              | Passed              |
+| Media-then-post order, captions/alt/featured_media, retry reuse     | Integration test  | `tests/integration/wordpress-publish.test.ts` (mocked WP REST API)                                                                                                                | Passed              |
+| Published-but-refresh-failed result                                 | Integration test  | `tests/integration/publish-action.test.ts`                                                                                                                                        | Passed              |
+| Home page renders / calm unavailable state when reads are rejected  | E2E test          | `tests/e2e/news-resilience.spec.ts`                                                                                                                                               | Passed              |
+| Authentication gate on `/admin`                                     | E2E test          | `tests/e2e/admin-login.spec.ts`                                                                                                                                                   | Passed              |
+| Publish one article with two images through `/admin`                | Manual            | Signed in with the dev login; published against local WordPress; confirmed on the home page, `/news/<slug>`, and in `wp-admin` (post + media, correct category/captions/alt text) | Passed (2026-09-20) |

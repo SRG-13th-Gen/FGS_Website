@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useId } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   UploadCloud,
   Image as ImageIcon,
@@ -15,7 +16,11 @@ import {
   Sparkles,
   Star,
   Info,
+  ExternalLink,
 } from "lucide-react";
+
+import type { PublishArticleResult } from "@/lib/wordpress/types";
+import { publishArticleAction } from "./publish-actions";
 
 export type ArticleCategory = "announcements" | "events" | "clubs";
 
@@ -24,6 +29,9 @@ export interface UploadedPicture {
   file: File;
   previewUrl: string;
   caption: string;
+  altText: string;
+  /** Set once this slot has been uploaded to WordPress, so a retry reuses it. */
+  uploadedMediaId: number | null;
 }
 
 const CATEGORIES: Array<{
@@ -57,6 +65,37 @@ const CATEGORIES: Array<{
   },
 ];
 
+const initialState: PublishArticleResult | null = null;
+
+/** Programmatically attaches `file` to a hidden file input via DataTransfer, so it rides along with the native form submission. */
+function PictureFileField({
+  clientId,
+  file,
+}: {
+  clientId: string;
+  file: File;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    inputRef.current.files = dataTransfer.files;
+  }, [file]);
+
+  return (
+    <input
+      ref={inputRef}
+      type="file"
+      name={`image-file-${clientId}`}
+      className="hidden"
+      tabIndex={-1}
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function AdminPage() {
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,12 +107,36 @@ export default function AdminPage() {
   const [pictures, setPictures] = useState<UploadedPicture[]>([]);
 
   // UI state
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
-  const [feedback, setFeedback] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
+  const [state, formAction, isPending] = useActionState(
+    publishArticleAction,
+    initialState,
+  );
+
+  // Reconcile server results when a new one arrives: keep already-uploaded
+  // images on retry, reset the form on success. Handled at render time
+  // (React's "adjusting state when a value changes" pattern) rather than in
+  // an effect, so it doesn't cascade an extra render.
+  const [handledState, setHandledState] = useState(state);
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state?.status === "success") {
+      setTitle("");
+      setBody("");
+      setCategory("announcements");
+      pictures.forEach((pic) => URL.revokeObjectURL(pic.previewUrl));
+      setPictures([]);
+    } else if (state && state.uploadedImages.length > 0) {
+      setPictures((prev) =>
+        prev.map((pic) => {
+          const uploaded = state.uploadedImages.find(
+            (ref) => ref.clientId === pic.id,
+          );
+          return uploaded ? { ...pic, uploadedMediaId: uploaded.mediaId } : pic;
+        }),
+      );
+    }
+  }
 
   // File upload handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,13 +148,14 @@ export default function AdminPage() {
       file,
       previewUrl: URL.createObjectURL(file),
       caption: "",
+      altText: "",
+      uploadedMediaId: null,
     }));
 
     setPictures((prev) => [...prev, ...newPictures]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Caption update handler
   const handleCaptionChange = (id: string, newCaption: string) => {
     setPictures((prev) =>
       prev.map((pic) =>
@@ -100,7 +164,14 @@ export default function AdminPage() {
     );
   };
 
-  // Remove picture handler
+  const handleAltTextChange = (id: string, newAltText: string) => {
+    setPictures((prev) =>
+      prev.map((pic) =>
+        pic.id === id ? { ...pic, altText: newAltText } : pic,
+      ),
+    );
+  };
+
   const handleRemovePicture = (id: string) => {
     setPictures((prev) => {
       const removed = prev.find((p) => p.id === id);
@@ -109,7 +180,6 @@ export default function AdminPage() {
     });
   };
 
-  // Set as primary/cover image handler (moves to index 0)
   const handleSetAsCover = (index: number) => {
     if (index === 0) return;
     setPictures((prev) => {
@@ -120,46 +190,8 @@ export default function AdminPage() {
     });
   };
 
-  // Form submission handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedback(null);
-
-    // Validation
-    if (!title.trim()) {
-      setFeedback({
-        type: "error",
-        message: "Please provide an article title.",
-      });
-      return;
-    }
-    if (!body.trim()) {
-      setFeedback({
-        type: "error",
-        message: "Please provide the article body content.",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Temporary simulated submission until WordPress handler is connected in step 2
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      setFeedback({
-        type: "success",
-        message: `Article "${title}" is ready! Ready to be published to WordPress.`,
-      });
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Failed to publish article. Your draft has been preserved.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const fieldErrors =
+    state?.status === "validation_error" ? state.fieldErrors : {};
 
   return (
     <div className="space-y-8">
@@ -204,26 +236,86 @@ export default function AdminPage() {
       </div>
 
       {/* Feedback Banner */}
-      {feedback && (
+      {state && (
         <div
+          role={state.status === "success" ? "status" : "alert"}
+          aria-live="polite"
           className={`flex items-start gap-3 rounded-xl border p-4 text-sm ${
-            feedback.type === "success"
+            state.status === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-red-200 bg-red-50 text-red-800"
+              : state.status === "uncertain"
+                ? "border-amber-200 bg-amber-50 text-amber-800"
+                : "border-red-200 bg-red-50 text-red-800"
           }`}
         >
-          {feedback.type === "success" ? (
+          {state.status === "success" ? (
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
           ) : (
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           )}
-          <div className="flex-1 font-medium">{feedback.message}</div>
+          <div className="flex-1 font-medium">
+            {state.status === "success" && (
+              <>
+                <p>
+                  {state.cacheWarning
+                    ? "Published, but the site may take a few minutes to update."
+                    : "Article published successfully!"}
+                </p>
+                <Link
+                  href={state.articlePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 text-emerald-700 underline hover:text-emerald-900"
+                >
+                  <span>View published article</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+            {state.status === "validation_error" && (
+              <p>Please fix the highlighted fields below.</p>
+            )}
+            {state.status === "error" && <p>{state.message}</p>}
+            {state.status === "uncertain" && <p>{state.message}</p>}
+          </div>
         </div>
       )}
 
       {/* Tab: Editor View */}
       {activeTab === "edit" ? (
-        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
+        <form action={formAction} className="grid gap-8 lg:grid-cols-3">
+          <input
+            type="hidden"
+            name="imageIds"
+            value={pictures.map((p) => p.id).join(",")}
+          />
+          {pictures.map((pic) => (
+            <div key={pic.id} className="hidden">
+              <input
+                type="hidden"
+                name={`image-caption-${pic.id}`}
+                value={pic.caption}
+                readOnly
+              />
+              <input
+                type="hidden"
+                name={`image-alt-${pic.id}`}
+                value={pic.altText}
+                readOnly
+              />
+              {pic.uploadedMediaId ? (
+                <input
+                  type="hidden"
+                  name={`image-existingId-${pic.id}`}
+                  value={pic.uploadedMediaId}
+                  readOnly
+                />
+              ) : (
+                <PictureFileField clientId={pic.id} file={pic.file} />
+              )}
+            </div>
+          ))}
+
           {/* Main Content Columns (2 cols on desktop) */}
           <div className="space-y-6 lg:col-span-2">
             {/* Title Input */}
@@ -236,13 +328,20 @@ export default function AdminPage() {
               </label>
               <input
                 id="article-title"
+                name="title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Annual Science Fair & Robotics Exhibition 2026"
                 className="mt-2.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
+                aria-invalid={Boolean(fieldErrors.title)}
                 required
               />
+              {fieldErrors.title && (
+                <p className="mt-2 text-xs font-medium text-red-600">
+                  {fieldErrors.title}
+                </p>
+              )}
             </div>
 
             {/* Category Selector */}
@@ -253,6 +352,7 @@ export default function AdminPage() {
               <p className="mt-1 text-xs text-neutral-500">
                 Select where this article will be published on the website.
               </p>
+              <input type="hidden" name="category" value={category} />
 
               <div className="mt-3.5 grid gap-3 sm:grid-cols-3">
                 {CATEGORIES.map((cat) => {
@@ -286,6 +386,11 @@ export default function AdminPage() {
                   );
                 })}
               </div>
+              {fieldErrors.category && (
+                <p className="mt-2 text-xs font-medium text-red-600">
+                  {fieldErrors.category}
+                </p>
+              )}
             </div>
 
             {/* Body Content */}
@@ -301,17 +406,24 @@ export default function AdminPage() {
               </p>
               <textarea
                 id="article-body"
+                name="body"
                 rows={10}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Share the full details of this announcement or story..."
                 className="mt-3.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-sm leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
+                aria-invalid={Boolean(fieldErrors.body)}
                 required
               />
               <div className="mt-2 flex items-center justify-between text-xs text-neutral-400">
                 <span>Supports multi-paragraph stories</span>
                 <span>{body.length} characters</span>
               </div>
+              {fieldErrors.body && (
+                <p className="mt-2 text-xs font-medium text-red-600">
+                  {fieldErrors.body}
+                </p>
+              )}
             </div>
 
             {/* Pictures & Individual Captions */}
@@ -323,7 +435,7 @@ export default function AdminPage() {
                   </h2>
                   <p className="text-xs text-neutral-500">
                     Upload photos for your article. Each photo can have its own
-                    custom caption.
+                    custom caption and alt text.
                   </p>
                 </div>
                 <button
@@ -377,7 +489,11 @@ export default function AdminPage() {
                         <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg bg-neutral-100 sm:h-28 sm:w-36">
                           <Image
                             src={pic.previewUrl}
-                            alt={pic.caption || `Uploaded picture ${index + 1}`}
+                            alt={
+                              pic.altText ||
+                              pic.caption ||
+                              `Uploaded picture ${index + 1}`
+                            }
                             fill
                             className="object-cover"
                           />
@@ -387,9 +503,14 @@ export default function AdminPage() {
                               Cover Image
                             </span>
                           )}
+                          {pic.uploadedMediaId && (
+                            <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 rounded bg-neutral-900/80 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                              Uploaded
+                            </span>
+                          )}
                         </div>
 
-                        {/* Caption Input & Actions */}
+                        {/* Caption / Alt Text Inputs & Actions */}
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center justify-between">
                             <label
@@ -429,6 +550,25 @@ export default function AdminPage() {
                             placeholder="Add a caption for this picture (e.g., Grade 3 students showcasing their science models)..."
                             className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:ring-1 focus:ring-school-green focus:outline-none"
                           />
+
+                          <label
+                            htmlFor={`alt-${pic.id}`}
+                            className="block text-xs font-semibold text-neutral-700"
+                          >
+                            Alt text (optional — falls back to caption, then
+                            title)
+                          </label>
+                          <input
+                            id={`alt-${pic.id}`}
+                            type="text"
+                            value={pic.altText}
+                            onChange={(e) =>
+                              handleAltTextChange(pic.id, e.target.value)
+                            }
+                            placeholder="Describe this picture for screen readers"
+                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:ring-1 focus:ring-school-green focus:outline-none"
+                          />
+
                           <p className="text-[10px] text-neutral-400">
                             {pic.file.name} •{" "}
                             {(pic.file.size / (1024 * 1024)).toFixed(2)} MB
@@ -447,6 +587,11 @@ export default function AdminPage() {
                     <UploadCloud className="h-4 w-4" />
                     <span>+ Add more photos</span>
                   </button>
+                  {fieldErrors.images && (
+                    <p className="text-xs font-medium text-red-600">
+                      {fieldErrors.images}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -485,28 +630,14 @@ export default function AdminPage() {
               <div className="mt-6 flex flex-col gap-2.5">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isPending}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-school-green py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-school-green-dark disabled:opacity-50"
                 >
-                  {isSubmitting ? (
+                  {isPending ? (
                     <span>Publishing to Website...</span>
                   ) : (
                     <span>Publish Article</span>
                   )}
-                </button>
-
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    setFeedback({
-                      type: "success",
-                      message: "Draft saved locally.",
-                    });
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white py-2.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
-                >
-                  Save as Draft
                 </button>
               </div>
             </div>
@@ -565,7 +696,7 @@ export default function AdminPage() {
               <div className="relative aspect-video w-full">
                 <Image
                   src={pictures[0].previewUrl}
-                  alt={pictures[0].caption || title}
+                  alt={pictures[0].altText || pictures[0].caption || title}
                   fill
                   className="object-cover"
                 />
@@ -599,7 +730,11 @@ export default function AdminPage() {
                     <div className="relative aspect-video w-full">
                       <Image
                         src={pic.previewUrl}
-                        alt={pic.caption || `Gallery photo ${idx + 2}`}
+                        alt={
+                          pic.altText ||
+                          pic.caption ||
+                          `Gallery photo ${idx + 2}`
+                        }
                         fill
                         className="object-cover"
                       />

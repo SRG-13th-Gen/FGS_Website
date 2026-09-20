@@ -2,17 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Calendar,
-  Share2,
-  Tag,
-  Building2,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { ArrowLeft, Calendar, Tag, Phone, Mail } from "lucide-react";
 
-import { getAllArticles, getArticleBySlug } from "@/lib/articles";
+import { getArticleBySlug, getPublishedArticles } from "@/lib/wordpress/reads";
+import {
+  ARTICLE_CATEGORY_LABELS,
+  formatArticleDate,
+} from "@/lib/wordpress/display";
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
 
@@ -23,39 +19,68 @@ interface ArticlePageProps {
 }
 
 export async function generateStaticParams() {
-  const articles = getAllArticles();
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
+  const result = await getPublishedArticles();
+  // WordPress unreachable at build time: skip prerendering these, don't fail the build.
+  // dynamicParams stays on (the App Router default), so slugs still render on request.
+  if (result.status !== "ok") return [];
+  return result.articles.map((article) => ({ slug: article.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const result = await getArticleBySlug(slug);
 
-  if (!article) {
+  if (result.status !== "ok") {
     return {
       title: "Article Not Found | Flor de Grace School Inc.",
     };
   }
 
   return {
-    title: `${article.title} | Flor de Grace School Inc.`,
-    description: article.excerpt,
+    title: `${result.article.title} | Flor de Grace School Inc.`,
+    description: result.article.excerpt,
   };
 }
 
 export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const result = await getArticleBySlug(slug);
 
-  if (!article) {
+  if (result.status === "not-found") {
     notFound();
   }
 
-  const otherArticles = getAllArticles().filter((a) => a.slug !== article.slug);
+  if (result.status === "unavailable") {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28">
+          <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
+            <p className="rounded-2xl border border-neutral-200 bg-white p-10 text-sm font-medium text-neutral-600 shadow-sm">
+              This article is unavailable right now. Please check back soon.
+            </p>
+            <Link
+              href="/#news"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-school-green hover:underline"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to News &amp; Events</span>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const { article } = result;
+  const othersResult = await getPublishedArticles();
+  const otherArticles =
+    othersResult.status === "ok"
+      ? othersResult.articles.filter((a) => a.slug !== article.slug).slice(0, 4)
+      : [];
 
   return (
     <>
@@ -73,9 +98,9 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               <span>Back to News &amp; Events</span>
             </Link>
 
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-school-green-light px-3 py-1 text-xs font-bold uppercase tracking-wider text-school-green">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-school-green-light px-3 py-1 text-xs font-bold tracking-wider text-school-green uppercase">
               <Tag className="h-3 w-3" />
-              {article.category}
+              {ARTICLE_CATEGORY_LABELS[article.category]}
             </span>
           </div>
 
@@ -83,45 +108,46 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           <header className="rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-10">
             <div className="flex items-center gap-2 text-xs font-medium text-neutral-500">
               <Calendar className="h-3.5 w-3.5 text-school-green" />
-              <span>{article.date}</span>
+              <span>{formatArticleDate(article.publishedAt)}</span>
               <span>•</span>
               <span>Flor de Grace School Administration</span>
             </div>
 
-            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl lg:text-5xl leading-tight">
+            <h1 className="mt-4 text-2xl leading-tight font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl lg:text-5xl">
               {article.title}
             </h1>
 
-            <p className="mt-4 text-base italic text-neutral-600 sm:text-lg">
-              {article.excerpt}
-            </p>
+            {article.excerpt && (
+              <p className="mt-4 text-base text-neutral-600 italic sm:text-lg">
+                {article.excerpt}
+              </p>
+            )}
 
             {/* Featured Cover Image */}
             {article.coverImage && (
               <figure className="mt-8 overflow-hidden rounded-2xl border border-neutral-200/80 shadow-sm">
                 <div className="relative aspect-[16/9] w-full bg-neutral-100 sm:aspect-[21/9]">
                   <Image
-                    src={article.coverImage}
-                    alt={article.coverImageCaption || article.title}
+                    src={article.coverImage.url}
+                    alt={article.coverImage.alt || article.title}
                     fill
                     priority
                     className="object-cover"
                   />
                 </div>
-                {article.coverImageCaption && (
-                  <figcaption className="border-t border-neutral-100 bg-neutral-50/80 px-4 py-3 text-center text-xs italic text-neutral-600 sm:text-sm">
-                    {article.coverImageCaption}
+                {article.coverImage.caption && (
+                  <figcaption className="border-t border-neutral-100 bg-neutral-50/80 px-4 py-3 text-center text-xs text-neutral-600 italic sm:text-sm">
+                    {article.coverImage.caption}
                   </figcaption>
                 )}
               </figure>
             )}
 
-            {/* Main Article Body */}
-            <div className="mt-10 space-y-6 text-base leading-relaxed text-neutral-700 sm:text-lg sm:leading-8">
-              {article.content.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
+            {/* Main Article Body — sanitized WordPress HTML (paragraphs, lists, links, headings, images with captions) */}
+            <div
+              className="mt-10 text-base leading-relaxed text-neutral-700 sm:text-lg sm:leading-8 [&_a]:text-school-green [&_a]:underline [&_a]:underline-offset-2 [&_figcaption]:border-t [&_figcaption]:border-neutral-100 [&_figcaption]:bg-neutral-50/80 [&_figcaption]:px-4 [&_figcaption]:py-3 [&_figcaption]:text-center [&_figcaption]:text-xs [&_figcaption]:text-neutral-600 [&_figcaption]:italic [&_figure]:my-8 [&_figure]:overflow-hidden [&_figure]:rounded-2xl [&_figure]:border [&_figure]:border-neutral-200/80 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-neutral-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-neutral-900 [&_h4]:mt-6 [&_h4]:mb-2 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-neutral-900 [&_img]:w-full [&_img]:object-cover [&_li]:mb-2 [&_ol]:mb-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-900 [&_ul]:mb-6 [&_ul]:list-disc [&_ul]:pl-6"
+              dangerouslySetInnerHTML={{ __html: article.contentHtml }}
+            />
 
             {/* School Contact Footer Card inside Article */}
             <div className="mt-12 rounded-2xl border border-school-green/20 bg-school-green-light/40 p-6 sm:p-8">
@@ -174,15 +200,15 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   <Link
                     key={other.slug}
                     href={`/news/${other.slug}`}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm transition-all hover:border-school-green/40 hover:shadow-md hover:-translate-y-0.5"
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-md"
                   >
                     <span className="w-fit rounded-full bg-school-green-light px-2.5 py-0.5 text-[11px] font-bold text-school-green">
-                      {other.category}
+                      {ARTICLE_CATEGORY_LABELS[other.category]}
                     </span>
                     <h3 className="mt-3 text-base font-bold text-neutral-900 transition-colors group-hover:text-school-green">
                       {other.title}
                     </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-neutral-600 line-clamp-2">
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-neutral-600">
                       {other.excerpt}
                     </p>
                     <span className="mt-4 inline-flex items-center text-xs font-semibold text-school-green">
