@@ -18,12 +18,12 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 - Dependencies: SPEC-001, designer-owned DESIGN, DEC-108/112, and SPEC-004 for release freshness behavior.
 - Planned evidence: T-003, T-004, T-013, T-016, T-017, T-018.
 
-## SPEC-003 Team admin
+## [SPEC-003 Team admin & article management](003-team-admin.md)
 
-- Scope: team sessions/roles, announcement lifecycle, category creation/editing, media upload/selection, safe result reporting and proposed audit attribution.
+- Scope: client `/admin` dashboard, article authoring (title, category: Clubs/Events/Announcements, body, pictures with captions), team sessions/roles, media upload, safe result reporting.
 - Requirements: FR-005, FR-006, FR-007, FR-008, NFR-001, NFR-002, NFR-003, NFR-005, NFR-007.
-- Dependencies: SPEC-001, DEC-103/104/111; define content round-trip/concurrency policy and integrate SPEC-004 invalidation.
-- Planned evidence: T-005, T-006, T-007, T-014, T-015, T-016, T-020; saved/refresh-pending behavior also uses T-008.
+- Dependencies: SPEC-001, DEC-103/104/111; integrate SPEC-004 invalidation.
+- Planned evidence: T-005, T-006, T-007, T-014, T-015, T-016, T-020.
 
 ## SPEC-004 Content revalidation
 

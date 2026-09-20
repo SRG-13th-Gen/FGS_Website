@@ -35,3 +35,13 @@ The repository contains a Next.js/TypeScript/Tailwind scaffold, the full selecte
 shadcn components in `src/components/ui` are primitives. The frontend designer must create custom school components and layouts; follow [FRONTEND.md](docs/FRONTEND.md). Starter tokens are not approved branding.
 
 For commit or PR tasks, use the repository-local [github-pr skill](.agents/skills/github-pr/SKILL.md). Ordinary editing does not authorize commits, pushes, merges, deployments, or branch-protection changes. Preserve authorization already given by the user instead of requesting it again.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

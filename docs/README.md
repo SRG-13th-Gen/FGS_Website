@@ -30,7 +30,7 @@ Owners below are responsibilities to assign, not named people already appointed.
 | [ARCHITECTURE.md](ARCHITECTURE.md)                 | Boundaries, ownership, topology, flows                                   | Technical lead                     |
 | [TECH_STACK.md](TECH_STACK.md)                     | Baseline stack and recommended alternatives                              | Technical lead                     |
 | [FRONTEND.md](FRONTEND.md)                         | Installed primitives, custom-component ownership, and developer commands | Engineering with frontend designer |
-| [DESIGN.md](DESIGN.md)                             | Intentionally empty; future visual design authority                      | Frontend designer                  |
+| [DESIGN.md](DESIGN.md)                             | Visual design system, brand tokens, typography, and component patterns    | Frontend designer                  |
 | [DOCKER.md](DOCKER.md)                             | Local services, setup, and operational safeguards                        | Engineering                        |
 | [CI_CD.md](CI_CD.md)                               | Intentionally empty; CI/CD deferred                                      | Engineering                        |
 | [DATA_API_CONTRACTS.md](DATA_API_CONTRACTS.md)     | Resource mappings and proposed interfaces                                | Engineering                        |
@@ -52,7 +52,7 @@ Owners below are responsibilities to assign, not named people already appointed.
 | CMS/public content               | ARCHITECTURE, DATA_API_CONTRACTS, SECURITY, relevant requirements                 |
 | Admin/authentication             | SECURITY, DECISIONS, contracts, admin requirements                                |
 | Inquiry forms                    | Inquiry requirements, contracts, SECURITY, delivery/privacy decisions             |
-| Frontend design                  | DESIGN (currently empty), approved content requirements; coordinate with designer |
+| Frontend design                  | DESIGN, FRONTEND, approved content requirements                                   |
 | Local setup                      | DOCKER, TECH_STACK, architecture hosting constraints                              |
 | Testing                          | TESTING and the affected requirement/specification                                |
 | Commits or PRs                   | Git rules and repository-local GitHub PR skill via AGENTS                         |
