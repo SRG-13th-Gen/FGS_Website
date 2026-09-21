@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 import { SECTION_ICON_NAMES } from "./icons";
+import { imageRefSchema, type ResolvedImage } from "./types";
 
-const iconSchema = z.enum(SECTION_ICON_NAMES as [string, ...string[]]);
+const iconSchema = z.enum(SECTION_ICON_NAMES);
 
 const programSchema = z.object({
   name: z.string().trim().min(1).max(60),
@@ -26,6 +27,8 @@ export const admissionSchema = z.object({
   sectionLabel: z.string().trim().min(1).max(60),
   heading: z.string().trim().min(3).max(150),
   intro: z.string().trim().max(500),
+  /** Full-bleed decorative background behind the whole section. */
+  backgroundImage: imageRefSchema,
   programs: z.array(programSchema).min(1).max(6),
   requirementCategories: z.array(requirementCategorySchema).min(1).max(6),
   /** Numbered 01, 02, 03... by position — no separate order field needed. */
@@ -38,11 +41,22 @@ export type AdmissionRequirementCategory = z.infer<
 >;
 export type AdmissionEnrollmentStep = z.infer<typeof enrollmentStepSchema>;
 
+export interface AdmissionView extends Omit<
+  AdmissionContent,
+  "backgroundImage"
+> {
+  backgroundImage: ResolvedImage;
+}
+
 export const ADMISSION_DEFAULTS: AdmissionContent = {
   sectionLabel: "Admission",
   heading: "Start Your Journey with Us",
   intro:
     "We welcome young learners who are eager to explore, discover, and grow. Here's everything you need to join the FGS family.",
+  backgroundImage: {
+    mediaId: 0,
+    alt: "Flor de Grace School students and admission",
+  },
   programs: [
     {
       name: "Preschool",
@@ -102,4 +116,13 @@ export const ADMISSION_DEFAULTS: AdmissionContent = {
         "Complete the enrollment form, settle fees, and officially welcome your child to the FGS family!",
     },
   ],
+};
+
+export const ADMISSION_FALLBACK: AdmissionView = {
+  ...ADMISSION_DEFAULTS,
+  backgroundImage: {
+    mediaId: 0,
+    url: "/images/general/Admission.webp",
+    alt: ADMISSION_DEFAULTS.backgroundImage.alt,
+  },
 };

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { SECTION_ICON_NAMES } from "./icons";
 
-const iconSchema = z.enum(SECTION_ICON_NAMES as [string, ...string[]]);
+const iconSchema = z.enum(SECTION_ICON_NAMES);
 
 const contactCardSchema = z.object({
   icon: iconSchema,

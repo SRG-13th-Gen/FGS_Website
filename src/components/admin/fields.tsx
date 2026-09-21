@@ -5,6 +5,11 @@ import Image from "next/image";
 import { ArrowDown, ArrowUp, Plus, Trash2, UploadCloud } from "lucide-react";
 
 import { reorderArray } from "@/lib/wordpress/sections/reorder";
+import {
+  SECTION_ICON_NAMES,
+  SECTION_ICON_OPTIONS,
+  type SectionIconName,
+} from "@/lib/wordpress/sections/icons";
 
 const fieldLabelClass = "block text-sm font-bold text-neutral-800";
 const helperTextClass = "mt-1 text-xs text-neutral-500";
@@ -263,6 +268,158 @@ export function StringListField({
         <Plus className="h-3.5 w-3.5" />
         <span>Add {itemLabel.toLowerCase()}</span>
       </button>
+      {error && <p className={errorTextClass}>{error}</p>}
+    </div>
+  );
+}
+
+export function IconPickerField({
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: SectionIconName;
+  onChange: (next: SectionIconName) => void;
+  error?: string;
+}) {
+  return (
+    <div>
+      <span className={fieldLabelClass}>{label}</span>
+      <div
+        className="mt-2 flex flex-wrap gap-2"
+        role="radiogroup"
+        aria-label={label}
+      >
+        {SECTION_ICON_NAMES.map((name) => {
+          const Icon = SECTION_ICON_OPTIONS[name];
+          const selected = value === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={name}
+              onClick={() => onChange(name)}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
+                selected
+                  ? "border-school-green bg-school-green-light text-school-green"
+                  : "border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+            </button>
+          );
+        })}
+      </div>
+      {error && <p className={errorTextClass}>{error}</p>}
+    </div>
+  );
+}
+
+export function RepeatableList<T>({
+  label,
+  helperText,
+  items,
+  onChange,
+  itemLabel,
+  createItem,
+  renderItem,
+  error,
+  minItems = 0,
+  maxItems,
+}: {
+  label: string;
+  helperText?: string;
+  items: T[];
+  onChange: (next: T[]) => void;
+  itemLabel: string;
+  createItem: () => T;
+  renderItem: (
+    item: T,
+    update: (patch: Partial<T>) => void,
+    index: number,
+  ) => React.ReactNode;
+  error?: string;
+  minItems?: number;
+  maxItems?: number;
+}) {
+  const update = (index: number, patch: Partial<T>) => {
+    onChange(
+      items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
+  };
+  const remove = (index: number) =>
+    onChange(items.filter((_, i) => i !== index));
+  const move = (index: number, direction: -1 | 1) =>
+    onChange(reorderArray(items, index, direction));
+  const add = () => onChange([...items, createItem()]);
+  const canAdd = maxItems === undefined || items.length < maxItems;
+  const canRemove = items.length > minItems;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <span className={fieldLabelClass}>{label}</span>
+        {canAdd && (
+          <button
+            type="button"
+            onClick={add}
+            className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-school-green hover:underline"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add {itemLabel.toLowerCase()}</span>
+          </button>
+        )}
+      </div>
+      {helperText && <p className={helperTextClass}>{helperText}</p>}
+
+      <div className="mt-3 space-y-4">
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-4"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold text-neutral-500">
+                {itemLabel} {index + 1}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  aria-label={`Move ${itemLabel} ${index + 1} up`}
+                  className="rounded-lg border border-neutral-200 bg-white p-1.5 text-neutral-500 hover:bg-neutral-100 disabled:opacity-30"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(index, 1)}
+                  disabled={index === items.length - 1}
+                  aria-label={`Move ${itemLabel} ${index + 1} down`}
+                  className="rounded-lg border border-neutral-200 bg-white p-1.5 text-neutral-500 hover:bg-neutral-100 disabled:opacity-30"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  disabled={!canRemove}
+                  aria-label={`Remove ${itemLabel} ${index + 1}`}
+                  className="rounded-lg border border-neutral-200 bg-white p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-30"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+            {renderItem(item, (patch) => update(index, patch), index)}
+          </div>
+        ))}
+      </div>
       {error && <p className={errorTextClass}>{error}</p>}
     </div>
   );

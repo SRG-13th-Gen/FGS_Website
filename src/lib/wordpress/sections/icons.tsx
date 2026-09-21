@@ -28,6 +28,9 @@ export const SECTION_ICON_OPTIONS = {
 
 export type SectionIconName = keyof typeof SECTION_ICON_OPTIONS;
 
-export const SECTION_ICON_NAMES = Object.keys(
-  SECTION_ICON_OPTIONS,
-) as SectionIconName[];
+// A non-empty literal-typed tuple (not just SectionIconName[]) so z.enum()
+// infers the actual icon-name union instead of widening it to `string`.
+export const SECTION_ICON_NAMES = Object.keys(SECTION_ICON_OPTIONS) as [
+  SectionIconName,
+  ...SectionIconName[],
+];

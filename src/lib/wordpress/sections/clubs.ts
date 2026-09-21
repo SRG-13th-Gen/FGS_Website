@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { SECTION_ICON_NAMES } from "./icons";
 
-const iconSchema = z.enum(SECTION_ICON_NAMES as [string, ...string[]]);
+const iconSchema = z.enum(SECTION_ICON_NAMES);
 
 const clubItemSchema = z.object({
   name: z.string().trim().min(1).max(80),

@@ -1,6 +1,12 @@
 import "server-only";
 
-import { aboutSchema, ABOUT_DEFAULTS } from "./about";
+import {
+  ABOUT_DEFAULTS,
+  ABOUT_FALLBACK,
+  aboutSchema,
+  type AboutContent,
+  type AboutView,
+} from "./about";
 import {
   fetchSectionPage,
   resolveImageRef,
@@ -8,7 +14,13 @@ import {
   saveSectionRaw,
   zodIssuesToFieldErrors,
 } from "./adapter";
-import { admissionSchema, ADMISSION_DEFAULTS } from "./admission";
+import {
+  ADMISSION_DEFAULTS,
+  ADMISSION_FALLBACK,
+  admissionSchema,
+  type AdmissionContent,
+  type AdmissionView,
+} from "./admission";
 import { clubsSchema, CLUBS_DEFAULTS } from "./clubs";
 import { contactSchema, CONTACT_DEFAULTS } from "./contact";
 import {
@@ -34,16 +46,6 @@ import {
 } from "./school-info";
 import type { SectionSaveResult } from "./types";
 
-export const aboutContent = createSectionAdapter(
-  "site-about",
-  aboutSchema,
-  ABOUT_DEFAULTS,
-);
-export const admissionContent = createSectionAdapter(
-  "site-admission",
-  admissionSchema,
-  ADMISSION_DEFAULTS,
-);
 export const contactContent = createSectionAdapter(
   "site-contact",
   contactSchema,
@@ -116,6 +118,69 @@ export const schoolInfoContent = {
       };
     }
     return saveSectionRaw("site-school-info", parsed.data);
+  },
+};
+
+export const aboutContent = {
+  slug: "site-about" as const,
+  schema: aboutSchema,
+  defaults: ABOUT_DEFAULTS,
+  async get(): Promise<AboutView> {
+    const page = await fetchSectionPage("site-about");
+    if (!page) return ABOUT_FALLBACK;
+    const parsed = aboutSchema.safeParse(page.data);
+    if (!parsed.success) return ABOUT_FALLBACK;
+    const bannerImage = await resolveImageRef(
+      parsed.data.featureBanner.image,
+      ABOUT_FALLBACK.featureBanner.image,
+    );
+    return {
+      ...parsed.data,
+      featureBanner: { ...parsed.data.featureBanner, image: bannerImage },
+    };
+  },
+  async getLastModified(): Promise<string | null> {
+    return (await fetchSectionPage("site-about"))?.modifiedAt ?? null;
+  },
+  async save(data: AboutContent): Promise<SectionSaveResult> {
+    const parsed = aboutSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        status: "validation_error",
+        fieldErrors: zodIssuesToFieldErrors(parsed.error),
+      };
+    }
+    return saveSectionRaw("site-about", parsed.data);
+  },
+};
+
+export const admissionContent = {
+  slug: "site-admission" as const,
+  schema: admissionSchema,
+  defaults: ADMISSION_DEFAULTS,
+  async get(): Promise<AdmissionView> {
+    const page = await fetchSectionPage("site-admission");
+    if (!page) return ADMISSION_FALLBACK;
+    const parsed = admissionSchema.safeParse(page.data);
+    if (!parsed.success) return ADMISSION_FALLBACK;
+    const backgroundImage = await resolveImageRef(
+      parsed.data.backgroundImage,
+      ADMISSION_FALLBACK.backgroundImage,
+    );
+    return { ...parsed.data, backgroundImage };
+  },
+  async getLastModified(): Promise<string | null> {
+    return (await fetchSectionPage("site-admission"))?.modifiedAt ?? null;
+  },
+  async save(data: AdmissionContent): Promise<SectionSaveResult> {
+    const parsed = admissionSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        status: "validation_error",
+        fieldErrors: zodIssuesToFieldErrors(parsed.error),
+      };
+    }
+    return saveSectionRaw("site-admission", parsed.data);
   },
 };
 

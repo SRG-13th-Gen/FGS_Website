@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+import { imageRefSchema, type ResolvedImage } from "./types";
+
+const quoteSchema = z.object({
+  text: z.string().trim().min(3).max(500),
+  author: z.string().trim().min(1).max(80),
+});
+
+const featureBannerSchema = z.object({
+  heading: z.string().trim().min(3).max(200),
+  body: z.string().trim().max(500),
+  image: imageRefSchema,
+});
+
 export const aboutSchema = z.object({
   sectionLabel: z.string().trim().min(1).max(60),
   heading: z.string().trim().min(3).max(150),
@@ -7,8 +20,18 @@ export const aboutSchema = z.object({
   storyParagraphs: z.array(z.string().trim().min(1).max(2000)).min(1).max(12),
   mission: z.string().trim().min(1).max(600),
   vision: z.string().trim().min(1).max(600),
+  /** The Montessori quote band between the hero and the feature banner. */
+  quote: quoteSchema,
+  /** The full-bleed classroom photo banner between the quote band and About. */
+  featureBanner: featureBannerSchema,
 });
 export type AboutContent = z.infer<typeof aboutSchema>;
+export type AboutQuote = z.infer<typeof quoteSchema>;
+export type AboutFeatureBanner = z.infer<typeof featureBannerSchema>;
+
+export interface AboutView extends Omit<AboutContent, "featureBanner"> {
+  featureBanner: Omit<AboutFeatureBanner, "image"> & { image: ResolvedImage };
+}
 
 export const ABOUT_DEFAULTS: AboutContent = {
   sectionLabel: "About Us",
@@ -25,4 +48,26 @@ export const ABOUT_DEFAULTS: AboutContent = {
     "We are committed to providing quality education through a holistic approach that fosters academic excellence, character development, and lifelong learning.",
   vision:
     "Our vision is to become a model institution of learning that shapes well-rounded individuals—academically excellent, morally upright, and committed to lifelong growth and service to others.",
+  quote: {
+    text: "It is true that we cannot make a genius. We can only give the child the chance to fulfil his potential possibilities.",
+    author: "Maria Montessori",
+  },
+  featureBanner: {
+    heading:
+      "Nurturing Young Minds Through Curiosity, Critical Thinking, and a Love for Learning",
+    body: "Join our community where children develop strong foundations through exploration, thoughtful learning, and academic growth.",
+    image: { mediaId: 0, alt: "Flor de Grace School classroom learning" },
+  },
+};
+
+export const ABOUT_FALLBACK: AboutView = {
+  ...ABOUT_DEFAULTS,
+  featureBanner: {
+    ...ABOUT_DEFAULTS.featureBanner,
+    image: {
+      mediaId: 0,
+      url: "/images/general/classroom.webp",
+      alt: ABOUT_DEFAULTS.featureBanner.image.alt,
+    },
+  },
 };

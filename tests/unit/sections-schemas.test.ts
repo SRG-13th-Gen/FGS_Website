@@ -24,8 +24,6 @@ import { imageRefSchema } from "@/lib/wordpress/sections/types";
 describe("every section's default content satisfies its own schema", () => {
   // Text-only sections: the default is exactly what the schema expects.
   it.each([
-    ["about", aboutSchema, ABOUT_DEFAULTS],
-    ["admission", admissionSchema, ADMISSION_DEFAULTS],
     ["contact", contactSchema, CONTACT_DEFAULTS],
     ["clubs", clubsSchema, CLUBS_DEFAULTS],
     ["gallery", gallerySchema, GALLERY_DEFAULTS],
@@ -33,9 +31,10 @@ describe("every section's default content satisfies its own schema", () => {
     expect(schema.safeParse(defaults).success).toBe(true);
   });
 
-  // Hero/School Info use mediaId: 0 as a seed-time placeholder the seed
-  // script replaces with a real uploaded media id before writing/validating
-  // — see scripts/seed-content.ts resolveDefaultsWithImages().
+  // Hero/School Info/About/Admission use mediaId: 0 as a seed-time
+  // placeholder the seed script replaces with a real uploaded media id
+  // before writing/validating — see scripts/seed-content.ts
+  // resolveDefaultsWithImages().
   it("hero (with a resolved media id, as the seed script writes it)", () => {
     const seeded = {
       ...HERO_DEFAULTS,
@@ -50,6 +49,25 @@ describe("every section's default content satisfies its own schema", () => {
       logo: { ...SCHOOL_INFO_DEFAULTS.logo, mediaId: 1 },
     };
     expect(schoolInfoSchema.safeParse(seeded).success).toBe(true);
+  });
+
+  it("about (with a resolved media id, as the seed script writes it)", () => {
+    const seeded = {
+      ...ABOUT_DEFAULTS,
+      featureBanner: {
+        ...ABOUT_DEFAULTS.featureBanner,
+        image: { ...ABOUT_DEFAULTS.featureBanner.image, mediaId: 1 },
+      },
+    };
+    expect(aboutSchema.safeParse(seeded).success).toBe(true);
+  });
+
+  it("admission (with a resolved media id, as the seed script writes it)", () => {
+    const seeded = {
+      ...ADMISSION_DEFAULTS,
+      backgroundImage: { ...ADMISSION_DEFAULTS.backgroundImage, mediaId: 1 },
+    };
+    expect(admissionSchema.safeParse(seeded).success).toBe(true);
   });
 });
 

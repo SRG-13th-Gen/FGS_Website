@@ -1,7 +1,18 @@
-import { SectionEditorPlaceholder } from "@/components/admin/section-editor-placeholder";
+import { admissionContent } from "@/lib/wordpress/sections/content";
 
-export default function AdminAdmissionSectionPage() {
+import { AdmissionForm } from "./admission-form";
+
+export default async function AdminAdmissionSectionPage() {
+  const initial = await admissionContent.get();
+
   return (
-    <SectionEditorPlaceholder label="Admission" publicAnchor="/#admission" />
+    <div className="space-y-1">
+      <p className="text-sm text-neutral-500">
+        Fields appear in the same order as on the homepage Admission section.
+      </p>
+      <div className="pt-5">
+        <AdmissionForm initial={initial} />
+      </div>
+    </div>
   );
 }

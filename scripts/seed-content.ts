@@ -23,6 +23,14 @@ import {
   SCHOOL_INFO_DEFAULTS,
   type SchoolInfoContent,
 } from "../src/lib/wordpress/sections/school-info";
+import {
+  ABOUT_DEFAULTS,
+  type AboutContent,
+} from "../src/lib/wordpress/sections/about";
+import {
+  ADMISSION_DEFAULTS,
+  type AdmissionContent,
+} from "../src/lib/wordpress/sections/admission";
 import { SECTION_META_KEY } from "../src/lib/wordpress/sections/meta-key";
 import { shouldSeedSectionContent } from "../src/lib/wordpress/sections/seed-logic";
 
@@ -206,6 +214,31 @@ async function resolveDefaultsWithImages(slug: string): Promise<unknown> {
     const data: SchoolInfoContent = {
       ...SCHOOL_INFO_DEFAULTS,
       logo: { ...SCHOOL_INFO_DEFAULTS.logo, mediaId },
+    };
+    return data;
+  }
+  if (slug === "site-about") {
+    const mediaId = await uploadOrReuseImage(
+      "/images/general/classroom.webp",
+      ABOUT_DEFAULTS.featureBanner.image.alt,
+    );
+    const data: AboutContent = {
+      ...ABOUT_DEFAULTS,
+      featureBanner: {
+        ...ABOUT_DEFAULTS.featureBanner,
+        image: { ...ABOUT_DEFAULTS.featureBanner.image, mediaId },
+      },
+    };
+    return data;
+  }
+  if (slug === "site-admission") {
+    const mediaId = await uploadOrReuseImage(
+      "/images/general/Admission.webp",
+      ADMISSION_DEFAULTS.backgroundImage.alt,
+    );
+    const data: AdmissionContent = {
+      ...ADMISSION_DEFAULTS,
+      backgroundImage: { ...ADMISSION_DEFAULTS.backgroundImage, mediaId },
     };
     return data;
   }
