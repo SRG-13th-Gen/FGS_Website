@@ -51,11 +51,13 @@ src/
 ## 3. Custom Public Components & Features
 
 ### 3.1 Sticky Navigation (`src/components/public/navbar.tsx`)
+
 - Client boundary (`"use client"`).
-- Dynamic brand title transition: The school crest stays permanently visible; the text *"Flor de Grace School Inc."* smoothly slides and fades in (`opacity-0 -translate-x-2` to `opacity-100 translate-x-0`) once scrolled past the hero fold (`> 80px`).
+- Dynamic brand title transition: The school crest stays permanently visible; the text _"Flor de Grace School Inc."_ smoothly slides and fades in (`opacity-0 -translate-x-2` to `opacity-100 translate-x-0`) once scrolled past the hero fold (`> 80px`).
 - Mobile drawer using Radix `Sheet` containing navigation links, inquiry CTA, and school hours.
 
 ### 3.2 Landing Page (`src/app/page.tsx`)
+
 - Composed of modular, accessible sections:
   1. **Hero**: High-impact graduation background image, italic tagline, and dual action CTAs.
   2. **Montessori Quote & Classroom Banner**: Full-bleed classroom image with dark overlay and centered quote.
@@ -67,34 +69,39 @@ src/
   8. **Contact Us**: Embedded inquiry form with hours, location, and interactive phone/email cards.
 
 ### 3.3 Clubs Carousel (`src/components/public/clubs-section.tsx`)
+
 - Embla Carousel implementation with touch-drag support on mobile and prev/next buttons on desktop.
 - Displays responsive card slides (1 per view on mobile, 2 on tablet, 3 on desktop).
 - Features real-time active slide indicators (pagination dots) responding to scroll events.
 
 ### 3.4 Photo Gallery (`src/components/public/gallery-section.tsx`)
+
 - Default view displays a curated 5-image mosaic (1 large featured photo on the left, 4 in a 2x2 grid on the right).
 - An upper-right pill button (`View More / Show Less`) with animated chevron expands or collapses additional 5-image sets smoothly without route changes.
 
 ### 3.5 News & Announcements (`src/components/public/news-section.tsx`)
+
 - 3-column card grid rendering articles from `src/lib/articles.ts`.
 - Filterable category tags (`Announcements`, `Events`, `Clubs`).
 - Upper-right `View More / Show Less` toggle button.
 - Direct link to full story view (`/news/[slug]`).
 
 ### 3.6 Full Article View (`src/app/news/[slug]/page.tsx`)
+
 - Dynamic route rendering individual articles with full editorial body.
 - Displays author, publication date, read time, and category pill.
 - Supports multi-image layout with dedicated photo captions.
 - Includes breadcrumb navigation back to home/news.
 
 ### 3.7 Admin Publishing Portal (`src/app/admin/page.tsx`)
+
 - Administrative interface for school staff to compose articles, stories, and announcements.
 - Supported Fields:
   - Title input with character suggestions.
   - Category selector (`Announcements`, `Events`, `Clubs`).
   - Article Body text area with paragraph formatting.
   - Multiple image uploader with preview thumbnails and individual caption input fields per image.
-- Dual-tab view: *Write & Edit* mode and *Live Preview* mode to inspect exact public appearance before publishing.
+- Dual-tab view: _Write & Edit_ mode and _Live Preview_ mode to inspect exact public appearance before publishing.
 
 ---
 

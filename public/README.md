@@ -10,4 +10,5 @@ This directory contains static assets served by Next.js. Place images, fonts, an
 - `images/general/` — Other general-purpose images (campus, events, etc.)
 
 Files here are served from the root URL. For example:
+
 - `public/images/logo/fgs-logo.png` → accessible at `/images/logo/fgs-logo.png`
