@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
     // Local WordPress runs on loopback; the image optimizer otherwise refuses
     // local IPs as an SSRF guard. Never true for a non-loopback WORDPRESS_URL.
     dangerouslyAllowLocalIP: isLoopbackHost,
+    // Next.js 16 defaults to allowing only quality 75; explicitly allow every
+    // quality value actually passed to <Image> across the app (75 default, 85
+    // for the hero/admission background, 90 for the classroom banner).
+    qualities: [75, 85, 90],
   },
   experimental: {
     serverActions: {

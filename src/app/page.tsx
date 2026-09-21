@@ -43,7 +43,7 @@ export default async function Home() {
     <>
       <Navbar schoolInfo={schoolInfo} />
 
-      <main>
+      <main id="main-content">
         {/* ───────────────────── HERO ───────────────────── */}
         <section
           id="home"
@@ -54,6 +54,7 @@ export default async function Home() {
             src={hero.backgroundImage.url}
             alt={hero.backgroundImage.alt}
             fill
+            sizes="100vw"
             className="object-cover"
             priority
             quality={85}
@@ -101,6 +102,7 @@ export default async function Home() {
             src={about.featureBanner.image.url}
             alt={about.featureBanner.image.alt}
             fill
+            sizes="100vw"
             className="object-cover object-center"
             quality={90}
           />
@@ -126,7 +128,7 @@ export default async function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="mx-auto max-w-3xl text-center">
-              <span className="text-sm font-semibold tracking-widest text-school-green uppercase">
+              <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
                 {about.sectionLabel}
               </span>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
@@ -193,6 +195,7 @@ export default async function Home() {
             src={admission.backgroundImage.url}
             alt={admission.backgroundImage.alt}
             fill
+            sizes="100vw"
             className="object-cover object-center"
             quality={85}
           />
@@ -202,7 +205,7 @@ export default async function Home() {
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold tracking-widest text-school-green uppercase">
+              <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
                 {admission.sectionLabel}
               </span>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
@@ -224,8 +227,8 @@ export default async function Home() {
                     : "h-10 w-10 text-amber-500";
                 const levelClass =
                   index % 2 === 0
-                    ? "mt-1 text-sm font-medium text-school-green"
-                    : "mt-1 text-sm font-medium text-amber-500";
+                    ? "mt-1 text-sm font-medium text-school-green-dark"
+                    : "mt-1 text-sm font-medium text-amber-700";
                 return (
                   <div
                     key={program.name}
@@ -249,7 +252,7 @@ export default async function Home() {
             {/* Requirements List */}
             <div className="mt-20">
               <div className="mx-auto max-w-2xl text-center">
-                <h3 className="mt-3 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+                <h3 className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
                   Admission Requirements
                 </h3>
                 <p className="mt-2 text-sm text-neutral-600">
@@ -275,7 +278,7 @@ export default async function Home() {
                             ? "bg-school-green text-white"
                             : index === 2
                               ? "bg-school-yellow/30 text-neutral-800"
-                              : "bg-school-green/10 text-school-green"
+                              : "bg-school-green/10 text-school-green-dark"
                         }`}
                       >
                         {category.badgeLabel}
@@ -299,7 +302,7 @@ export default async function Home() {
 
             {/* Enrollment steps */}
             <div className="mt-20">
-              <h3 className="mb-8 text-center text-xl font-bold text-neutral-900">
+              <h3 className="mb-8 text-center text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
                 Enrollment Process
               </h3>
               <div className="grid gap-6 md:grid-cols-3">
@@ -347,7 +350,7 @@ export default async function Home() {
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {contact.heading}
               </h2>
-              <p className="mt-4 text-white/70">{contact.intro}</p>
+              <p className="mt-4 text-white/90">{contact.intro}</p>
             </div>
 
             <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -364,8 +367,8 @@ export default async function Home() {
                     <h3 className="text-base font-semibold text-white">
                       {card.title}
                     </h3>
-                    <p className="mt-2 text-sm text-white/80">{card.detail}</p>
-                    <p className="mt-1 text-xs text-white/50">{card.sub}</p>
+                    <p className="mt-2 text-sm text-white/90">{card.detail}</p>
+                    <p className="mt-1 text-xs text-white/80">{card.sub}</p>
                   </div>
                 );
               })}

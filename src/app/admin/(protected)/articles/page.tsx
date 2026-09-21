@@ -74,10 +74,10 @@ export default async function AdminAllArticlesPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            All Articles
+            All News
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Search, filter, edit, or trash published articles.
+            Search, filter, edit, or trash published news and events.
           </p>
         </div>
         <Link
@@ -85,7 +85,7 @@ export default async function AdminAllArticlesPage({
           className="inline-flex items-center gap-2 rounded-xl bg-school-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-school-green-dark"
         >
           <FilePlus className="h-4 w-4" />
-          <span>New Article</span>
+          <span>Add New</span>
         </Link>
       </div>
 
@@ -122,19 +122,19 @@ export default async function AdminAllArticlesPage({
       {result.status === "unavailable" ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-10 text-center">
           <p className="text-sm text-neutral-500">
-            Couldn&apos;t reach WordPress to load articles. Check the local CMS
+            Couldn&apos;t reach WordPress to load news. Check the local CMS
             connection and try again.
           </p>
         </div>
       ) : result.items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center">
           <p className="text-sm font-semibold text-neutral-900">
-            No articles found.
+            No news found.
           </p>
           <p className="mt-1 text-sm text-neutral-500">
             {q || category !== "all"
               ? "Try a different search or category."
-              : "Publish your first article to see it here."}
+              : "Publish your first news post to see it here."}
           </p>
         </div>
       ) : (

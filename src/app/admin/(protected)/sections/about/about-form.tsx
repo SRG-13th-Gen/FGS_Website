@@ -106,6 +106,7 @@ export function AboutForm({ initial }: { initial: AboutView }) {
     bannerHeading !== baseline.featureBanner.heading ||
     bannerBody !== baseline.featureBanner.body ||
     bannerImage.pendingFile !== null ||
+    bannerImage.mediaId !== baseline.featureBanner.image.mediaId ||
     bannerImage.alt !== baseline.featureBanner.image.alt;
 
   useUnsavedChangesWarning(isDirty);

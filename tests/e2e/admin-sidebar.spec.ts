@@ -51,7 +51,7 @@ test("desktop: sidebar navigates to every section without a full reload error", 
   await page.getByRole("link", { name: "School Info" }).click();
   await page.waitForURL(/\/admin\/sections\/school-info$/);
 
-  await page.getByRole("link", { name: "All Articles" }).click();
+  await page.getByRole("link", { name: "All News" }).click();
   await page.waitForURL(/\/admin\/articles$/);
 });
 

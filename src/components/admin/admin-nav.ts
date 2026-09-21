@@ -29,7 +29,7 @@ export function getAdminPageTitle(pathname: string): string {
     if (match) return match.label;
   }
   if (pathname.startsWith("/admin/articles/") && pathname.endsWith("/edit")) {
-    return "Edit Article";
+    return "Edit News & Events";
   }
   return "Admin";
 }
@@ -60,10 +60,10 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     ],
   },
   {
-    label: "Articles",
+    label: "News & Events",
     items: [
-      { label: "All Articles", href: "/admin/articles", icon: Newspaper },
-      { label: "New Article", href: "/admin/articles/new", icon: FilePlus },
+      { label: "All News", href: "/admin/articles", icon: Newspaper },
+      { label: "Add New", href: "/admin/articles/new", icon: FilePlus },
     ],
   },
 ];

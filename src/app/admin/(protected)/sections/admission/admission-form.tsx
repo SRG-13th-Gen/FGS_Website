@@ -101,6 +101,7 @@ export function AdmissionForm({ initial }: { initial: AdmissionView }) {
     heading !== baseline.heading ||
     intro !== baseline.intro ||
     backgroundImage.pendingFile !== null ||
+    backgroundImage.mediaId !== baseline.backgroundImage.mediaId ||
     backgroundImage.alt !== baseline.backgroundImage.alt ||
     JSON.stringify(programs) !== JSON.stringify(baseline.programs) ||
     JSON.stringify(requirementCategories) !==

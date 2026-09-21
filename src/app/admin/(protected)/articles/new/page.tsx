@@ -73,7 +73,7 @@ export default function AdminPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            Post New Article
+            Add News &amp; Events
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
             Publish school stories, club updates, and official announcements.

@@ -85,6 +85,7 @@ export function SchoolInfoForm({ initial }: { initial: SchoolInfoView }) {
     schoolName !== baseline.schoolName ||
     shortName !== baseline.shortName ||
     logo.pendingFile !== null ||
+    logo.mediaId !== baseline.logo.mediaId ||
     logo.alt !== baseline.logo.alt ||
     address !== baseline.address ||
     phone !== baseline.phone ||

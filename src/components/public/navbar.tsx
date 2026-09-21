@@ -60,13 +60,27 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
       e.preventDefault();
       const el = document.getElementById(href.slice(1));
       if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+        const reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+        window.history.replaceState(null, "", href);
         setActiveSection(href);
       }
       setMobileOpen(false);
     },
     [],
   );
+
+  /* Escape closes the mobile menu. */
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
 
   return (
     <header
@@ -75,12 +89,18 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         scrolled ? "bg-white/95 shadow-md backdrop-blur-sm" : "bg-white"
       }`}
     >
+      <a
+        href="#main-content"
+        className="sr-only rounded-md bg-white px-4 py-2 text-sm font-semibold text-school-green-dark focus:not-sr-only focus:absolute focus:top-2 focus:left-4 focus:z-50 focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
+      >
+        Skip to main content
+      </a>
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo / School name */}
         <a
           href="#home"
           onClick={(e) => handleNavClick(e, "#home")}
-          className="flex items-center gap-2.5 text-lg font-normal tracking-tight"
+          className="flex min-h-11 items-center gap-2.5 rounded-md text-lg font-normal tracking-tight focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <Image
             src={schoolInfo.logo.url}
@@ -109,9 +129,12 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               <a
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`relative rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-school-green ${
+                aria-current={
+                  activeSection === item.href ? "location" : undefined
+                }
+                className={`relative inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
                   activeSection === item.href
-                    ? "text-school-green"
+                    ? "text-school-green-dark"
                     : "text-foreground/70"
                 }`}
               >
@@ -131,9 +154,10 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="inline-flex items-center justify-center rounded-md p-2 text-foreground/70 transition-colors hover:bg-school-green-light hover:text-school-green md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-foreground/70 transition-colors hover:bg-school-green-light hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none md:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
+          aria-controls="mobile-menu"
         >
           {mobileOpen ? (
             <X className="h-5 w-5" />
@@ -145,10 +169,12 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
 
       {/* Mobile slide-down menu */}
       <div
+        id="mobile-menu"
+        inert={!mobileOpen}
         className={`overflow-hidden border-b border-border/50 bg-white transition-all duration-300 ease-in-out md:hidden ${
           mobileOpen
             ? "max-h-[28rem] opacity-100"
-            : "max-h-0 border-transparent opacity-0"
+            : "invisible max-h-0 border-transparent opacity-0"
         }`}
       >
         <ul className="space-y-1 px-4 pt-2 pb-4">
@@ -157,9 +183,12 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               <a
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                aria-current={
+                  activeSection === item.href ? "location" : undefined
+                }
+                className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
                   activeSection === item.href
-                    ? "bg-school-green-light text-school-green"
+                    ? "bg-school-green-light text-school-green-dark"
                     : "text-foreground/70 hover:bg-muted hover:text-foreground"
                 }`}
               >

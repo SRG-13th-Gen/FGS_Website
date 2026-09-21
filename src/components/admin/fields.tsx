@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import Image from "next/image";
 import { ArrowDown, ArrowUp, Plus, Trash2, UploadCloud } from "lucide-react";
 
+import { MediaPickerDialog } from "@/components/admin/media-picker";
 import { reorderArray } from "@/lib/wordpress/sections/reorder";
 import {
   SECTION_ICON_NAMES,
@@ -111,18 +112,6 @@ export function ImageField({
   error?: string;
 }) {
   const inputId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    onChange({
-      ...value,
-      previewUrl: URL.createObjectURL(file),
-      pendingFile: file,
-    });
-    e.target.value = "";
-  };
 
   return (
     <div>
@@ -147,20 +136,34 @@ export function ImageField({
         </div>
 
         <div className="flex-1 space-y-2.5">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
-          >
-            <UploadCloud className="h-3.5 w-3.5" />
-            <span>Replace image</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            onChange={handleFileChange}
-            className="hidden"
+          <MediaPickerDialog
+            title={`Choose a photo — ${label}`}
+            onSelectExisting={(item) =>
+              onChange({
+                ...value,
+                mediaId: item.mediaId,
+                previewUrl: item.url,
+                pendingFile: null,
+              })
+            }
+            onSelectFiles={(files) => {
+              const file = files[0];
+              if (!file) return;
+              onChange({
+                ...value,
+                previewUrl: URL.createObjectURL(file),
+                pendingFile: file,
+              });
+            }}
+            trigger={
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+              >
+                <UploadCloud className="h-3.5 w-3.5" />
+                <span>Replace image</span>
+              </button>
+            }
           />
           {recommendedSize && (
             <p className="text-xs text-neutral-400">

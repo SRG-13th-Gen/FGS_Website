@@ -80,6 +80,7 @@ export function HeroForm({ initial }: { initial: HeroView }) {
     heading !== baseline.heading ||
       tagline !== baseline.tagline ||
       image.pendingFile !== null ||
+      image.mediaId !== baseline.backgroundImage.mediaId ||
       image.alt !== baseline.backgroundImage.alt,
   );
 
@@ -87,6 +88,7 @@ export function HeroForm({ initial }: { initial: HeroView }) {
     heading !== baseline.heading ||
     tagline !== baseline.tagline ||
     image.pendingFile !== null ||
+    image.mediaId !== baseline.backgroundImage.mediaId ||
     image.alt !== baseline.backgroundImage.alt;
 
   const fieldErrors =

@@ -22,7 +22,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               />
               <span className="text-lg font-bold">{schoolInfo.schoolName}</span>
             </div>
-            <p className="text-sm leading-relaxed text-background/60">
+            <p className="text-sm leading-relaxed text-background/70">
               {schoolInfo.footerTagline}
             </p>
           </div>
@@ -32,11 +32,11 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             <h3 className="mb-4 text-sm font-semibold tracking-wider text-school-yellow uppercase">
               Quick Links
             </h3>
-            <ul className="space-y-2 text-sm text-background/60">
+            <ul className="text-sm text-background/70">
               <li>
                 <a
                   href="#about"
-                  className="transition-colors hover:text-school-green"
+                  className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   About Us
                 </a>
@@ -44,7 +44,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               <li>
                 <a
                   href="#admission"
-                  className="transition-colors hover:text-school-green"
+                  className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   Admission
                 </a>
@@ -52,7 +52,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               <li>
                 <a
                   href="#news"
-                  className="transition-colors hover:text-school-green"
+                  className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   News &amp; Events
                 </a>
@@ -60,7 +60,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
               <li>
                 <a
                   href="#clubs"
-                  className="transition-colors hover:text-school-green"
+                  className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   Clubs
                 </a>
@@ -73,7 +73,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             <h3 className="mb-4 text-sm font-semibold tracking-wider text-school-yellow uppercase">
               Programs
             </h3>
-            <ul className="space-y-2 text-sm text-background/60">
+            <ul className="space-y-2 text-sm text-background/70">
               {schoolInfo.footerPrograms.map((program) => (
                 <li key={program}>{program}</li>
               ))}
@@ -85,7 +85,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             <h3 className="mb-4 text-sm font-semibold tracking-wider text-school-yellow uppercase">
               Contact Us
             </h3>
-            <ul className="space-y-3 text-sm text-background/60">
+            <ul className="space-y-3 text-sm text-background/70">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-school-green" />
                 <span>{schoolInfo.address}</span>
@@ -103,7 +103,7 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 border-t border-background/10 pt-6 text-center text-xs text-background/40">
+        <div className="mt-10 border-t border-background/10 pt-6 text-center text-xs text-background/70">
           <p>
             &copy; {currentYear} {schoolInfo.schoolName}. All rights reserved.
           </p>

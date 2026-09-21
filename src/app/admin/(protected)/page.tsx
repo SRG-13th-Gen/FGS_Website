@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
           className="inline-flex items-center gap-2 rounded-xl bg-school-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-school-green-dark"
         >
           <FilePlus className="h-4 w-4" />
-          <span>New Article</span>
+          <span>Add News</span>
         </Link>
         <Link
           href="/"
@@ -143,11 +143,11 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      {/* Recent articles */}
+      {/* Recent news */}
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold tracking-wide text-neutral-500 uppercase">
-            Recent Articles
+            Recent News
           </h2>
           <Link
             href="/admin/articles"
@@ -160,12 +160,11 @@ export default async function AdminDashboardPage() {
 
         {articlesResult.status === "unavailable" ? (
           <p className="mt-4 rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-            Articles are unavailable right now. Check the local WordPress
-            connection.
+            News is unavailable right now. Check the local WordPress connection.
           </p>
         ) : recentArticles.length === 0 ? (
           <p className="mt-4 rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-            No articles published yet.{" "}
+            No news published yet.{" "}
             <Link
               href="/admin/articles/new"
               className="font-semibold text-school-green hover:underline"

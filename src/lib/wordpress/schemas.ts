@@ -21,6 +21,7 @@ export const wpMediaSchema = z.object({
   alt_text: z.string().optional().default(""),
   caption: wpRenderedFieldSchema.optional(),
 });
+export const wpMediaListSchema = z.array(wpMediaSchema);
 
 export const wpPostSchema = z.object({
   id: z.number(),

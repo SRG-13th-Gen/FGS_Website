@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+import { MediaPickerDialog } from "@/components/admin/media-picker";
 import type { ArticleCategorySlug } from "@/lib/wordpress/types";
 
 export const ARTICLE_CATEGORY_OPTIONS: Array<{
@@ -114,14 +115,32 @@ export interface ArticlePicture {
   existingMediaId: number | null;
 }
 
+function newPictureId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export function newArticlePicture(file: File): ArticlePicture {
   return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: newPictureId(),
     file,
     previewUrl: URL.createObjectURL(file),
     caption: "",
     altText: "",
     existingMediaId: null,
+  };
+}
+
+function newArticlePictureFromExisting(item: {
+  mediaId: number;
+  url: string;
+}): ArticlePicture {
+  return {
+    id: newPictureId(),
+    file: null,
+    previewUrl: item.url,
+    caption: "",
+    altText: "",
+    existingMediaId: item.mediaId,
   };
 }
 
@@ -202,45 +221,38 @@ export function ArticlePictureEditor({
   onChange: (next: ArticlePicture[]) => void;
   error?: string;
 }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const replaceInputRef = useRef<HTMLInputElement>(null);
-  const replaceTargetId = useRef<string | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    onChange([...pictures, ...Array.from(files).map(newArticlePicture)]);
-    e.target.value = "";
+  const addFiles = (files: File[]) => {
+    if (files.length === 0) return;
+    onChange([...pictures, ...files.map(newArticlePicture)]);
   };
 
-  const handleReplaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const targetId = replaceTargetId.current;
-    e.target.value = "";
-    if (!file || !targetId) return;
-    onChange(
-      pictures.map((pic) =>
-        pic.id === targetId
-          ? {
-              ...pic,
-              file,
-              previewUrl: URL.createObjectURL(file),
-              existingMediaId: null,
-            }
-          : pic,
-      ),
-    );
-  };
-
-  const handleReplaceClick = (id: string) => {
-    replaceTargetId.current = id;
-    replaceInputRef.current?.click();
+  const addExisting = (item: { mediaId: number; url: string; alt: string }) => {
+    onChange([...pictures, newArticlePictureFromExisting(item)]);
   };
 
   const update = (id: string, patch: Partial<ArticlePicture>) => {
     onChange(
       pictures.map((pic) => (pic.id === id ? { ...pic, ...patch } : pic)),
     );
+  };
+
+  const replaceWithFile = (id: string, file: File) => {
+    update(id, {
+      file,
+      previewUrl: URL.createObjectURL(file),
+      existingMediaId: null,
+    });
+  };
+
+  const replaceWithExisting = (
+    id: string,
+    item: { mediaId: number; url: string },
+  ) => {
+    update(id, {
+      file: null,
+      previewUrl: item.url,
+      existingMediaId: item.mediaId,
+    });
   };
 
   const remove = (id: string) => {
@@ -267,47 +279,46 @@ export function ArticlePictureEditor({
             caption and alt text.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-neutral-800 sm:mt-0"
-        >
-          <UploadCloud className="h-3.5 w-3.5" />
-          <span>Upload Photos</span>
-        </button>
+        <MediaPickerDialog
+          title="Add a photo"
+          allowMultipleUpload
+          onSelectExisting={addExisting}
+          onSelectFiles={addFiles}
+          trigger={
+            <button
+              type="button"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-neutral-800 sm:mt-0"
+            >
+              <UploadCloud className="h-3.5 w-3.5" />
+              <span>Add Photos</span>
+            </button>
+          }
+        />
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/png,image/jpeg,image/webp,image/avif"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <input
-        ref={replaceInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/avif"
-        onChange={handleReplaceChange}
-        className="hidden"
-      />
-
       {pictures.length === 0 ? (
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 p-8 text-center transition-colors hover:border-school-green hover:bg-neutral-50"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-school-green-light text-school-green">
-            <ImageIcon className="h-6 w-6" />
-          </div>
-          <p className="mt-3 text-sm font-semibold text-neutral-800">
-            Click to select pictures
-          </p>
-          <p className="mt-1 text-xs text-neutral-500">
-            PNG, JPG, WebP, or AVIF (Up to 10MB per image)
-          </p>
-        </div>
+        <MediaPickerDialog
+          title="Add a photo"
+          allowMultipleUpload
+          onSelectExisting={addExisting}
+          onSelectFiles={addFiles}
+          trigger={
+            <button
+              type="button"
+              className="mt-4 flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 p-8 text-center transition-colors hover:border-school-green hover:bg-neutral-50"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-school-green-light text-school-green">
+                <ImageIcon className="h-6 w-6" />
+              </div>
+              <p className="mt-3 text-sm font-semibold text-neutral-800">
+                Click to select pictures
+              </p>
+              <p className="mt-1 text-xs text-neutral-500">
+                PNG, JPG, WebP, or AVIF (Up to 10MB per image)
+              </p>
+            </button>
+          }
+        />
       ) : (
         <div className="mt-5 space-y-4">
           {pictures.map((pic, index) => {
@@ -347,14 +358,25 @@ export function ArticlePictureEditor({
                       Picture {index + 1} Caption
                     </label>
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleReplaceClick(pic.id)}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-neutral-600 hover:text-neutral-900"
-                      >
-                        <RefreshCw className="h-3 w-3" />
-                        <span>Replace</span>
-                      </button>
+                      <MediaPickerDialog
+                        title="Replace this photo"
+                        onSelectExisting={(item) =>
+                          replaceWithExisting(pic.id, item)
+                        }
+                        onSelectFiles={(files) => {
+                          const file = files[0];
+                          if (file) replaceWithFile(pic.id, file);
+                        }}
+                        trigger={
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-neutral-600 hover:text-neutral-900"
+                          >
+                            <RefreshCw className="h-3 w-3" />
+                            <span>Replace</span>
+                          </button>
+                        }
+                      />
                       {!isCover && (
                         <button
                           type="button"
@@ -414,14 +436,21 @@ export function ArticlePictureEditor({
             );
           })}
 
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-school-green hover:underline"
-          >
-            <UploadCloud className="h-4 w-4" />
-            <span>+ Add more photos</span>
-          </button>
+          <MediaPickerDialog
+            title="Add a photo"
+            allowMultipleUpload
+            onSelectExisting={addExisting}
+            onSelectFiles={addFiles}
+            trigger={
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-school-green hover:underline"
+              >
+                <UploadCloud className="h-4 w-4" />
+                <span>+ Add more photos</span>
+              </button>
+            }
+          />
         </div>
       )}
       {error && (

@@ -67,14 +67,14 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
         {/* Section Header with Carousel Navigation */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-sm font-semibold tracking-widest text-school-green uppercase">
+            <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
               {content.sectionLabel}
             </span>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
               {content.heading}
             </h2>
             <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
-            <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+            <p className="mt-3 max-w-xl text-sm text-neutral-600 sm:text-base">
               {content.intro}
             </p>
           </div>
@@ -86,7 +86,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               onClick={() => api?.scrollPrev()}
               disabled={!api?.canScrollPrev()}
               aria-label="Previous club slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -95,7 +95,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               onClick={() => api?.scrollNext()}
               disabled={!api?.canScrollNext()}
               aria-label="Next club slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -129,7 +129,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
                             <Icon className={`h-6 w-6 ${accent.icon}`} />
                           </div>
                           <span
-                            className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${accent.card}`}
+                            className={`rounded-full border px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase ${accent.card}`}
                           >
                             {club.category}
                           </span>
@@ -146,7 +146,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
 
                       {/* Bottom Info */}
                       <div className="mt-6 border-t border-neutral-100 pt-4">
-                        <span className="text-xs font-medium text-neutral-400">
+                        <span className="text-xs font-medium text-neutral-500">
                           {club.meetingDay}
                         </span>
                       </div>
@@ -159,19 +159,24 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
 
           {/* Dots Indicator */}
           {count > 0 && (
-            <div className="mt-8 flex justify-center gap-1.5">
+            <div className="mt-4 flex flex-wrap justify-center">
               {Array.from({ length: count }).map((_, index) => (
                 <button
                   key={index}
                   type="button"
                   aria-label={`Go to slide ${index + 1}`}
+                  aria-current={current === index}
                   onClick={() => api?.scrollTo(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    current === index
-                      ? "w-8 bg-school-green"
-                      : "w-2 bg-neutral-200 hover:bg-neutral-300"
-                  }`}
-                />
+                  className="group flex h-11 w-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
+                >
+                  <span
+                    className={`block h-2 rounded-full transition-all ${
+                      current === index
+                        ? "w-8 bg-school-green"
+                        : "w-2 bg-neutral-300 group-hover:bg-neutral-400"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           )}
