@@ -1,110 +1,36 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  UploadCloud,
-  Image as ImageIcon,
-  Trash2,
   CheckCircle2,
   AlertCircle,
   Eye,
   PenLine,
-  Megaphone,
-  Calendar,
-  Sparkles,
-  Star,
   Info,
   ExternalLink,
 } from "lucide-react";
 
+import {
+  ArticleCategoryPicker,
+  ArticlePictureEditor,
+  ArticlePictureFormFields,
+  type ArticlePicture,
+} from "@/components/admin/article-fields";
 import type { PublishArticleResult } from "@/lib/wordpress/types";
 import { publishArticleAction } from "./publish-actions";
 
 export type ArticleCategory = "announcements" | "events" | "clubs";
 
-export interface UploadedPicture {
-  id: string;
-  file: File;
-  previewUrl: string;
-  caption: string;
-  altText: string;
-  /** Set once this slot has been uploaded to WordPress, so a retry reuses it. */
-  uploadedMediaId: number | null;
-}
-
-const CATEGORIES: Array<{
-  id: ArticleCategory;
-  name: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}> = [
-  {
-    id: "announcements",
-    name: "Announcements",
-    description:
-      "Official school advisories, enrollment updates, schedule alerts",
-    icon: Megaphone,
-    color: "border-blue-500/30 bg-blue-50 text-blue-700",
-  },
-  {
-    id: "events",
-    name: "Events",
-    description: "Celebrations, ceremonies, gatherings, and milestones",
-    icon: Calendar,
-    color: "border-school-green/30 bg-school-green-light text-school-green",
-  },
-  {
-    id: "clubs",
-    name: "Clubs",
-    description: "Student clubs, workshops, activities, and exhibits",
-    icon: Sparkles,
-    color: "border-amber-500/30 bg-amber-50 text-amber-700",
-  },
-];
-
 const initialState: PublishArticleResult | null = null;
 
-/** Programmatically attaches `file` to a hidden file input via DataTransfer, so it rides along with the native form submission. */
-function PictureFileField({
-  clientId,
-  file,
-}: {
-  clientId: string;
-  file: File;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!inputRef.current) return;
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    inputRef.current.files = dataTransfer.files;
-  }, [file]);
-
-  return (
-    <input
-      ref={inputRef}
-      type="file"
-      name={`image-file-${clientId}`}
-      className="hidden"
-      tabIndex={-1}
-      aria-hidden="true"
-    />
-  );
-}
-
 export default function AdminPage() {
-  const fileInputId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Form state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<ArticleCategory>("announcements");
   const [body, setBody] = useState("");
-  const [pictures, setPictures] = useState<UploadedPicture[]>([]);
+  const [pictures, setPictures] = useState<ArticlePicture[]>([]);
 
   // UI state
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -132,63 +58,11 @@ export default function AdminPage() {
           const uploaded = state.uploadedImages.find(
             (ref) => ref.clientId === pic.id,
           );
-          return uploaded ? { ...pic, uploadedMediaId: uploaded.mediaId } : pic;
+          return uploaded ? { ...pic, existingMediaId: uploaded.mediaId } : pic;
         }),
       );
     }
   }
-
-  // File upload handler
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const newPictures: UploadedPicture[] = Array.from(files).map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      file,
-      previewUrl: URL.createObjectURL(file),
-      caption: "",
-      altText: "",
-      uploadedMediaId: null,
-    }));
-
-    setPictures((prev) => [...prev, ...newPictures]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleCaptionChange = (id: string, newCaption: string) => {
-    setPictures((prev) =>
-      prev.map((pic) =>
-        pic.id === id ? { ...pic, caption: newCaption } : pic,
-      ),
-    );
-  };
-
-  const handleAltTextChange = (id: string, newAltText: string) => {
-    setPictures((prev) =>
-      prev.map((pic) =>
-        pic.id === id ? { ...pic, altText: newAltText } : pic,
-      ),
-    );
-  };
-
-  const handleRemovePicture = (id: string) => {
-    setPictures((prev) => {
-      const removed = prev.find((p) => p.id === id);
-      if (removed) URL.revokeObjectURL(removed.previewUrl);
-      return prev.filter((pic) => pic.id !== id);
-    });
-  };
-
-  const handleSetAsCover = (index: number) => {
-    if (index === 0) return;
-    setPictures((prev) => {
-      const copy = [...prev];
-      const [item] = copy.splice(index, 1);
-      copy.unshift(item);
-      return copy;
-    });
-  };
 
   const fieldErrors =
     state?.status === "validation_error" ? state.fieldErrors : {};
@@ -284,37 +158,7 @@ export default function AdminPage() {
       {/* Tab: Editor View */}
       {activeTab === "edit" ? (
         <form action={formAction} className="grid gap-8 lg:grid-cols-3">
-          <input
-            type="hidden"
-            name="imageIds"
-            value={pictures.map((p) => p.id).join(",")}
-          />
-          {pictures.map((pic) => (
-            <div key={pic.id} className="hidden">
-              <input
-                type="hidden"
-                name={`image-caption-${pic.id}`}
-                value={pic.caption}
-                readOnly
-              />
-              <input
-                type="hidden"
-                name={`image-alt-${pic.id}`}
-                value={pic.altText}
-                readOnly
-              />
-              {pic.uploadedMediaId ? (
-                <input
-                  type="hidden"
-                  name={`image-existingId-${pic.id}`}
-                  value={pic.uploadedMediaId}
-                  readOnly
-                />
-              ) : (
-                <PictureFileField clientId={pic.id} file={pic.file} />
-              )}
-            </div>
-          ))}
+          <ArticlePictureFormFields pictures={pictures} />
 
           {/* Main Content Columns (2 cols on desktop) */}
           <div className="space-y-6 lg:col-span-2">
@@ -346,51 +190,12 @@ export default function AdminPage() {
 
             {/* Category Selector */}
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-              <label className="block text-sm font-bold text-neutral-800">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <p className="mt-1 text-xs text-neutral-500">
-                Select where this article will be published on the website.
-              </p>
               <input type="hidden" name="category" value={category} />
-
-              <div className="mt-3.5 grid gap-3 sm:grid-cols-3">
-                {CATEGORIES.map((cat) => {
-                  const Icon = cat.icon;
-                  const isSelected = category === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setCategory(cat.id)}
-                      className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
-                        isSelected
-                          ? "border-school-green bg-school-green-light/40 shadow-sm ring-2 ring-school-green/20"
-                          : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg ${cat.color}`}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </span>
-                        <span className="font-semibold text-neutral-900">
-                          {cat.name}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                        {cat.description}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-              {fieldErrors.category && (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  {fieldErrors.category}
-                </p>
-              )}
+              <ArticleCategoryPicker
+                value={category}
+                onChange={setCategory}
+                error={fieldErrors.category}
+              />
             </div>
 
             {/* Body Content */}
@@ -427,174 +232,11 @@ export default function AdminPage() {
             </div>
 
             {/* Pictures & Individual Captions */}
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-sm font-bold text-neutral-800">
-                    Article Pictures &amp; Captions
-                  </h2>
-                  <p className="text-xs text-neutral-500">
-                    Upload photos for your article. Each photo can have its own
-                    custom caption and alt text.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-neutral-800 sm:mt-0"
-                >
-                  <UploadCloud className="h-3.5 w-3.5" />
-                  <span>Upload Photos</span>
-                </button>
-              </div>
-
-              {/* Hidden file input */}
-              <input
-                id={fileInputId}
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/png,image/jpeg,image/webp,image/avif"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-
-              {/* Upload Dropzone (when empty) */}
-              {pictures.length === 0 ? (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 p-8 text-center transition-colors hover:border-school-green hover:bg-neutral-50"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-school-green-light text-school-green">
-                    <ImageIcon className="h-6 w-6" />
-                  </div>
-                  <p className="mt-3 text-sm font-semibold text-neutral-800">
-                    Click to select pictures
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    PNG, JPG, WebP, or AVIF (Up to 10MB per image)
-                  </p>
-                </div>
-              ) : (
-                /* Uploaded Pictures with per-picture caption fields */
-                <div className="mt-5 space-y-4">
-                  {pictures.map((pic, index) => {
-                    const isCover = index === 0;
-                    return (
-                      <div
-                        key={pic.id}
-                        className="flex flex-col gap-4 rounded-xl border border-neutral-200/90 bg-neutral-50/50 p-4 sm:flex-row sm:items-start"
-                      >
-                        {/* Thumbnail */}
-                        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg bg-neutral-100 sm:h-28 sm:w-36">
-                          <Image
-                            src={pic.previewUrl}
-                            alt={
-                              pic.altText ||
-                              pic.caption ||
-                              `Uploaded picture ${index + 1}`
-                            }
-                            fill
-                            className="object-cover"
-                          />
-                          {isCover && (
-                            <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded bg-school-green px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                              <Star className="h-3 w-3 fill-current" />
-                              Cover Image
-                            </span>
-                          )}
-                          {pic.uploadedMediaId && (
-                            <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 rounded bg-neutral-900/80 px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                              Uploaded
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Caption / Alt Text Inputs & Actions */}
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label
-                              htmlFor={`caption-${pic.id}`}
-                              className="text-xs font-semibold text-neutral-700"
-                            >
-                              Picture {index + 1} Caption
-                            </label>
-                            <div className="flex items-center gap-2">
-                              {!isCover && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleSetAsCover(index)}
-                                  className="text-[11px] font-medium text-school-green hover:underline"
-                                >
-                                  Make Cover
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handleRemovePicture(pic.id)}
-                                className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                                <span>Remove</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          <input
-                            id={`caption-${pic.id}`}
-                            type="text"
-                            value={pic.caption}
-                            onChange={(e) =>
-                              handleCaptionChange(pic.id, e.target.value)
-                            }
-                            placeholder="Add a caption for this picture (e.g., Grade 3 students showcasing their science models)..."
-                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:ring-1 focus:ring-school-green focus:outline-none"
-                          />
-
-                          <label
-                            htmlFor={`alt-${pic.id}`}
-                            className="block text-xs font-semibold text-neutral-700"
-                          >
-                            Alt text (optional — falls back to caption, then
-                            title)
-                          </label>
-                          <input
-                            id={`alt-${pic.id}`}
-                            type="text"
-                            value={pic.altText}
-                            onChange={(e) =>
-                              handleAltTextChange(pic.id, e.target.value)
-                            }
-                            placeholder="Describe this picture for screen readers"
-                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:ring-1 focus:ring-school-green focus:outline-none"
-                          />
-
-                          <p className="text-[10px] text-neutral-400">
-                            {pic.file.name} •{" "}
-                            {(pic.file.size / (1024 * 1024)).toFixed(2)} MB
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {/* Add more button */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-school-green hover:underline"
-                  >
-                    <UploadCloud className="h-4 w-4" />
-                    <span>+ Add more photos</span>
-                  </button>
-                  {fieldErrors.images && (
-                    <p className="text-xs font-medium text-red-600">
-                      {fieldErrors.images}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+            <ArticlePictureEditor
+              pictures={pictures}
+              onChange={setPictures}
+              error={fieldErrors.images}
+            />
           </div>
 
           {/* Right Sidebar Column */}
@@ -698,6 +340,7 @@ export default function AdminPage() {
                   src={pictures[0].previewUrl}
                   alt={pictures[0].altText || pictures[0].caption || title}
                   fill
+                  unoptimized={pictures[0].previewUrl.startsWith("blob:")}
                   className="object-cover"
                 />
               </div>
@@ -736,6 +379,7 @@ export default function AdminPage() {
                           `Gallery photo ${idx + 2}`
                         }
                         fill
+                        unoptimized={pic.previewUrl.startsWith("blob:")}
                         className="object-cover"
                       />
                     </div>

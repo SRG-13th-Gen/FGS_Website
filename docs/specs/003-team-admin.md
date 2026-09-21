@@ -1,14 +1,14 @@
 # SPEC-003: Team Admin & Article Management
 
-| Field                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Feature ID            | SPEC-003                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Approval status       | Accepted (per owner instruction 2026-09-20)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Implementation status | Partially implemented — public reads and admin publishing (FR-007/FR-008/FR-009) built and verified locally; team authentication (FR-005) remains the temporary dev-only login pending DEC-103; FR-006 role enforcement is deferred to DEC-111. The admin now lives inside the [SPEC-007](007-site-content-management.md) CMS shell at `/admin/articles/new` (moved, unchanged); **editing or trashing an existing article is not implemented** — only publishing a new one. |
-| Responsible owner     | Engineering                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md)                                                                                                                                                                                                                                                                                                                                                                                          |
-| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Acceptance evidence   | See [Verification and evidence](#verification-and-evidence) below                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Field                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature ID            | SPEC-003                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Approval status       | Accepted (per owner instruction 2026-09-20)                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Implementation status | Partially implemented — public reads, admin publishing, and the All Articles list/edit/trash flow (FR-007/FR-008/FR-009) are built and verified locally; team authentication (FR-005) remains the temporary dev-only login pending DEC-103; FR-006 role enforcement is deferred to DEC-111. The admin lives inside the [SPEC-007](007-site-content-management.md) CMS shell at `/admin/articles` (list), `/admin/articles/new` (publish), and `/admin/articles/<id>/edit` (edit or read-only). |
+| Responsible owner     | Engineering                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md)                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Acceptance evidence   | See [Verification and evidence](#verification-and-evidence) below                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Outcome and scope
 
@@ -18,7 +18,7 @@ The school administrator / client needs a clean, streamlined portal at `/admin` 
 
 ### Observable Outcome
 
-An authenticated administrator can visit `/admin`, create a new article with a title, category (`Clubs`, `Events`, `Announcements`), narrative body, and multiple uploaded pictures where each picture can have its own dedicated caption. Upon submission, the article is published to WordPress and reflected on the website.
+An authenticated administrator can visit `/admin`, create a new article with a title, category (`Clubs`, `Events`, `Announcements`), narrative body, and multiple uploaded pictures where each picture can have its own dedicated caption. Upon submission, the article is published to WordPress and reflected on the website. From the All Articles list, the admin can search by title, filter by category, page through results, edit an existing article's title/category/body/pictures, and move an article to trash with a confirmation naming it — never a permanent delete. An article whose WordPress content the simple editor can't safely reproduce opens read-only with a link to edit it natively in WordPress instead.
 
 ### In Scope
 
@@ -30,12 +30,17 @@ An authenticated administrator can visit `/admin`, create a new article with a t
   - **Media / Pictures**: Multi-file image upload with an individual caption field for every uploaded picture.
 - Server-side validation and secure orchestration with WordPress REST API (`/wp-json/wp/v2/media` and `/wp-json/wp/v2/posts`).
 - Transparent feedback states (loading, upload progress, validation errors, success confirmation).
+- All Articles list: cover thumbnail, title, category, published date, status; title search and category filter pushed down to the WordPress REST query; pagination.
+- Editing an existing article's title, category, body, and pictures (add/replace/remove, captions, alt text) — when the admin editor can safely round-trip its content (see [Read-only detection rule](#read-only-detection-rule)).
+- Moving an article to WordPress's trash, with a confirmation dialog naming it. Never a permanent/forced delete.
 
 ### Out of Scope
 
-- Full-page site layout editing or arbitrary Gutenberg block design (native WordPress retains ownership of full static page layouts).
+- Full-page site layout editing or arbitrary Gutenberg block design (native WordPress retains ownership of full static page layouts) — including editing an article whose content the simple editor can't safely round-trip; that stays a native WordPress edit.
 - Visitor commenting, user registration, or student portal features.
 - Permanent media deletion or arbitrary taxonomy administration.
+- Restoring a trashed article from `/admin` (use wp-admin; WordPress's own trash retention still applies).
+- Draft/pending/scheduled article workflows — every article this app creates or lists is `status: publish`.
 
 ---
 
@@ -177,6 +182,105 @@ update"), distinct from a publish failure.
 
 ---
 
+## Article list, edit, and trash (implemented)
+
+Implemented in `src/lib/wordpress/admin-articles.ts` (reads),
+`src/lib/wordpress/edit-article.ts` (mutations — reuses the same
+image-upload/reuse pipeline as publishing, factored into
+`src/lib/wordpress/article-images.ts`), and wired by
+`src/app/admin/(protected)/articles/{page.tsx,actions.ts}` (list, trash) and
+`src/app/admin/(protected)/articles/[id]/edit/{page.tsx,actions.ts}` (edit).
+The category picker and picture upload/caption/replace/remove/cover UI are
+shared components (`src/components/admin/article-fields.tsx`) used by both
+the New Article and Edit Article forms — never duplicated.
+
+### All Articles list
+
+`GET /wp/v2/posts` with `status=publish`, `per_page=10`, `page`, `orderby=date&order=desc`,
+and (when set) `search` and `categories` — search and pagination are WordPress
+REST query parameters, never a fetch-everything-then-filter-in-app approach.
+Title search uses the mu-plugin's `rest_post_query` filter
+(`wordpress/mu-plugins/fgs-site-content.php`) to set WP_Query's
+`search_columns` to `post_title` only, since the REST API's bare `search`
+parameter matches title, content, and excerpt together with no built-in way to
+scope it to the title alone. Pagination reads the `X-WP-Total`/`X-WP-TotalPages`
+response headers. The category filter is scoped to the three managed
+categories; the table's category column shows "Uncategorized" for a post
+outside them rather than hiding it — the admin can still see and trash it.
+
+### Editing an article
+
+`GET /wp/v2/posts/<id>?context=edit` (authenticated) reads the raw,
+un-rendered `content` field — `rendered` strips the Gutenberg block comments
+that reading the real structure back out requires. The featured image is
+edited as image slot 0, exactly the model `publishArticle()` already uses.
+Saving revalidates `/`, the article's own path, and its own edit page, with
+the same `cacheWarning`/`uncertain` distinct-from-failure handling as
+publishing (see [Admin publishing](#admin-publishing-fr-007fr-008-implemented)
+above) — a save-request timeout never auto-retries.
+
+An unchanged photo (no new file selected) is never re-uploaded: its existing
+media id is confirmed and reused, identically to a publish retry. **Concurrent
+edits**: no optimistic-locking/conflict detection is implemented — a save is
+last-write-wins, the same as every other admin write path in this app (the
+section editors included). A future spec can add `modified_gmt`-based conflict
+detection if concurrent admin edits turn out to be a real problem.
+
+### Read-only detection rule
+
+Per [DATA_API_CONTRACTS.md](../DATA_API_CONTRACTS.md): "Preserve Gutenberg
+content unless an approved editor can round-trip it; route unsupported block
+edits to WordPress." `src/lib/wordpress/article-content.ts` implements the
+exact rule, covered by `tests/unit/article-content.test.ts`:
+
+An article is editable in the simple admin editor if and only if its raw
+content is composed **entirely** of top-level Gutenberg blocks, matching all
+of the following:
+
+1. Every block is either `core/paragraph` or `core/image` — any other block
+   type (heading, list, gallery, quote, embed, columns, custom HTML, …) opens
+   read-only.
+2. Every `core/paragraph` block comes **before** every `core/image` block, with
+   no interleaving. The admin editor always regenerates content in that exact
+   order (paragraphs, then images) via `buildArticleContent()` — an image
+   placed between paragraphs by a native edit can't be preserved in that
+   position, so saving through the simple editor would silently reorder it.
+3. Every paragraph block has no custom block attributes (alignment, drop cap,
+   custom class, etc.) and its inner HTML is plain text plus `<br>` line
+   breaks only — no links, bold/italic, or other inline formatting the plain
+   textarea editor would strip on save.
+4. Every image block has only the `id` and (optionally) `sizeSlug` attributes
+   `buildImageBlock()` itself ever writes (nothing implying a custom link
+   destination, alignment, or layout), and its markup is exactly one `<img>`
+   with a numeric media id plus an optional plain-text `<figcaption>` — no
+   wrapping link, gallery grid, or nested formatting.
+5. Content with **no** block markup at all (legacy/classic-editor HTML) is
+   always unsafe — the simple editor has no representation for it.
+
+Anything that fails these checks returns a specific, admin-readable reason
+(e.g. "This article has a picture placed between paragraphs — the admin
+editor always puts all pictures after the body text, so saving would reorder
+it.") and the edit page renders read-only: the reason, a note to edit the
+article in WordPress instead, and a direct `wp-admin/post.php?post=<id>&action=edit`
+link. The rule is intentionally conservative — it's fine to send a
+technically-safe-but-unusual article to WordPress unnecessarily; it is never
+fine to silently corrupt or reorder content the simple editor can't fully
+represent.
+
+### Trashing an article
+
+`DELETE /wp/v2/posts/<id>` **without** `force=true` — the WordPress REST API's
+documented behavior for that is trash, not permanent deletion (confirmed
+against the [Posts endpoint reference](https://developer.wordpress.org/rest-api/reference/posts/#delete-a-post),
+consulted 2026-09-21). A trashed post keeps WordPress's normal trash retention
+and can be restored natively; this app never exposes permanent deletion. The
+confirmation dialog names the article being trashed. A successful trash
+revalidates `/`, `/admin/articles`, and the article's own public path so it
+disappears from the site immediately rather than waiting for the 60-second
+interim revalidation window.
+
+---
+
 ## Security and credentials
 
 - All privileged communication with WordPress uses server-side environment variables (`WORDPRESS_USERNAME`, `WORDPRESS_APPLICATION_PASSWORD`), read only through `src/lib/wordpress/client.ts`.
@@ -212,16 +316,23 @@ All results below are from this repository's own test run against local Docker
 WordPress (`pnpm test`, `pnpm test:e2e`) plus one manual publish, not a
 hosted/CI run — see [TESTING.md](../TESTING.md) for scope.
 
-| Criterion                                                           | Verification Type | Procedure                                                                                                                                                                         | Result              |
-| ------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| Form validation (title, category, body)                             | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
-| Category allowlist (`clubs`, `events`, `announcements`)             | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
-| Image content-type sniffing and 10 MB limit                         | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                         | Passed              |
-| Gutenberg block content builder (escaping, paragraph split, images) | Unit test         | `tests/unit/wordpress-blocks.test.ts`                                                                                                                                             | Passed              |
-| Public HTML sanitizer allowlist                                     | Unit test         | `tests/unit/wordpress-sanitize.test.ts`                                                                                                                                           | Passed              |
-| Upstream post/media mapping, incl. missing media                    | Unit test         | `tests/unit/wordpress-reads.test.ts`                                                                                                                                              | Passed              |
-| Media-then-post order, captions/alt/featured_media, retry reuse     | Integration test  | `tests/integration/wordpress-publish.test.ts` (mocked WP REST API)                                                                                                                | Passed              |
-| Published-but-refresh-failed result                                 | Integration test  | `tests/integration/publish-action.test.ts`                                                                                                                                        | Passed              |
-| Home page renders / calm unavailable state when reads are rejected  | E2E test          | `tests/e2e/news-resilience.spec.ts`                                                                                                                                               | Passed              |
-| Authentication gate on `/admin`                                     | E2E test          | `tests/e2e/admin-login.spec.ts`                                                                                                                                                   | Passed              |
-| Publish one article with two images through `/admin`                | Manual            | Signed in with the dev login; published against local WordPress; confirmed on the home page, `/news/<slug>`, and in `wp-admin` (post + media, correct category/captions/alt text) | Passed (2026-09-20) |
+| Criterion                                                                                                                                                                                | Verification Type | Procedure                                                                                                                                                                                                                                                                                                                                                                 | Result              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Form validation (title, category, body)                                                                                                                                                  | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                                                                                                                                                                                                                 | Passed              |
+| Category allowlist (`clubs`, `events`, `announcements`)                                                                                                                                  | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                                                                                                                                                                                                                 | Passed              |
+| Image content-type sniffing and 10 MB limit                                                                                                                                              | Unit test         | `tests/unit/wordpress-validation.test.ts`                                                                                                                                                                                                                                                                                                                                 | Passed              |
+| Gutenberg block content builder (escaping, paragraph split, images)                                                                                                                      | Unit test         | `tests/unit/wordpress-blocks.test.ts`                                                                                                                                                                                                                                                                                                                                     | Passed              |
+| Public HTML sanitizer allowlist                                                                                                                                                          | Unit test         | `tests/unit/wordpress-sanitize.test.ts`                                                                                                                                                                                                                                                                                                                                   | Passed              |
+| Upstream post/media mapping, incl. missing media                                                                                                                                         | Unit test         | `tests/unit/wordpress-reads.test.ts`                                                                                                                                                                                                                                                                                                                                      | Passed              |
+| Media-then-post order, captions/alt/featured_media, retry reuse                                                                                                                          | Integration test  | `tests/integration/wordpress-publish.test.ts` (mocked WP REST API)                                                                                                                                                                                                                                                                                                        | Passed              |
+| Published-but-refresh-failed result                                                                                                                                                      | Integration test  | `tests/integration/publish-action.test.ts`                                                                                                                                                                                                                                                                                                                                | Passed              |
+| Home page renders / calm unavailable state when reads are rejected                                                                                                                       | E2E test          | `tests/e2e/news-resilience.spec.ts`                                                                                                                                                                                                                                                                                                                                       | Passed              |
+| Authentication gate on `/admin`                                                                                                                                                          | E2E test          | `tests/e2e/admin-login.spec.ts`                                                                                                                                                                                                                                                                                                                                           | Passed              |
+| Publish one article with two images through `/admin`                                                                                                                                     | Manual            | Signed in with the dev login; published against local WordPress; confirmed on the home page, `/news/<slug>`, and in `wp-admin` (post + media, correct category/captions/alt text)                                                                                                                                                                                         | Passed (2026-09-20) |
+| Read-only detection rule: round-trips our own content, rejects everything else                                                                                                           | Unit test         | `tests/unit/article-content.test.ts`                                                                                                                                                                                                                                                                                                                                      | Passed              |
+| Admin list query building (search, category filter, pagination) and edit-context read (round-trippable vs. read-only vs. not-found vs. trashed)                                          | Integration test  | `tests/integration/admin-articles.test.ts` (mocked WP REST API)                                                                                                                                                                                                                                                                                                           | Passed              |
+| Update pipeline: reuses unchanged photos, uploads new ones, clears the featured image when all photos are removed, uncertain-on-timeout                                                  | Integration test  | `tests/integration/edit-article.test.ts` (mocked WP REST API)                                                                                                                                                                                                                                                                                                             | Passed              |
+| Trash: DELETE without `force`, not-found, uncertain-on-timeout                                                                                                                           | Integration test  | `tests/integration/edit-article.test.ts`                                                                                                                                                                                                                                                                                                                                  | Passed              |
+| Edit/trash server actions: permission gate, revalidation, cache-warning result                                                                                                           | Integration test  | `tests/integration/article-management-actions.test.ts`                                                                                                                                                                                                                                                                                                                    | Passed              |
+| Create an article, edit its title/body, add a photo, confirm each change on the public page, then trash it and confirm it disappears from the site but still exists in WordPress's trash | Manual            | Signed in with the dev login; ran the full flow against local WordPress; confirmed the edited title/body/photo caption rendered at `/news/<slug>`, confirmed the article disappeared from the public page and the admin list after trashing, and confirmed via the WordPress REST API that the post remained retrievable with `status=trash` (not deleted) before cleanup | Passed (2026-09-21) |
+| A native-WordPress-edited article (a heading block) opens read-only with the reason shown and a working link to `wp-admin`                                                               | Manual            | Created a post directly via the WordPress REST API with a `core/heading` block, opened its `/admin/articles/<id>/edit` page, confirmed the read-only view and "Open in WordPress" link, confirmed no Save form is rendered                                                                                                                                                | Passed (2026-09-21) |

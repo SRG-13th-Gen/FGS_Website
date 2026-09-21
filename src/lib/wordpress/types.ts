@@ -60,6 +60,8 @@ export type PublishArticleResult =
       slug: string;
       articlePath: string;
       cacheWarning: boolean;
+      /** Every image's final WordPress media id, in the same order submitted — index 0 is the cover. */
+      uploadedImages: UploadedImageRef[];
     }
   | {
       status: "validation_error";

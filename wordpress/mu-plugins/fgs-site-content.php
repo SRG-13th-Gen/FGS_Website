@@ -38,3 +38,22 @@ add_action('init', function () {
         },
     ]);
 });
+
+/**
+ * Scopes the `/wp/v2/posts?search=` REST parameter to the post title only.
+ * By default WP_Query's `s` param (which the REST API's `search` param maps
+ * to) matches title, content, and excerpt together; the SPEC-003 admin
+ * article list needs title-only search. `search_columns` is a core WP_Query
+ * arg (stable since WP 6.2) applied through the standard `rest_post_query`
+ * filter — no new REST route or behavior for any other consumer.
+ *
+ * Reference consulted 2026-09-21:
+ * https://developer.wordpress.org/reference/classes/wp_query/#search-parameters
+ * https://developer.wordpress.org/reference/hooks/rest_this-post_type_query/
+ */
+add_filter('rest_post_query', function ($args, $request) {
+    if ($request->get_param('search')) {
+        $args['search_columns'] = ['post_title'];
+    }
+    return $args;
+}, 10, 2);

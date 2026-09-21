@@ -16,16 +16,25 @@ import {
   validateImageFile,
 } from "@/lib/wordpress/validation";
 
-const POST_CREATE_TIMEOUT_MS = 15_000;
+const POST_UPDATE_TIMEOUT_MS = 15_000;
+const POST_TRASH_TIMEOUT_MS = 15_000;
+
+export interface UpdateArticleInput extends PublishArticleInput {
+  postId: number;
+}
 
 /**
- * Validates input, uploads images (skipping ones already uploaded in a prior
- * attempt), and creates the WordPress post. No Next.js-specific APIs here —
- * see src/app/admin/(protected)/publish-actions.ts for requireAdmin() and
- * cache revalidation around this.
+ * Same validation/upload/content-building pipeline as publishArticle()
+ * (src/lib/wordpress/publish.ts) — reused via article-images.ts — but PATCHes
+ * an existing post instead of creating one. An `images[]` entry that keeps
+ * its `existingMediaId` and carries no new `file` is never re-uploaded;
+ * uploadOrReuseImage() just re-confirms it still exists. `images[0]` is
+ * always the featured/cover image and `images[1..]` become body image
+ * blocks, in that order — the same model getArticleForEdit() reads the
+ * article into, so an unmodified save reproduces equivalent content.
  */
-export async function publishArticle(
-  input: PublishArticleInput,
+export async function updateArticle(
+  input: UpdateArticleInput,
 ): Promise<PublishArticleResult> {
   if (input.images.length > MAX_IMAGES_PER_ARTICLE) {
     return {
@@ -71,8 +80,8 @@ export async function publishArticle(
     uploadedImages.push(outcome.ref);
   }
 
-  // The first image is the cover/featured image, already shown separately
-  // above the article body — don't also embed it inline as a body block.
+  // Same cover/body split as publishArticle(): the first image is the
+  // featured image, shown separately — never duplicated inline.
   const blockImages = input.images.slice(1).map((image, index) => ({
     url: uploadedImages[index + 1].url,
     mediaId: uploadedImages[index + 1].mediaId,
@@ -81,34 +90,34 @@ export async function publishArticle(
   }));
 
   const contentHtml = buildArticleContent(fields.body, blockImages);
+  // 0 explicitly clears the featured image when every photo was removed.
   const featuredMediaId = uploadedImages[0]?.mediaId ?? 0;
 
   let response: Response;
   try {
-    response = await wordpressAuthedFetch("/posts", {
+    response = await wordpressAuthedFetch(`/posts/${input.postId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: fields.title,
-        status: "publish",
         content: contentHtml,
         categories: [categoryId],
         featured_media: featuredMediaId,
       }),
-      timeoutMs: POST_CREATE_TIMEOUT_MS,
+      timeoutMs: POST_UPDATE_TIMEOUT_MS,
     });
   } catch (error) {
     if (isAbortError(error)) {
       return {
         status: "uncertain",
         message:
-          "Publishing timed out. WordPress may have still created the post — check wp-admin before retrying to avoid a duplicate.",
+          "Saving timed out. WordPress may have still saved the change — reload before retrying.",
         uploadedImages,
       };
     }
     return {
       status: "error",
-      message: "Could not reach WordPress to publish the article.",
+      message: "Could not reach WordPress to save this article.",
       uploadedImages,
     };
   }
@@ -116,7 +125,7 @@ export async function publishArticle(
   if (!response.ok) {
     return {
       status: "error",
-      message: "WordPress rejected the new article.",
+      message: "WordPress rejected the change.",
       uploadedImages,
     };
   }
@@ -126,7 +135,7 @@ export async function publishArticle(
     return {
       status: "uncertain",
       message:
-        "WordPress returned an unexpected response after publishing. Check wp-admin before retrying to avoid a duplicate.",
+        "WordPress returned an unexpected response after saving. Reload before retrying.",
       uploadedImages,
     };
   }
@@ -138,4 +147,50 @@ export async function publishArticle(
     cacheWarning: false,
     uploadedImages,
   };
+}
+
+export type TrashArticleResult =
+  | { status: "success" }
+  | { status: "not-found" }
+  | { status: "error"; message: string }
+  | { status: "uncertain"; message: string };
+
+/**
+ * Moves a post to WordPress's trash — DELETE without `force=true` per the
+ * REST API reference (never permanent deletion; DEC-111/SPEC-003 owner
+ * instruction). A trashed post keeps its data for WordPress's normal trash
+ * retention and can be restored natively.
+ */
+export async function trashArticle(
+  postId: number,
+): Promise<TrashArticleResult> {
+  let response: Response;
+  try {
+    response = await wordpressAuthedFetch(`/posts/${postId}`, {
+      method: "DELETE",
+      timeoutMs: POST_TRASH_TIMEOUT_MS,
+    });
+  } catch (error) {
+    if (isAbortError(error)) {
+      return {
+        status: "uncertain",
+        message:
+          "Moving this article to trash timed out. Check wp-admin before retrying.",
+      };
+    }
+    return {
+      status: "error",
+      message: "Could not reach WordPress to trash this article.",
+    };
+  }
+
+  if (response.status === 404) return { status: "not-found" };
+  if (!response.ok) {
+    return {
+      status: "error",
+      message: "WordPress rejected the request to trash this article.",
+    };
+  }
+
+  return { status: "success" };
 }

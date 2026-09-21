@@ -35,6 +35,39 @@ export const wpPostSchema = z.object({
 });
 export const wpPostListSchema = z.array(wpPostSchema);
 
+// Admin list queries request a narrower `_fields` set (no content/excerpt —
+// unused there), so they need their own schema rather than the full
+// wpPostSchema, which requires those fields.
+export const wpPostSummarySchema = z.object({
+  id: z.number(),
+  slug: z.string(),
+  status: z.string(),
+  date_gmt: z.string().nullable().optional(),
+  title: wpRenderedFieldSchema,
+  categories: z.array(z.number()).optional().default([]),
+  featured_media: z.number().optional().default(0),
+});
+export const wpPostSummaryListSchema = z.array(wpPostSummarySchema);
+
+// `context=edit` additionally exposes the unrendered `raw` sub-field for
+// protected fields (title/content) to a user with edit capability — needed
+// to inspect the actual Gutenberg block markup, since `rendered` returns
+// already-rendered HTML with block comments stripped.
+export const wpRawFieldSchema = z.object({
+  raw: z.string(),
+  rendered: z.string(),
+});
+export const wpPostEditSchema = z.object({
+  id: z.number(),
+  slug: z.string(),
+  status: z.string(),
+  date_gmt: z.string().nullable().optional(),
+  title: wpRawFieldSchema,
+  content: wpRawFieldSchema,
+  categories: z.array(z.number()).optional().default([]),
+  featured_media: z.number().optional().default(0),
+});
+
 export const wpCreatedPostSchema = z.object({
   id: z.number(),
   slug: z.string(),
