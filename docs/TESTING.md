@@ -2,7 +2,9 @@
 
 Status: the repository has executable scaffold, WordPress adapter, section-editor, article-management, and browser smoke checks. The detailed T-001 through T-022 matrix below remains a release acceptance plan; its older "Not run" cells do not mean there are no related local tests. [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence) record feature-level evidence and limits. CI/CD is not configured, and local checks do not establish production acceptance.
 
-Launch branch local check on 2026-09-26: `pnpm verify` passed lint, types, 216 tests across 25 files, formatting, and a production build. The browser suite passed 7 public/anonymous tests with 3 authenticated admin UI tests skipped because no school-approved Google session fixture is available (`pnpm test:e2e:run` after the final selector fix). WordPress PHP lint was not run because PHP is absent and Docker Desktop's daemon is stopped. Hosted OAuth, CMS copy, webhook delivery, and runtime smoke checks remain pending.
+Launch branch local check on 2026-09-26: `pnpm verify` passed lint, types, 216 tests across 25 files, formatting, and a production webpack build. `pnpm test:e2e` passed 7 public/anonymous browser tests with 3 authenticated admin UI tests skipped because no school-approved Google session fixture is available. WordPress PHP lint was not run because PHP is absent and Docker Desktop's daemon is stopped. Hosted OAuth, CMS copy, webhook delivery, and full runtime smoke checks remain pending.
+
+Partial Hostinger preview smoke on 2026-09-26: webpack build `01a0d97a-3528-701c-9b5c-9c70c83ddf1d` of `a8c7f02` completed; HTTPS homepage and published article 200, missing article 404, anonymous admin redirect, local/WordPress optimized images 200, non-indexable robots and empty sitemap, webhook denial/malformed/success responses 401/400/200. Runtime logs showed a ready server and no errors from these requests. This preview still reads the old root WordPress REST API and has no approved Google admin access; hosted CMS writes/event delivery and rollback were not tested.
 
 ## Available commands
 

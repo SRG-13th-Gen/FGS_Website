@@ -1,6 +1,6 @@
 # Architecture
 
-Status: accepted high-level boundaries from DEC-001 through DEC-005. Public WordPress reads, admin writes, Google OAuth authorization code, and CMS event revalidation code are implemented locally. Hosted identity, CMS copy, preview/live deployment, and inquiries remain unverified or unfinished.
+Status: accepted high-level boundaries from DEC-001 through DEC-005. Public WordPress reads, admin writes, Google OAuth authorization code, and CMS event revalidation code are implemented locally. The independent Hostinger preview's public Node routes passed partial smoke checks; hosted identity, CMS copy, live cutover, and inquiries remain unverified or unfinished.
 
 ## Accepted system boundaries
 
