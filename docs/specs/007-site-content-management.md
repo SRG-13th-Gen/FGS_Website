@@ -33,7 +33,7 @@ copy, and images across the landing page are hardcoded in the Next.js source. On
 An authenticated admin visits `/admin`, picks a website section from the sidebar (Hero,
 About, Admission, Clubs, Gallery, Contact, or School Info), edits its text fields and
 images through a plain form, and saves. The public site reflects the change (immediately for
-admin-originated saves, and within the interim revalidation window for any other change) and
+admin-originated saves, and through the CMS webhook or 60-second fallback for any other change) and
 never breaks — a missing or unreachable section falls back to the same default content the
 seed script uses.
 
@@ -55,8 +55,8 @@ seed script uses.
 ### Out of Scope
 
 - Arbitrary page-layout or Gutenberg block editing (DEC-114 still covers this).
-- Real team login/roles (DEC-103/DEC-111), the revalidation webhook (DEC-105), the inquiry
-  form, and public visual redesign.
+- Separate Editor/Viewer roles (DEC-111), the inquiry form, and public visual redesign.
+  Google sign-in and the revalidation webhook are now owned by SPEC-003 and SPEC-004.
 
 Article list/edit/trash (step 8) was originally tracked as pending here; it's now
 implemented — see [SPEC-003](003-team-admin.md#article-list-edit-and-trash-implemented),
@@ -190,12 +190,16 @@ Every section's `saveXAction` (e.g. `src/app/admin/(protected)/sections/hero/act
 5. A save-request timeout returns `status: "uncertain"`, telling the admin to check before
    retrying, never auto-retried.
 
-## Interim revalidation
+## Revalidation
 
-No DEC-105 webhook producer exists yet. Public section reads use the same 60-second `fetch`
-`revalidate` stopgap as SPEC-003 article reads, so a native WordPress edit (bypassing
-`/admin`) is picked up within that window; an `/admin`-originated save additionally gets the
-immediate `revalidatePath` above.
+The version-controlled CMS must-use plugin emits native section edit events to the authenticated
+endpoint in [SPEC-004](004-content-revalidation.md). Public section reads retain 60-second
+`fetch` expiry as fallback if delivery fails. An `/admin` save also calls immediate
+`revalidatePath` as described above. Hosted delivery remains unverified.
+
+The historical sidebar/media browser passes below used the former development
+login. The current production browser suite skips authenticated workflows
+without an approved Google session fixture; those paths need hosted acceptance.
 
 ## Verification and evidence
 

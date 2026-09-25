@@ -1,0 +1,33 @@
+# Hostinger deployment and recovery
+
+Status 2026-09-26: application code and local checks are in progress. The root WordPress website has **not** been removed. The hPanel backup/copy steps, CMS credentials/content, preview deployment, Google OAuth configuration, and live smoke tests have not passed yet.
+
+## Target topology
+
+- `flordegraceschoolinc.com`: public Next.js Node 24 website, from the reviewed `main` commit.
+- `cms.flordegraceschoolinc.com`: independent WordPress website and separate database copied from the original. Native school editing and the public REST/media source live here.
+- `preview.flordegraceschoolinc.com`: independent Next.js Node 24 website, from the same candidate commit. Set `SITE_INDEXABLE=false`.
+- All three use HTTPS. The root WordPress installation remains in place until the backup, CMS copy, and preview gates below pass.
+
+Hostinger Business hosting and its Node 24/Next.js support were checked through the installed Hostinger MCP and [Hostinger's Node.js guide](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/) on 2026-09-26. The account currently has one root WordPress website, no CMS or preview website, and the root homepage returns HTTP 503 while public WordPress REST reads return 200. Actual Node deployment and cache persistence remain unverified.
+
+## Release gates
+
+1. In hPanel, generate **files and database** backups for the root WordPress website, download both, and verify archive integrity and that the database export and `wp-content/uploads` are present. Record backup date and safe storage location outside Git. [Hostinger backup steps](https://www.hostinger.com/support/5981435-how-to-download-backups-at-hostinger/).
+2. Create `cms.flordegraceschoolinc.com` as an **independent website** on the Business order. Use hPanel **Copy Website** from the original root to that destination. Verify the destination has a separate database, its own files and media, correct WordPress home/site URLs, HTTPS, and REST reads. The source has an active Slim Maintenance Mode plugin that may also cause a 503 on the copy; assess/disable it on the **copy** when checking its front end, leaving the root untouched. Never create the CMS as a disposable child directory of the root website. [Hostinger Copy Website](https://www.hostinger.com/support/6601521-how-to-copy-a-wordpress-website-to-another-domain-name-in-hostinger/).
+3. On the CMS copy, install `wordpress/mu-plugins/fgs-site-content.php`, create a dedicated WordPress **Editor** integration account and Application Password, set the webhook URL/secret in server-side `wp-config.php`, and run `pnpm wp:seed-content` against the CMS copy. This script seeds seven sections without overwriting an existing structured field. Apply the [launch content selection](CONTENT_SELECTION.md) to the section fields and public article categories (`clubs`, `events`, `announcements`). Keep all copied old posts/pages/media. Update/test WordPress core and required plugins on the copy only.
+4. Configure the independent preview Node website using Node 24, pnpm, application type Next.js, `pnpm build`, and the exact reviewed source archive. Supply the **complete** server-side environment variable set when calling Hostinger's replace-environment API. Required settings: `WORDPRESS_URL=https://cms.flordegraceschoolinc.com`, `WORDPRESS_USERNAME`, `WORDPRESS_APPLICATION_PASSWORD`, `REVALIDATION_SECRET`, `NEXTAUTH_URL=https://preview.flordegraceschoolinc.com`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `ADMIN_ALLOWED_EMAILS`, `SITE_INDEXABLE=false`. Never commit or print secret values. Google must list `https://preview.flordegraceschoolinc.com/api/auth/callback/google` as an authorized redirect URI.
+5. Confirm public sections, images, published/missing article behavior, metadata/noindex, HTTPS, CMS REST, authorized and denied Google sign-in, admin section/article reads and writes, webhook delivery, cache refresh, and runtime logs on preview. `pnpm verify`, browser smoke tests, and targeted auth/CMS/webhook tests must pass for the candidate commit. The school OAuth client and exact first administrator list must be supplied securely before this gate can pass.
+6. Merge the reviewed candidate through `staging` to `main`. **Only after gates 1–5 pass**, remove the old root WordPress website in Hostinger, recreate the root as an independent Node.js website, and deploy the exact merged `main` commit. The destructive remove action loses the old root files/database/configuration; the verified backup and CMS copy are recovery dependencies. Set the same complete environment set with `NEXTAUTH_URL=https://flordegraceschoolinc.com` and `SITE_INDEXABLE=true`; Google must also list `https://flordegraceschoolinc.com/api/auth/callback/google`. Configure SSL and repeat every smoke test, including `/robots.txt` and `/sitemap.xml`.
+
+## Cache events
+
+The CMS must-use plugin sends JSON to `POST /api/revalidate` with `X-FGS-Revalidation-Secret`. It uses `FGS_REVALIDATION_URL` and `FGS_REVALIDATION_SECRET` constants defined privately in `wp-config.php`. The endpoint accepts only post/page/category/media event shapes, derives tags and routes server-side, and expires data immediately. Article old and new slugs are both invalidated. A failed webhook does not fail an editorial save; the public article, category, media, and section reads retain a 60-second fallback. After cutover, point the CMS webhook to the live root. Repeated events are harmless. See [data contracts](DATA_API_CONTRACTS.md).
+
+## Recovery
+
+- During first root cutover failure, stop further deployment and restore the original root WordPress website from the verified files/database backup in hPanel. Keep the working CMS copy intact. Recheck DNS/SSL and the public homepage.
+- For later Node releases, redeploy the last known good reviewed archive/commit and restore its full environment set. Do not roll back WordPress content with an application rollback.
+- Keep the verified original backup and independent CMS copy through launch acceptance. Record the deployment commit, backup identity/location, site IDs, environment key names, deployment IDs, smoke results, and rollback outcome in a private operations record without secrets.
+
+The installed Hostinger MCP covers account, website, files, SSL, Node deployment, runtime logs, and environment operations. It does **not** expose backup export or WordPress Copy Website, so those steps require signed-in hPanel. Hostinger's environment endpoint replaces the entire variable set; masked values returned by its list operation cannot be reused as values.

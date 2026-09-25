@@ -36,13 +36,13 @@ export const CONTACT_DEFAULTS: ContactContent = {
       icon: "phone",
       title: "Call Us",
       detail: "09682200677",
-      sub: "Mon–Fri, 7:00 AM – 5:00 PM",
+      sub: "Contact the school for office hours",
     },
     {
       icon: "mail",
       title: "Email Us",
       detail: "flordegrace.school2001@gmail.com",
-      sub: "We reply within 24 hours",
+      sub: "Contact the school office",
     },
   ],
 };

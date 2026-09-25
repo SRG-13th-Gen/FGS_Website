@@ -24,56 +24,31 @@ export type ClubItem = z.infer<typeof clubItemSchema>;
 export const CLUBS_DEFAULTS: ClubsContent = {
   sectionLabel: "Clubs & Activities",
   heading: "Beyond the Classroom",
-  intro:
-    "Discover passions, build friendships, and cultivate lifelong talents through our extracurricular programs.",
+  intro: "Explore the student clubs described by Flor de Grace School.",
   clubs: [
     {
-      name: "Arts & Crafts Club",
-      category: "Creative Arts",
+      name: "Science Club",
+      category: "Science",
       description:
-        "Express creativity through painting, sketching, paper craft, and collaborative mural projects.",
-      meetingDay: "Wednesdays, 3:30 PM",
-      icon: "palette",
+        "Explore scientific ideas through hands-on activities, experiments, and real-world discovery.",
+      meetingDay: "Contact the school for the schedule",
+      icon: "sparkles",
     },
     {
-      name: "Music & Choir Club",
-      category: "Performing Arts",
+      name: "English Club",
+      category: "Language & Communication",
       description:
-        "Develop vocal harmony, choral singing, and musical instrument fundamentals for school programs.",
-      meetingDay: "Tuesdays, 3:30 PM",
-      icon: "music",
-    },
-    {
-      name: "Sports & Athletics",
-      category: "Physical Fitness",
-      description:
-        "Build agility, team spirit, and sportsmanship through basketball, volleyball, and active play.",
-      meetingDay: "Fridays, 3:30 PM",
-      icon: "dumbbell",
-    },
-    {
-      name: "Tech & Robotics Club",
-      category: "STEM",
-      description:
-        "Learn beginner-friendly coding, robotics kits, and digital problem-solving in a fun workshop environment.",
-      meetingDay: "Thursdays, 3:30 PM",
-      icon: "monitor",
-    },
-    {
-      name: "Young Readers Club",
-      category: "Literary & Debate",
-      description:
-        "Explore classic literature, storytelling, and develop confident public speaking and debate skills.",
-      meetingDay: "Mondays, 3:30 PM",
+        "Build confidence in speaking, writing, listening, and leadership through group activities.",
+      meetingDay: "Contact the school for the schedule",
       icon: "book-open",
     },
     {
-      name: "Science Explorers",
-      category: "Discovery",
+      name: "Makabayang Graciano",
+      category: "Araling Panlipunan",
       description:
-        "Engage in hands-on science experiments, nature observation, and annual science fair projects.",
-      meetingDay: "Wednesdays, 3:30 PM",
-      icon: "sparkles",
+        "Discover Philippine history, culture, and heritage through the school's student society.",
+      meetingDay: "Contact the school for the schedule",
+      icon: "blocks",
     },
   ],
 };

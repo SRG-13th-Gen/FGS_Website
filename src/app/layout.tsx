@@ -6,10 +6,16 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Flordegrace School",
-  description: "The Flordegrace School website is in preparation.",
-  // Remove the scaffold-wide exclusion only as part of approved launch work.
-  robots: { index: false, follow: false },
+  metadataBase: new URL("https://flordegraceschoolinc.com"),
+  title: "Flor de Grace School Inc.",
+  description:
+    "Explore learning, school life, admissions, and news at Flor de Grace School Inc.",
+  alternates: { canonical: "/" },
+  // Preview and local builds remain out of search until the root launch.
+  robots: {
+    index: process.env.SITE_INDEXABLE === "true",
+    follow: process.env.SITE_INDEXABLE === "true",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

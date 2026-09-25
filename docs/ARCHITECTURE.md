@@ -1,6 +1,6 @@
 # Architecture
 
-Status: accepted high-level boundaries from DEC-001 through DEC-005. The public WordPress read adapter, local admin post/media and site-section writes, and public presentation are implemented. The team login is development-only. Production identity, CMS event revalidation, inquiries, and deployment remain unimplemented; proposed flows below are labeled accordingly.
+Status: accepted high-level boundaries from DEC-001 through DEC-005. Public WordPress reads, admin writes, Google OAuth authorization code, and CMS event revalidation code are implemented locally. Hosted identity, CMS copy, preview/live deployment, and inquiries remain unverified or unfinished.
 
 ## Accepted system boundaries
 
@@ -25,7 +25,7 @@ WordPress is the sole authority for posts, pages, categories, and media. Next.js
 
 Use one Next.js application. Public routes, `/admin`, and server endpoints share server-only services without creating a second backend deployment. Route groups organize code; they do not authorize requests.
 
-The application uses `src/app`, custom `src/components/public` and `src/components/admin` components, shadcn primitives in `src/components/ui`, and `src/lib/env`. CMS transport and content mapping are in `src/lib/wordpress`. `src/lib/auth` currently holds only a temporary development login and admin guard; the accepted production identity is pending. Inquiry delivery remains planned. Add `lib/db` only after an application storage requirement is accepted.
+The application uses `src/app`, custom `src/components/public` and `src/components/admin` components, shadcn primitives in `src/components/ui`, and `src/lib/env`. CMS transport and content mapping are in `src/lib/wordpress`. `src/lib/auth` holds Google OAuth options, exact email allowlisting, and the admin guard. `src/lib/revalidation` maps trusted WordPress events to cache dependencies. Inquiry delivery remains planned. Add `lib/db` only after an application storage requirement is accepted.
 
 UI entry points call validated application operations; those operations authorize access and invoke adapters. Components must not assemble privileged WordPress requests. See [contracts](DATA_API_CONTRACTS.md) for the proposed interface boundary.
 
@@ -37,10 +37,10 @@ Current team-write flow, with full event coverage still proposed:
 
 1. Validate the request and authorize the team actor before a CMS call.
 2. Write to WordPress and retain its resource ID/result.
-3. Call `revalidatePath` for affected public routes; broader taxonomy/metadata dependency mapping remains planned.
+3. Call `revalidatePath` for affected public routes. Native CMS category/media dependency mapping is in the authenticated webhook endpoint; hosted behavior remains to verify.
 4. If invalidation fails after the write succeeds, report that content was saved but refresh is pending. Do not repeat the write to fix the cache.
 
-School edits require a webhook producer that is not yet selected or installed. Proposed events include publication, edits, slug changes, withdrawal, deletion, category changes, and relevant media changes. Invalidation must account for old and new URLs; it must not accept arbitrary browser-supplied cache paths. Refresh deadlines, fallback expiry, webhook retry strategy, and removal of previously published cached content remain DEC-105 decisions.
+The version-controlled WordPress must-use plugin emits post, section-page, category, and media events after edits. `/api/revalidate` checks a server-only shared secret, validates resource type/ID/slugs, and derives tags/paths itself. Old and new article slugs are invalidated; the public read cache retains a 60-second fallback if a webhook delivery fails. Hosted delivery, withdrawal freshness, and multi-instance behavior still need proof on preview.
 
 During a CMS outage, distinguish unavailable content from a genuine missing page. A previously published cache may be used only within the approved freshness/removal policy. No draft or private data may enter public caches. Do not claim immediate removal of cached content until verified.
 
@@ -52,7 +52,7 @@ The proposed default stores no inquiry message bodies in the application databas
 
 ## Hosting and environments
 
-Accepted target: Next.js at `flordegraceschoolinc.com`, WordPress at `cms.flordegraceschoolinc.com`, both on Hostinger. Docker is local-only. The production hosting plan, DNS, TLS, secrets, and provisioning are unverified.
+Accepted target: Next.js at `flordegraceschoolinc.com`, independent WordPress at `cms.flordegraceschoolinc.com`, plus Node preview at `preview.flordegraceschoolinc.com`, all on Hostinger. Docker is local-only. The active Business plan and root WordPress installation were inspected through the Hostinger MCP; new site provisioning, DNS, TLS, and secrets are unverified. See [DEPLOYMENT.md](DEPLOYMENT.md).
 
 Before selecting a deployment procedure, prove that the chosen Hostinger product supports the selected Next.js runtime, server operations, cache persistence/invalidation, and image handling. Decide how caches and sessions behave if more than one application instance runs. Self-hosted runtime concerns are described in the [Next.js self-hosting guide](https://nextjs.org/docs/app/guides/self-hosting) (consulted 2026-09-19); this is not evidence of a particular Hostinger plan's capabilities.
 

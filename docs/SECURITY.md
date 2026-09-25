@@ -4,22 +4,11 @@ Status: server-only CMS authentication and WordPress data ownership are accepted
 
 ## Identity and authorization
 
-School staff authenticate with native WordPress at the CMS host. Team members authenticate separately for Next.js `/admin`; the provider, auth library, session lifecycle, MFA, and invite/revocation process remain DEC-103. No public team signup is proposed.
+School staff authenticate with native WordPress at the CMS host. Team members authenticate separately for Next.js `/admin` through Google OAuth and `next-auth@4.24.15`. No public team signup exists. The first release has one administrator permission level; Editor/Viewer roles remain deferred under DEC-111.
 
-**Interim state**: DEC-103 is on hold pending access to the school's Google account.
-Until it is resolved, `/admin` is gated by a temporary, dev-only seeded login
-(`src/lib/auth/dev-login.ts`, documented in [SPEC-003](specs/003-team-admin.md)).
-Credentials live only in `.env.local` (`ADMIN_DEV_EMAIL`, `ADMIN_DEV_PASSWORD`,
-`ADMIN_DEV_SESSION_SECRET`); the session cookie is httpOnly, sameSite=lax, signed,
-and expires after 8 hours. It is hard-disabled outside development — a production
-build never accepts it and every `/admin` route denies access with no fallback to
-open access. `requireAdmin()` performs the real check in the protected layout and
-must be called by every protected admin server action/route handler; a proxy-level
-cookie-presence check is optimistic UX only, not authorization. This is scaffolding
-for FR-005, not FR-005 itself: no rate limiting, lockout, password rules,
-allowlist, or roles.
+Google sign-in requires a verified email exactly matching `ADMIN_ALLOWED_EMAILS`; no domain-wide access is granted. `next-auth` uses encrypted JWT sessions with an eight-hour lifetime and secure production cookies. `getAdminSession()` checks the current allowlist on every protected read and action, so removing an address revokes admin access before token expiry. Missing OAuth configuration or an unlisted account denies access. The school has not yet provided a client or initial list; hosted authentication is unverified. `requireAdmin()` is called at protected server entry points; UI and metadata do not authorize access. OAuth state/CSRF and sign-out are handled by the auth library.
 
-Proposed role matrix (DEC-111):
+Deferred later role matrix (DEC-111):
 
 | Capability                                                   | Viewer | Editor | Admin |
 | ------------------------------------------------------------ | ------ | ------ | ----- |
@@ -33,7 +22,7 @@ Proposed role matrix (DEC-111):
 
 Unknown roles and missing permissions deny access. Authorize each server operation, including reads; do not rely on hidden controls, route layouts, or browser claims. The dedicated CMS account's capabilities bound every team operation but do not identify the individual team actor; proposed app audit events provide that attribution.
 
-Use secure session cookies appropriate to production HTTPS and implement server-side expiry/revocation checks. Protect cookie-authenticated mutations against cross-site requests. The exact library configuration and origin policy require a feature spec and negative tests.
+The OAuth client, session secret, and WordPress/revalidation credentials stay server-side. Register only the preview/live callback URLs authorized for the school client. Hostinger HTTPS and production cookie behavior need hosted negative tests before launch.
 
 ## Secrets and infrastructure boundaries
 

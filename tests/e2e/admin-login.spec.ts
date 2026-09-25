@@ -27,3 +27,13 @@ test("the admin login page renders without the protected admin header", async ({
   ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
 });
+
+test("a denied Google callback shows a safe sign-in message", async ({
+  page,
+}) => {
+  await page.goto("/admin/login?error=AccessDenied");
+  await expect(page.getByText(/Sign-in was not accepted/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Flor de Grace School" }),
+  ).toBeVisible();
+});

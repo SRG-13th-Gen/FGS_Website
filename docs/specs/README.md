@@ -1,6 +1,6 @@
 # Feature specification index
 
-SPEC-001 and SPEC-002 remain draft outlines, although their WordPress read and public-page behavior has been implemented. [SPEC-003](003-team-admin.md) records the implemented article workflows and the unfinished production identity/role controls. SPEC-004 and SPEC-005 remain unimplemented. [SPEC-006](006-repository-scaffold.md) records the development foundation, and [SPEC-007](007-site-content-management.md) records the implemented WordPress-backed section editors. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is specified, then link its implementation evidence here.
+SPEC-001 and SPEC-002 remain draft outlines, although their WordPress read and public-page behavior has been implemented. [SPEC-003](003-team-admin.md) records the implemented article workflows and locally implemented Google authentication; hosted credentials/tests remain pending. [SPEC-004](004-content-revalidation.md) records local webhook implementation. SPEC-005 remains unimplemented. [SPEC-006](006-repository-scaffold.md) records the development foundation, and [SPEC-007](007-site-content-management.md) records the implemented WordPress-backed section editors. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is specified, then link its implementation evidence here.
 
 Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACTS.md), [decisions](../DECISIONS.md), [workflow](../SPEC_WORKFLOW.md), and [test matrix](../TESTING.md). Cross-cutting requirements may apply to more than one feature.
 
@@ -25,7 +25,7 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 - Dependencies: SPEC-001, DEC-103/104/111; integrate SPEC-004 invalidation.
 - Planned evidence: T-005, T-006, T-007, T-014, T-015, T-016, T-020.
 
-## SPEC-004 Content revalidation
+## [SPEC-004 Content revalidation](004-content-revalidation.md)
 
 - Scope: authenticated CMS events, team mutation refresh, cache dependency mapping, withdrawal/slug changes and failure recovery.
 - Requirements: FR-009, NFR-004, NFR-005, NFR-007.

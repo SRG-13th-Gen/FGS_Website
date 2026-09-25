@@ -27,7 +27,7 @@ export const SCHOOL_INFO_DEFAULTS: SchoolInfoContent = {
   address: "74 Gold St, Quezon City, 1121 Metro Manila",
   phone: "09682200677",
   email: "flordegrace.school2001@gmail.com",
-  officeHours: "Mon–Fri, 7:00 AM – 5:00 PM",
+  officeHours: "Contact the school for office hours",
   footerTagline:
     "Nurturing minds, building futures. A school committed to excellence in education.",
   footerPrograms: ["Preschool", "Elementary"],

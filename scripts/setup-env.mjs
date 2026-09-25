@@ -8,13 +8,10 @@ function randomSecret() {
   return randomBytes(32).toString("base64url");
 }
 
-// Keys this script keeps filled in .env.local, without ever overwriting a
-// value that is already set. ADMIN_DEV_* seed the temporary dev-only admin
-// login (see src/lib/auth/dev-login.ts) and are never printed.
+// Keys this script keeps filled in .env.local without overwriting existing
+// values. Real OAuth client credentials and admin emails are supplied separately.
 const managedDefaults = {
-  ADMIN_DEV_EMAIL: () => "admin@fgs.local",
-  ADMIN_DEV_PASSWORD: randomSecret,
-  ADMIN_DEV_SESSION_SECRET: randomSecret,
+  NEXTAUTH_SECRET: randomSecret,
 };
 
 function parseValues(contents) {
