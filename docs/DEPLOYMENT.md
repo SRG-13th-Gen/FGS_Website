@@ -9,7 +9,7 @@ Status 2026-09-26: application code and local checks are in progress. The root W
 - `preview.flordegraceschoolinc.com`: independent Next.js Node 24 website, from the same candidate commit. Set `SITE_INDEXABLE=false`.
 - All three use HTTPS. The root WordPress installation remains in place until the backup, CMS copy, and preview gates below pass.
 
-Hostinger Business hosting and its Node 24/Next.js support were checked through the installed Hostinger MCP and [Hostinger's Node.js guide](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/) on 2026-09-26. The account currently has one root WordPress website, no CMS or preview website, and the root homepage returns HTTP 503 while public WordPress REST reads return 200. Actual Node deployment and cache persistence remain unverified.
+Hostinger Business hosting and its Node 24/Next.js support were checked through the installed Hostinger MCP and [Hostinger's Node.js guide](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/) on 2026-09-26. The root homepage returns HTTP 503 while public WordPress REST reads return 200. An independent preview website now exists with active SSL. Its first build exposed Hostinger's Node `24.6.0` runtime, so the repository engine declaration was widened from `>=24.13.0` to `>=24.6.0`; a successful Node deployment and cache persistence are still unverified.
 
 ## Release gates
 
