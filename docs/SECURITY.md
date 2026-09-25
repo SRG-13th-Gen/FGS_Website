@@ -6,6 +6,19 @@ Status: server-only CMS authentication and WordPress data ownership are accepted
 
 School staff authenticate with native WordPress at the CMS host. Team members authenticate separately for Next.js `/admin`; the provider, auth library, session lifecycle, MFA, and invite/revocation process remain DEC-103. No public team signup is proposed.
 
+**Interim state**: DEC-103 is on hold pending access to the school's Google account.
+Until it is resolved, `/admin` is gated by a temporary, dev-only seeded login
+(`src/lib/auth/dev-login.ts`, documented in [SPEC-003](specs/003-team-admin.md)).
+Credentials live only in `.env.local` (`ADMIN_DEV_EMAIL`, `ADMIN_DEV_PASSWORD`,
+`ADMIN_DEV_SESSION_SECRET`); the session cookie is httpOnly, sameSite=lax, signed,
+and expires after 8 hours. It is hard-disabled outside development — a production
+build never accepts it and every `/admin` route denies access with no fallback to
+open access. `requireAdmin()` performs the real check in the protected layout and
+must be called by every protected admin server action/route handler; a proxy-level
+cookie-presence check is optimistic UX only, not authorization. This is scaffolding
+for FR-005, not FR-005 itself: no rate limiting, lockout, password rules,
+allowlist, or roles.
+
 Proposed role matrix (DEC-111):
 
 | Capability                                                   | Viewer | Editor | Admin |

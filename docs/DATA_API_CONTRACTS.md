@@ -1,6 +1,6 @@
 # Data and API contracts
 
-Status: WordPress is the accepted integration boundary. Resource mappings below describe upstream API concepts; application DTOs and interfaces are **Proposed**, **Unimplemented**, and not a published API. Select versions and settle feature decisions before making them executable contracts.
+Status: WordPress is the accepted integration boundary. The public article reads, admin article create/edit/trash and media operations, and all seven site-section read/write contracts are implemented and locally verified (`src/lib/wordpress/`; see [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence)). Category administration and the authenticated revalidation endpoint remain proposed and unimplemented. Production team identity is also pending.
 
 ## WordPress resource mapping
 
@@ -21,21 +21,42 @@ Public requests use published/view-context content only. List queries validate p
 
 Official references consulted 2026-09-19: [posts](https://developer.wordpress.org/rest-api/reference/posts/), [pages](https://developer.wordpress.org/rest-api/reference/pages/), [categories](https://developer.wordpress.org/rest-api/reference/categories/), [media](https://developer.wordpress.org/rest-api/reference/media/). Recheck against the installed CMS and plugins when implementing.
 
-## Proposed server operation contracts
+## Server operation contracts
 
-| Operation           | Input                                                               | Outcome and constraints                                                                                                  |
-| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Public content read | Validated slug/ID or page/filter values                             | Normalized published content, genuine not-found, or dependency-unavailable; never raw privileged CMS errors              |
-| Admin post write    | Resource ID when editing; allowlisted editable fields; team session | Authorized WordPress write result, validation/permission/dependency failure, or unknown outcome requiring reconciliation |
-| Category write      | ID when editing; permitted name/slug/parent fields                  | Validated CMS result; no arbitrary WordPress endpoint proxy                                                              |
-| Media upload        | Allowed file plus permitted metadata                                | CMS media ID after successful validation/upload; limits and MIME policy need acceptance                                  |
-| Cache refresh       | Validated content event                                             | Invalidate server-derived dependencies; do not repeat an already successful CMS write                                    |
+| Operation                   | Status                                                                                                | Input                                                                                                                             | Outcome and constraints                                                                                                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public content read         | **Implemented** (`lib/wordpress/reads.ts`)                                                            | Slug (detail) or none (listing); category filtering is fixed to the three allowed slugs                                           | Normalized published content (`ArticleListResult`/`ArticleDetailResult`), genuine `not-found`, or `unavailable`; never raw privileged CMS errors                                                                                |
+| Admin post write            | **Implemented** (`lib/wordpress/publish.ts`, `app/admin/(protected)/articles/new/publish-actions.ts`) | Title, Category (`clubs`/`events`/`announcements`), Body, ordered images with captions/alt text; admin session (`requireAdmin()`) | Authorized WordPress write result per [SPEC-003](specs/003-team-admin.md#admin-publishing-fr-007fr-008-implemented): `success`, `validation_error`, `error`, or `uncertain` (timeout/unparseable response — never auto-retried) |
+| Category write              | Unimplemented                                                                                         | ID when editing; permitted name/slug/parent fields                                                                                | Validated CMS result; no arbitrary WordPress endpoint proxy                                                                                                                                                                     |
+| Media upload                | **Implemented** (part of admin post write above)                                                      | Allowed file (jpeg/png/webp/avif, sniffed by content not extension) plus caption/alt text, ≤10 MB                                 | WordPress media ID + URL after successful upload; a retry reuses an already-uploaded image by ID instead of re-uploading                                                                                                        |
+| Cache refresh (admin write) | **Implemented** — interim                                                                             | N/A (called automatically after a successful publish)                                                                             | `revalidatePath("/")` + `revalidatePath("/news/<slug>")`; a failure is reported as `cacheWarning`, not a publish failure                                                                                                        |
+| Cache refresh (webhook)     | Unimplemented — see [Proposed revalidation endpoint](#proposed-revalidation-endpoint)                 | Validated content event                                                                                                           | Invalidate server-derived dependencies; do not repeat an already successful CMS write                                                                                                                                           |
 
 Proposed admin operations use Server Actions; explicit external callbacks use Route Handlers. This avoids inventing a public `/api/admin/*` contract before it is needed. Each entry point must independently validate input and authorize the actor. A layout redirect is not a server authorization check.
 
 For edits, decide concurrent-write detection and editor compatibility in SPEC-003. Preserve Gutenberg content unless an approved editor can round-trip it; route unsupported block edits to WordPress. Proposed post deletion means trash, not forced permanent deletion. WordPress remains the canonical result after mutations.
 
 An internal result should distinguish validation failure, unauthorized/forbidden, missing resource, conflict, dependency failure, and uncertain outcome. Translate WordPress failures into safe UI messages and correlation IDs. Do not publish raw upstream responses or invent wire codes for Server Actions prematurely.
+
+## Site section content (SPEC-007, implemented locally)
+
+Public site sections (Hero, About, Admission, Clubs, Gallery, Contact, School Info) are
+**implemented** on top of the WordPress `pages` resource, distinct from the article
+(`posts`) contract above:
+
+| Concept          | WordPress field/endpoint                                                                                                    | Adapter responsibility                                                                                                                                                                                                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Section content  | `page.meta.fgs_section_data` (JSON string)                                                                                  | Registered via `register_post_meta()` in a must-use plugin (`wordpress/mu-plugins/fgs-site-content.php`), `show_in_rest: true`, `auth_callback` requires `edit_pages`. Validated both ways against the section's zod schema — the schema, not the WordPress-registered REST schema, is authoritative. |
+| Section identity | `page.slug` (`site-hero`, `site-about`, `site-admission`, `site-clubs`, `site-gallery`, `site-contact`, `site-school-info`) | Fixed slugs created once by the seed script; never created ad hoc by a save action                                                                                                                                                                                                                    |
+| Section images   | `{ mediaId, alt }` inside the JSON, resolved against `/media/<id>`                                                          | Never a hand-typed URL; resolved to a live `source_url` at read time (same missing-media fallback as the article cover image)                                                                                                                                                                         |
+| Last-updated     | `page.modified_gmt`                                                                                                         | Shown on the admin dashboard's per-section card                                                                                                                                                                                                                                                       |
+
+Reads: `GET /wp/v2/pages?slug=<slug>&status=publish` (public, unauthenticated — the meta
+field is readable to anyone who can view the published page). Writes:
+`POST /wp/v2/pages/<id>` with `{ meta: { fgs_section_data: "<json>" } }`, authenticated,
+after `requireAdmin()` and zod validation. A missing page is a configuration error ("run the
+seed script"), not a normal not-found — section pages are only ever created by
+`pnpm wp:seed-content`, never by a save action.
 
 ## Proposed revalidation endpoint
 

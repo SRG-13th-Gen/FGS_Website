@@ -1,6 +1,6 @@
 # Feature specification index
 
-SPEC-001 through SPEC-005 remain **Draft outline / Unimplemented**. [SPEC-006: repository scaffold](006-repository-scaffold.md) records the accepted developer foundation and its verification. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is being specified, then link its implementation evidence here.
+SPEC-001 and SPEC-002 remain draft outlines, although their WordPress read and public-page behavior has been implemented. [SPEC-003](003-team-admin.md) records the implemented article workflows and the unfinished production identity/role controls. SPEC-004 and SPEC-005 remain unimplemented. [SPEC-006](006-repository-scaffold.md) records the development foundation, and [SPEC-007](007-site-content-management.md) records the implemented WordPress-backed section editors. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is specified, then link its implementation evidence here.
 
 Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACTS.md), [decisions](../DECISIONS.md), [workflow](../SPEC_WORKFLOW.md), and [test matrix](../TESTING.md). Cross-cutting requirements may apply to more than one feature.
 
@@ -18,12 +18,12 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 - Dependencies: SPEC-001, designer-owned DESIGN, DEC-108/112, and SPEC-004 for release freshness behavior.
 - Planned evidence: T-003, T-004, T-013, T-016, T-017, T-018.
 
-## SPEC-003 Team admin
+## [SPEC-003 Team admin & article management](003-team-admin.md)
 
-- Scope: team sessions/roles, announcement lifecycle, category creation/editing, media upload/selection, safe result reporting and proposed audit attribution.
+- Scope: client `/admin` dashboard, article authoring (title, category: Clubs/Events/Announcements, body, pictures with captions), team sessions/roles, media upload, safe result reporting.
 - Requirements: FR-005, FR-006, FR-007, FR-008, NFR-001, NFR-002, NFR-003, NFR-005, NFR-007.
-- Dependencies: SPEC-001, DEC-103/104/111; define content round-trip/concurrency policy and integrate SPEC-004 invalidation.
-- Planned evidence: T-005, T-006, T-007, T-014, T-015, T-016, T-020; saved/refresh-pending behavior also uses T-008.
+- Dependencies: SPEC-001, DEC-103/104/111; integrate SPEC-004 invalidation.
+- Planned evidence: T-005, T-006, T-007, T-014, T-015, T-016, T-020.
 
 ## SPEC-004 Content revalidation
 
@@ -45,3 +45,9 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 - Scope: application/toolchain, full shadcn primitives, local Docker services, environment safety and quality checks; custom design remains designer-owned.
 - Requirements: NFR-001 (configuration only), NFR-008, NFR-009 (local/toolchain only).
 - Evidence: T-023 plus partial T-014/T-021; product integration tests remain pending.
+
+## [SPEC-007 Site content management](007-site-content-management.md)
+
+- Scope: WordPress-backed structured content for every public site section (Hero, About, Admission, Clubs, Gallery, Contact, School Info), the admin CMS shell/dashboard, and section editors. Fixed fields only — no page-layout/block editing.
+- Dependencies: SPEC-001 (WordPress adapter), SPEC-003 (admin shell/auth base), DEC-114 (narrowed).
+- Evidence: see the spec's verification table. All seven section editors and the article list/edit/trash flow are implemented and locally verified; production identity and release readiness remain separate work.

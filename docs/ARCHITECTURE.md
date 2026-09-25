@@ -1,6 +1,6 @@
 # Architecture
 
-Status: accepted high-level boundaries from DEC-001 through DEC-005. SPEC-006 implements the development scaffold; production deployment and product flows below remain unimplemented. Implementation details are proposed unless identified as accepted.
+Status: accepted high-level boundaries from DEC-001 through DEC-005. The public WordPress read adapter, local admin post/media and site-section writes, and public presentation are implemented. The team login is development-only. Production identity, CMS event revalidation, inquiries, and deployment remain unimplemented; proposed flows below are labeled accordingly.
 
 ## Accepted system boundaries
 
@@ -25,7 +25,7 @@ WordPress is the sole authority for posts, pages, categories, and media. Next.js
 
 Use one Next.js application. Public routes, `/admin`, and server endpoints share server-only services without creating a second backend deployment. Route groups organize code; they do not authorize requests.
 
-The scaffold now uses `src/app`, `src/components/ui`, `src/components/providers.tsx`, and `src/lib/env`. Add custom public/admin components as designs arrive. CMS transport in `lib/wordpress`, authorization in `lib/auth`, inquiry delivery adapters, and shared domain types remain planned; do not create empty implementations. Add `lib/db` only after an application storage requirement is accepted.
+The application uses `src/app`, custom `src/components/public` and `src/components/admin` components, shadcn primitives in `src/components/ui`, and `src/lib/env`. CMS transport and content mapping are in `src/lib/wordpress`. `src/lib/auth` currently holds only a temporary development login and admin guard; the accepted production identity is pending. Inquiry delivery remains planned. Add `lib/db` only after an application storage requirement is accepted.
 
 UI entry points call validated application operations; those operations authorize access and invoke adapters. Components must not assemble privileged WordPress requests. See [contracts](DATA_API_CONTRACTS.md) for the proposed interface boundary.
 
@@ -33,11 +33,11 @@ UI entry points call validated application operations; those operations authoriz
 
 Public reads use published WordPress resources and explicit cache policy. Admin reads and mutations are private and must not share public cache entries. Native Next.js `fetch` is the accepted integration baseline; the selected Next.js version must determine the exact caching APIs and configuration. Do not assume framework defaults provide ISR. See the [official caching guide](https://nextjs.org/docs/app/getting-started/caching) (consulted 2026-09-19).
 
-Proposed update flow:
+Current team-write flow, with full event coverage still proposed:
 
 1. Validate the request and authorize the team actor before a CMS call.
 2. Write to WordPress and retain its resource ID/result.
-3. Invalidate relevant public detail, listing, taxonomy, and metadata dependencies.
+3. Call `revalidatePath` for affected public routes; broader taxonomy/metadata dependency mapping remains planned.
 4. If invalidation fails after the write succeeds, report that content was saved but refresh is pending. Do not repeat the write to fix the cache.
 
 School edits require a webhook producer that is not yet selected or installed. Proposed events include publication, edits, slug changes, withdrawal, deletion, category changes, and relevant media changes. Invalidation must account for old and new URLs; it must not accept arbitrary browser-supplied cache paths. Refresh deadlines, fallback expiry, webhook retry strategy, and removal of previously published cached content remain DEC-105 decisions.

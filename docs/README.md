@@ -2,13 +2,13 @@
 
 ## Status and authority
 
-The repository now has an executable development scaffold: Next.js, Tailwind, the full selected shadcn registry, local WordPress/MariaDB Compose services, and quality tooling. Product features remain **Unimplemented**; scaffold checks do not establish product acceptance. See [SPEC-006](specs/006-repository-scaffold.md) for implementation evidence.
+The repository has an implemented public landing page and article detail route, WordPress-backed section content, a local admin CMS for section and article editing, local WordPress/MariaDB Compose services, and quality tooling. [SPEC-003](specs/003-team-admin.md) and [SPEC-007](specs/007-site-content-management.md) record implementation evidence. Production team authentication, role enforcement, native WordPress revalidation events, inquiry delivery, and deployment remain unfinished. Passing local checks does not establish product or launch acceptance.
 
 - **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
 - **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
 - **Open**: a question without a selected answer. **Deferred**: intentionally outside the current delivery phase.
 
-Record acceptance evidence in [DECISIONS.md](DECISIONS.md). The owner's requests approve documentation, v1 scope, and repository scaffolding with delegated library choices, not every proposed product detail in these documents.
+Record acceptance evidence in [DECISIONS.md](DECISIONS.md). The owner's requests approve documentation, v1 scope, repository scaffolding, and the accepted section/content decisions recorded there; they do not approve every proposed product detail in these documents.
 
 Authority for future work:
 
@@ -30,7 +30,7 @@ Owners below are responsibilities to assign, not named people already appointed.
 | [ARCHITECTURE.md](ARCHITECTURE.md)                 | Boundaries, ownership, topology, flows                                   | Technical lead                     |
 | [TECH_STACK.md](TECH_STACK.md)                     | Baseline stack and recommended alternatives                              | Technical lead                     |
 | [FRONTEND.md](FRONTEND.md)                         | Installed primitives, custom-component ownership, and developer commands | Engineering with frontend designer |
-| [DESIGN.md](DESIGN.md)                             | Intentionally empty; future visual design authority                      | Frontend designer                  |
+| [DESIGN.md](DESIGN.md)                             | Visual design system, brand tokens, typography, and component patterns   | Frontend designer                  |
 | [DOCKER.md](DOCKER.md)                             | Local services, setup, and operational safeguards                        | Engineering                        |
 | [CI_CD.md](CI_CD.md)                               | Intentionally empty; CI/CD deferred                                      | Engineering                        |
 | [DATA_API_CONTRACTS.md](DATA_API_CONTRACTS.md)     | Resource mappings and proposed interfaces                                | Engineering                        |
@@ -45,17 +45,17 @@ Owners below are responsibilities to assign, not named people already appointed.
 
 ## Read only what the task needs
 
-| Task                             | Reading path                                                                      |
-| -------------------------------- | --------------------------------------------------------------------------------- |
-| New contributor                  | Root README, AGENTS, this index, then relevant rules                              |
-| Requirements or feature proposal | FRS_NFRS, DECISIONS, SPEC_WORKFLOW, feature index                                 |
-| CMS/public content               | ARCHITECTURE, DATA_API_CONTRACTS, SECURITY, relevant requirements                 |
-| Admin/authentication             | SECURITY, DECISIONS, contracts, admin requirements                                |
-| Inquiry forms                    | Inquiry requirements, contracts, SECURITY, delivery/privacy decisions             |
-| Frontend design                  | DESIGN (currently empty), approved content requirements; coordinate with designer |
-| Local setup                      | DOCKER, TECH_STACK, architecture hosting constraints                              |
-| Testing                          | TESTING and the affected requirement/specification                                |
-| Commits or PRs                   | Git rules and repository-local GitHub PR skill via AGENTS                         |
+| Task                             | Reading path                                                          |
+| -------------------------------- | --------------------------------------------------------------------- |
+| New contributor                  | Root README, AGENTS, this index, then relevant rules                  |
+| Requirements or feature proposal | FRS_NFRS, DECISIONS, SPEC_WORKFLOW, feature index                     |
+| CMS/public content               | ARCHITECTURE, DATA_API_CONTRACTS, SECURITY, relevant requirements     |
+| Admin/authentication             | SECURITY, DECISIONS, contracts, admin requirements                    |
+| Inquiry forms                    | Inquiry requirements, contracts, SECURITY, delivery/privacy decisions |
+| Frontend design                  | DESIGN, FRONTEND, approved content requirements                       |
+| Local setup                      | DOCKER, TECH_STACK, architecture hosting constraints                  |
+| Testing                          | TESTING and the affected requirement/specification                    |
+| Commits or PRs                   | Git rules and repository-local GitHub PR skill via AGENTS             |
 
 ## Keeping this index useful
 
