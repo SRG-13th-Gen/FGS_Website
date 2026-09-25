@@ -1,39 +1,48 @@
 # Testing and verification
 
-Status: executable scaffold checks now exist under SPEC-006. Product scenarios T-001 through T-022 remain planned except where partial evidence is explicitly recorded; T-023 tracks the developer foundation. CI/CD is not configured. Do not report scaffold checks as complete product coverage.
+Status: the repository has executable scaffold, WordPress adapter, section-editor, article-management, and browser smoke checks. The detailed T-001 through T-022 matrix below remains a release acceptance plan; its older "Not run" cells do not mean there are no related local tests. [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence) record feature-level evidence and limits. CI/CD is not configured, and local checks do not establish production acceptance.
 
 ## Available commands
 
-| Command              | Coverage                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| `pnpm lint`          | Next.js/TypeScript/React lint rules across maintained source                                 |
-| `pnpm typecheck`     | Next.js route type generation plus strict TypeScript, including every installed UI primitive |
-| `pnpm test`          | Server environment safety and registry subscription regression checks                        |
-| `pnpm test:coverage` | Unit checks with V8 coverage (currently environment schema)                                  |
-| `pnpm format:check`  | Prettier/Tailwind formatting; historical draft and empty placeholders excluded               |
-| `pnpm build`         | Production Next.js build without network fonts or CMS access                                 |
-| `pnpm verify`        | Lint, types, unit tests, formatting and production build                                     |
-| `pnpm test:e2e`      | Build then Chromium smoke tests against a dedicated production server on port 3100           |
-| `pnpm test:e2e:run`  | Reuse an already-built artifact for browser tests; does not rebuild                          |
-| `pnpm docker:config` | Quiet Compose validation after `pnpm setup:env`                                              |
+| Command              | Coverage                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `pnpm lint`          | Next.js/TypeScript/React lint rules across maintained source                                            |
+| `pnpm typecheck`     | Next.js route type generation plus strict TypeScript, including every installed UI primitive            |
+| `pnpm test`          | Unit and mocked integration tests for environment, auth, WordPress reads/writes, sections, and articles |
+| `pnpm test:coverage` | The same Vitest suite with V8 coverage                                                                  |
+| `pnpm format:check`  | Prettier/Tailwind formatting; historical draft and empty placeholders excluded                          |
+| `pnpm build`         | Production Next.js build without network fonts or CMS access                                            |
+| `pnpm verify`        | Lint, types, unit tests, formatting and production build                                                |
+| `pnpm test:e2e`      | Build then Chromium smoke tests against a dedicated production server on port 3100                      |
+| `pnpm test:e2e:run`  | Reuse an already-built artifact for browser tests; does not rebuild                                     |
+| `pnpm docker:config` | Quiet Compose validation after `pnpm setup:env`                                                         |
 
-Install the browser once with `pnpm exec playwright install chromium`. The browser test runner manages its own server, refuses to reuse an unknown process, and stores failures under ignored report/trace directories. It does not start the CMS or send email. Current tests are [environment](../tests/unit/environment.test.ts), [UI subscriptions](../tests/unit/ui-subscriptions.test.ts), and [browser smoke checks](../tests/e2e/scaffold.spec.ts).
+Install the browser once with `pnpm exec playwright install chromium`. The browser test runner manages its own server, refuses to reuse an unknown process, and stores failures under ignored report/trace directories. It does not start the CMS or send email. Current test groups are [unit](../tests/unit), [mocked integration](../tests/integration), and [browser smoke checks](../tests/e2e). The browser suite uses a production build, where the temporary development login is disabled; it does not establish a real authenticated production admin flow.
 
 ## Verification layers
 
-- Documentation changes: validate links, status/authority consistency, requirement references, and whitespace; preserve the intentionally empty placeholders.
+- Documentation changes: validate links, status/authority consistency, requirement references, and whitespace; preserve the existing DESIGN guidance and the empty CI_CD placeholder.
 - Pure logic: use installed Vitest for validation and isolated behavior; add permission/adapter tests as those features are implemented.
 - Integration: exercise CMS adapters against controlled fixtures and, when available, disposable local WordPress. Include failure and permission paths.
-- Browser workflows: extend the installed Playwright scaffold suite for public content, admin, and inquiries; include keyboard, error, and responsive states. Real email sends are not a default test action.
+- Browser workflows: extend the installed Playwright suite for public content, admin, and inquiries; include keyboard, error, and responsive states. Real email sends are not a default test action.
 - Operations: verify local volumes/networking, production capability assumptions, restore, rollback, and approved performance/freshness targets when environments exist.
 
-Inspect actual manifests before running checks. Run checks proportional to the changed behavior and record exact commands, results and limitations. Product criteria still require their own tests; passing the scaffold suite does not implement them.
+Inspect actual manifests before running checks. Run checks proportional to the changed behavior and record exact commands, results, and limitations. Product criteria still require their own tests; passing local checks does not establish release acceptance.
 
 Implementation references consulted 2026-09-19: [Next.js with Vitest](https://nextjs.org/docs/app/guides/testing/vitest), [Next.js with Playwright](https://nextjs.org/docs/app/guides/testing/playwright), and [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Tool selection is accepted in DEC-109; the formal accessibility target remains proposed.
 
 ## Requirement-to-scenario matrix
 
-Feature definitions are in the [feature index](specs/README.md). This table is the initial traceability plan. Replace pending evidence with test paths and run/PR references as implementation arrives.
+Feature definitions are in the [feature index](specs/README.md). The matrix below tracks full acceptance scenarios, including production-only conditions that local mocked tests cannot satisfy. Current local evidence is grouped here so a "Not run" full scenario is not confused with untested code:
+
+| Implemented area                           | Local evidence                                                                                                                                                                                                                                     | Remaining acceptance limit                                                       |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Public WordPress articles and safe display | `tests/unit/wordpress-reads.test.ts`, `wordpress-sanitize.test.ts`, `article-content.test.ts`; `tests/e2e/news-resilience.spec.ts`                                                                                                                 | Real CMS publication/withdrawal, complete SEO and accessibility checks           |
+| Admin article create/edit/trash and media  | `tests/integration/wordpress-publish.test.ts`, `admin-articles.test.ts`, `edit-article.test.ts`, `article-management-actions.test.ts`, `media-library.test.ts`, `media-actions.test.ts`; feature-level local WordPress manual evidence in SPEC-003 | Production team identity/roles, concurrency policy, live cache-event integration |
+| Seven site sections and editors            | `tests/unit/sections-*.test.ts`; `tests/integration/sections-content.test.ts`, `section-actions.test.ts`; feature-level local WordPress manual evidence in SPEC-007                                                                                | Production CMS/plugin deployment and final content/design acceptance             |
+| Development login and browser shell        | `tests/unit/dev-login.test.ts`; `tests/e2e/admin-login.spec.ts`, `admin-sidebar.spec.ts`, `media-picker.spec.ts`                                                                                                                                   | Temporary login is disabled in production and does not satisfy FR-005/FR-006     |
+
+Replace pending full-acceptance evidence with exact test paths and run/PR references as launch work arrives.
 
 | Test ID | Requirements              | Scenario / expected observation                                                                                                                                                       | Feature                      | Evidence                                                                                                                   |
 | ------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |

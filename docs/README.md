@@ -2,13 +2,13 @@
 
 ## Status and authority
 
-The repository now has an executable development scaffold: Next.js, Tailwind, the full selected shadcn registry, local WordPress/MariaDB Compose services, and quality tooling. Product features remain **Unimplemented**; scaffold checks do not establish product acceptance. See [SPEC-006](specs/006-repository-scaffold.md) for implementation evidence.
+The repository has an implemented public landing page and article detail route, WordPress-backed section content, a local admin CMS for section and article editing, local WordPress/MariaDB Compose services, and quality tooling. [SPEC-003](specs/003-team-admin.md) and [SPEC-007](specs/007-site-content-management.md) record implementation evidence. Production team authentication, role enforcement, native WordPress revalidation events, inquiry delivery, and deployment remain unfinished. Passing local checks does not establish product or launch acceptance.
 
 - **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
 - **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
 - **Open**: a question without a selected answer. **Deferred**: intentionally outside the current delivery phase.
 
-Record acceptance evidence in [DECISIONS.md](DECISIONS.md). The owner's requests approve documentation, v1 scope, and repository scaffolding with delegated library choices, not every proposed product detail in these documents.
+Record acceptance evidence in [DECISIONS.md](DECISIONS.md). The owner's requests approve documentation, v1 scope, repository scaffolding, and the accepted section/content decisions recorded there; they do not approve every proposed product detail in these documents.
 
 Authority for future work:
 

@@ -117,7 +117,7 @@ home page news section and `/news/[slug]`:
 
 Implemented in `src/lib/wordpress/types.ts`, orchestrated by
 `src/lib/wordpress/publish.ts` (pure business logic, no Next.js APIs) and
-wrapped by `src/app/admin/(protected)/publish-actions.ts` (`requireAdmin()`,
+wrapped by `src/app/admin/(protected)/articles/new/publish-actions.ts` (`requireAdmin()`,
 `FormData` parsing, cache revalidation):
 
 ```typescript

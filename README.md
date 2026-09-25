@@ -6,7 +6,7 @@ A Next.js App Router application backed by headless WordPress. WordPress owns pu
 
 The repository includes the application/toolchain scaffold, Tailwind CSS, all 61 installable components from the selected shadcn Radix Nova registry, local WordPress/MariaDB services, and executable quality checks. The public landing page is built, and the news/announcements area reads real published articles from WordPress (`src/lib/wordpress/`) in the `clubs`/`events`/`announcements` categories, with a calm "unavailable"/"no news yet" state when the CMS can't be read. `/admin` is a small CMS shell (sidebar + dashboard) behind a temporary dev-only login (see below): every landing page section — Hero, School Info, About, Admission, Contact, Clubs, and Gallery — is editable end to end (text + images, WordPress-backed, per [SPEC-007](docs/specs/007-site-content-management.md)), and News & Events (articles, still `posts` in WordPress) is fully manageable — publish a new one, search/filter/page through All News, edit an existing article's title/category/body/photos, and move one to trash (never a permanent delete). An article whose WordPress content the simple editor can't safely reproduce (headings, lists, custom formatting, etc.) opens read-only with a link to edit it natively in WordPress instead — see [SPEC-003](docs/specs/003-team-admin.md#read-only-detection-rule) for the exact rule. Every image field — section images, gallery photos, article photos, the school logo — shares one media library picker: reuse an existing WordPress photo (no duplicate, no re-upload) or upload a new one, see [SPEC-007](docs/specs/007-site-content-management.md#media-library-picker). Team authentication (DEC-103), role enforcement (DEC-111), the CMS revalidation webhook (DEC-105), and inquiry delivery remain future feature work — see [SPEC-003](docs/specs/003-team-admin.md) and [SPEC-007](docs/specs/007-site-content-management.md) for exactly what is and isn't implemented.
 
-**shadcn provides primitives. The frontend designer still creates custom school components, layouts, and the visual system.** See [FRONTEND.md](docs/FRONTEND.md); [DESIGN.md](docs/DESIGN.md) remains empty and designer-owned.
+**shadcn provides primitives.** The custom public components and visual guidance are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
 
 ## Quick start
 
@@ -23,7 +23,7 @@ pnpm dev
 - WordPress setup/admin: [localhost:8080/wp-admin](http://localhost:8080/wp-admin).
 - The database stays inside the Compose network; it has no published host port.
 
-`setup:env` creates an ignored `.env.local` with random development values and tops up any keys it manages that are missing, without overwriting values already set; it does not print secrets. Complete WordPress's local installer to create your school-editor account, then select a permalink structure for `/wp-json` routes. A dedicated integration account is separate and will be used when CMS features are implemented.
+`setup:env` creates an ignored `.env.local` with random development values and tops up any keys it manages that are missing, without overwriting values already set; it does not print secrets. Complete WordPress's local installer to create your school-editor account, then select a permalink structure for `/wp-json` routes. Create a separate integration account for the implemented CMS reads and writes.
 
 `setup:env` also seeds `ADMIN_DEV_EMAIL`, `ADMIN_DEV_PASSWORD`, and `ADMIN_DEV_SESSION_SECRET` in `.env.local` for the temporary dev-only `/admin` login (see [SPEC-003](docs/specs/003-team-admin.md)). Check `.env.local` yourself for the generated email/password — they are never printed to the terminal. This login only works outside production and is scaffolding for FR-005, not the accepted DEC-103 team sign-in.
 
@@ -40,7 +40,7 @@ Once Docker and the integration account are set up, run `pnpm wp:seed-content` o
 | `pnpm verify`                               | Lint, types, unit tests, format check, production build                                     |
 | `pnpm test` / `pnpm test:coverage`          | Unit tests / coverage                                                                       |
 | `pnpm exec playwright install chromium`     | Install the browser used by smoke tests                                                     |
-| `pnpm test:e2e`                             | Build and test the production scaffold on port 3100                                         |
+| `pnpm test:e2e`                             | Build and run production browser smoke checks on port 3100                                  |
 | `pnpm format` / `pnpm format:check`         | Format / check maintained source and docs                                                   |
 | `pnpm docker:config` / `pnpm docker:status` | Validate local Compose / inspect service health                                             |
 | `pnpm docker:stop` / `pnpm docker:down`     | Stop services / remove containers and network, retaining volumes                            |
@@ -52,7 +52,7 @@ See [DOCKER.md](docs/DOCKER.md) for local service details and [TESTING.md](docs/
 ## Repository map
 
 - `src/app`: routes, layout, public pages, admin routes, not-found page, and global CSS.
-- `src/components/ui`: installed shadcn primitives; custom public/admin components follow approved designs.
+- `src/components/public` and `src/components/admin`: custom public sections and admin CMS interfaces; `src/components/ui` contains shadcn primitives.
 - `src/components/providers.tsx`: theme, tooltip, and toast wiring.
 - `src/lib/env`: server-only configuration boundary and pure validation.
 - `src/lib/auth`: server-only session/authorization helpers, including the temporary dev-only admin login (`dev-login.ts`).
@@ -65,8 +65,8 @@ See [DOCKER.md](docs/DOCKER.md) for local service details and [TESTING.md](docs/
 
 ## Specifications and contributing
 
-Start with [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md). [Requirements](docs/FRS_NFRS.md), [decisions](docs/DECISIONS.md), and [SPEC-006](docs/specs/006-repository-scaffold.md) distinguish product proposals from implemented scaffolding.
+Start with [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md). [Requirements](docs/FRS_NFRS.md), [decisions](docs/DECISIONS.md), [SPEC-003](docs/specs/003-team-admin.md), and [SPEC-007](docs/specs/007-site-content-management.md) distinguish implemented behavior from outstanding requirements.
 
-Typed work branches target `staging`; promotion uses `staging` -> `main`. Actual branch protection and CI/CD remain unconfigured. Use the local [GitHub PR skill](.agents/skills/github-pr/SKILL.md) when commits or PRs are requested. This scaffold does not create commits, push branches, or deploy.
+Typed work branches target `staging`; promotion uses `staging` -> `main`. Actual branch protection and CI/CD remain unconfigured. Use the local [GitHub PR skill](.agents/skills/github-pr/SKILL.md) when commits or PRs are requested.
 
 The [initial conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) is preserved unchanged. Maintained specifications govern implementation.

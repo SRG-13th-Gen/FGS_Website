@@ -1,129 +1,36 @@
-# Frontend Development & Architecture
+# Frontend implementation
 
-This document describes the frontend application architecture, component hierarchy, client boundaries, routing structure, and developer workflows for Flor de Grace School Inc. (FGS).
+The public site and local editorial UI use Next.js App Router, React 19, TypeScript, Tailwind CSS v4, Lucide icons, and the installed shadcn primitives. The implemented visual tokens and component patterns are in [DESIGN.md](DESIGN.md); the shadcn registry supplies primitives, not the site's complete interface.
 
-Visual tokens, typography, and UI styling standards are specified in [DESIGN.md](DESIGN.md).
+## Routes and components
 
----
+| Location                       | Current behavior                                                                                                                                                                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/page.tsx`             | Server-rendered landing page: hero, school information, Montessori quote and banner, about, admissions, clubs, gallery, news, and contact. Seven structured content groups come from WordPress with local defaults. News reads published WordPress posts. |
+| `src/app/news/[slug]/page.tsx` | Published article detail with sanitized body and media, plus distinct missing and CMS-unavailable states.                                                                                                                                                 |
+| `src/app/admin/login`          | Temporary development-only login. It is disabled when `NODE_ENV=production`.                                                                                                                                                                              |
+| `src/app/admin/(protected)`    | Admin dashboard, seven section editors, article list/new/edit/trash, and media picker. Server actions use the admin guard and WordPress REST adapter.                                                                                                     |
+| `src/components/public`        | Custom navbar, footer, clubs carousel, gallery, and news grid.                                                                                                                                                                                            |
+| `src/components/admin`         | Admin shell/navigation, shared fields, article fields, media picker, save bar, and unsaved-change warning.                                                                                                                                                |
+| `src/components/ui`            | Installed shadcn primitives.                                                                                                                                                                                                                              |
+| `src/lib/wordpress`            | Server-only public reads, sanitized article display, validation, post/media writes, and site-section adapters.                                                                                                                                            |
 
-## 1. Technology Stack & Foundations
+The public navbar, footer, clubs carousel, gallery expansion, and news expansion have client-side interactions. The landing page itself fetches content on the server. Article news cards come from WordPress, not a local sample-story module. Section editors update fixed fields stored in WordPress page metadata; they do not edit Gutenberg layouts.
 
-- **Framework**: Next.js (App Router) with React 19 and TypeScript.
-- **Styling**: Tailwind CSS v4 using inline `@theme` tokens in `src/app/globals.css`.
-- **UI Primitives**: Installed shadcn Radix Nova primitives in `src/components/ui` (Button, Card, Carousel, Dialog, Form, Input, Textarea, Tooltip, Sheet, etc.).
-- **Icons**: Lucide React icons (`lucide-react`).
-- **Carousel**: Embla Carousel React (`embla-carousel-react`) via shadcn carousel primitive.
+## Content and image behavior
 
----
+The homepage reads Hero, School Info, About, Admission, Contact, Clubs, and Gallery sections concurrently. The section adapter validates CMS data and falls back to bundled defaults when a section cannot be read. Run `pnpm wp:seed-content` after local WordPress setup to persist those defaults and bundled images into WordPress. The admin media picker can reuse an existing WordPress image or upload a new one.
 
-## 2. Directory & Component Hierarchy
+Public news uses the three allowed categories: Clubs, Events, and Announcements. The listing shows an empty state or CMS-unavailable message as appropriate. Article detail distinguishes a genuine missing slug from unavailable WordPress. The simple admin editor opens unsupported Gutenberg content read-only and links to native WordPress editing. See [SPEC-003](specs/003-team-admin.md) and [SPEC-007](specs/007-site-content-management.md) for behavior and limits.
 
-Public-facing components reside in `src/components/public`, admin editorial interfaces in `src/app/admin`, and shared utilities/data models in `src/lib`.
+Image assets used as local defaults live under `public/images`. Public images use Next.js Image with responsive sizes. WordPress media URLs must match the remote-image configuration in `next.config.ts`.
 
-```
-src/
-├── app/
-│   ├── layout.tsx              # Root HTML shell, providers, metadata
-│   ├── page.tsx                # Public landing page (Hero, Montessori Banner, About, Admission, Contact)
-│   ├── globals.css             # Tailwind v4 import, theme tokens, school brand variables
-│   ├── admin/
-│   │   ├── layout.tsx          # Dedicated admin portal shell & navigation header
-│   │   └── page.tsx            # Article/Announcement authoring form with live preview & captioning
-│   └── news/
-│       └── [slug]/
-│           └── page.tsx        # Dynamic full article view with image gallery & captions
-├── components/
-│   ├── providers.tsx           # ThemeProvider, TooltipProvider, Sonner Toaster
-│   ├── public/
-│   │   ├── navbar.tsx          # Sticky responsive navigation with scroll-triggered brand text
-│   │   ├── footer.tsx          # Comprehensive dark footer with school crest and DepEd info
-│   │   ├── clubs-section.tsx   # Interactive carousel for school clubs & activities
-│   │   ├── gallery-section.tsx # 5-photo mosaic grid with expandable 'View More' toggle
-│   │   └── news-section.tsx    # News & announcements grid with 'View More' toggle & detail routing
-│   └── ui/                     # Official shadcn Radix primitives (Button, Card, Input, etc.)
-└── lib/
-    ├── articles.ts             # Central article data structures, sample stories, helper accessors
-    └── utils.ts                # Tailwind clsx + twMerge utility function (`cn`)
-```
+On mobile, avoid nested `backdrop-filter` effects across tall stacked sections. Earlier layouts showed blank render layers in iOS Safari and mobile Chrome when large blurred overlays were combined. Use solid or tinted surfaces for long sections, and keep explicit image dimensions or `fill` with responsive `sizes` to limit layout shift.
 
----
+## Current limits
 
-## 3. Custom Public Components & Features
+The contact section presents school contact information; inquiry delivery is not implemented. The admin login is local development scaffolding, and production role enforcement has not been built. Native WordPress edits rely on the current time-based cache refresh until the authenticated event integration is implemented. Production deployment and final accessibility acceptance still need evidence.
 
-### 3.1 Sticky Navigation (`src/components/public/navbar.tsx`)
+## Local checks
 
-- Client boundary (`"use client"`).
-- Dynamic brand title transition: The school crest stays permanently visible; the text _"Flor de Grace School Inc."_ smoothly slides and fades in (`opacity-0 -translate-x-2` to `opacity-100 translate-x-0`) once scrolled past the hero fold (`> 80px`).
-- Mobile drawer using Radix `Sheet` containing navigation links, inquiry CTA, and school hours.
-
-### 3.2 Landing Page (`src/app/page.tsx`)
-
-- Composed of modular, accessible sections:
-  1. **Hero**: High-impact graduation background image, italic tagline, and dual action CTAs.
-  2. **Montessori Quote & Classroom Banner**: Full-bleed classroom image with dark overlay and centered quote.
-  3. **About Us**: Campus narrative accompanied by subtle glassmorphic Mission (brand green) and Vision (amber) cards.
-  4. **Admission**: Preschool & Elementary program cards, 3 category requirements (Old, New, Transferees), and 3-step enrollment guide.
-  5. **Clubs & Activities**: Embedded `<ClubsSection />`.
-  6. **Photo Gallery**: Embedded `<GallerySection />`.
-  7. **News & Announcements**: Embedded `<NewsSection />`.
-  8. **Contact Us**: Embedded inquiry form with hours, location, and interactive phone/email cards.
-
-### 3.3 Clubs Carousel (`src/components/public/clubs-section.tsx`)
-
-- Embla Carousel implementation with touch-drag support on mobile and prev/next buttons on desktop.
-- Displays responsive card slides (1 per view on mobile, 2 on tablet, 3 on desktop).
-- Features real-time active slide indicators (pagination dots) responding to scroll events.
-
-### 3.4 Photo Gallery (`src/components/public/gallery-section.tsx`)
-
-- Default view displays a curated 5-image mosaic (1 large featured photo on the left, 4 in a 2x2 grid on the right).
-- An upper-right pill button (`View More / Show Less`) with animated chevron expands or collapses additional 5-image sets smoothly without route changes.
-
-### 3.5 News & Announcements (`src/components/public/news-section.tsx`)
-
-- 3-column card grid rendering articles from `src/lib/articles.ts`.
-- Filterable category tags (`Announcements`, `Events`, `Clubs`).
-- Upper-right `View More / Show Less` toggle button.
-- Direct link to full story view (`/news/[slug]`).
-
-### 3.6 Full Article View (`src/app/news/[slug]/page.tsx`)
-
-- Dynamic route rendering individual articles with full editorial body.
-- Displays author, publication date, read time, and category pill.
-- Supports multi-image layout with dedicated photo captions.
-- Includes breadcrumb navigation back to home/news.
-
-### 3.7 Admin Publishing Portal (`src/app/admin/page.tsx`)
-
-- Administrative interface for school staff to compose articles, stories, and announcements.
-- Supported Fields:
-  - Title input with character suggestions.
-  - Category selector (`Announcements`, `Events`, `Clubs`).
-  - Article Body text area with paragraph formatting.
-  - Multiple image uploader with preview thumbnails and individual caption input fields per image.
-- Dual-tab view: _Write & Edit_ mode and _Live Preview_ mode to inspect exact public appearance before publishing.
-
----
-
-## 4. Performance & Mobile Rendering Rules
-
-1. **Avoid Nested `backdrop-filter` in Tall Sections**:
-   - Applying `backdrop-filter` (e.g. `backdrop-blur`) on full-section overlays that stretch thousands of pixels on mobile stacks creates excessive GPU composite memory allocations.
-   - This previously caused iOS Safari and mobile Chrome to drop render layers, resulting in blank white screens in the Admission section.
-   - **Rule**: Use high-contrast solid card surfaces (`bg-white border border-neutral-200 shadow-sm`) and solid/tinted section overlays (`bg-neutral-50/90`) rather than nested backdrop filters for tall stacked layouts.
-2. **Local Image Optimization**:
-   - Use Next.js `<Image>` with explicit dimensions or `fill` and responsive `sizes` to eliminate layout shift (CLS).
-   - High-quality WebP assets are stored under `public/images/`.
-
----
-
-## 5. Developer Quality Commands
-
-Run these checks from the repository root:
-
-- `pnpm dev`: Start Next.js App Router development server at `http://localhost:3000`.
-- `pnpm typecheck`: Run TypeScript compiler validation (`tsc --noEmit`).
-- `pnpm lint`: Run ESLint checks across all pages and components.
-- `pnpm format:check`: Verify Prettier formatting compliance.
-- `pnpm test:e2e`: Run Playwright end-to-end tests against a production build.
-- `pnpm verify`: Run complete quality pipeline (lint, typecheck, format, test, build).
+Run `pnpm verify` for lint, route type generation/typecheck, unit and integration tests, formatting, and a production build. Run `pnpm test:e2e` for the production browser suite; its admin workflow coverage is limited by the development-only login. See [TESTING.md](TESTING.md) for exact scope.

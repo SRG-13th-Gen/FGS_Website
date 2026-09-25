@@ -24,15 +24,15 @@ The documentation index defines authority, document ownership, and task-specific
 - Privileged WordPress calls and credentials stay server-side. No secrets in browser code, public environment variables, logs, or committed files.
 - Docker is for local WordPress/database development only. Hostinger is the production target; its exact runtime capabilities remain unverified until recorded.
 - The optional application database is only for accepted application-owned needs. Do not create illustrative schemas automatically.
-- Keep [DESIGN.md](docs/DESIGN.md) empty for the frontend designer and [CI_CD.md](docs/CI_CD.md) empty until their work is requested. Do not invent branding or CI/CD configuration.
+- Preserve the frontend designer's implemented visual guidance in [DESIGN.md](docs/DESIGN.md). Keep [CI_CD.md](docs/CI_CD.md) empty until that work is requested; do not invent CI/CD configuration.
 - Preserve [the initial conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) as historical input. Update maintained specifications instead.
 - Preserve unrelated user changes. Document actual implementation and verification status honestly.
 
 ## Present repository state
 
-The repository contains a Next.js/TypeScript/Tailwind scaffold, the full selected shadcn registry, local WordPress/MariaDB Compose services, and executable quality checks. Product features are still unimplemented. Use `pnpm verify` for lint, types, unit tests, formatting and build; `pnpm test:e2e` for production browser checks; and `pnpm docker:config` for Compose validation after `pnpm setup:env`. See [TESTING.md](docs/TESTING.md) for scope and prerequisites.
+The repository contains a Next.js/TypeScript/Tailwind site, the selected shadcn registry, local WordPress/MariaDB Compose services, and executable quality checks. The public landing page and news detail route, WordPress-backed site sections, and local admin section/article workflows are implemented. The admin uses a temporary development-only login; production team authentication, role enforcement, native WordPress revalidation events, inquiry delivery, and deployment remain unfinished. Use `pnpm verify` for lint, types, unit tests, formatting and build; `pnpm test:e2e` for production browser checks; and `pnpm docker:config` for Compose validation after `pnpm setup:env`. See [TESTING.md](docs/TESTING.md) for scope and prerequisites.
 
-shadcn components in `src/components/ui` are primitives. The frontend designer must create custom school components and layouts; follow [FRONTEND.md](docs/FRONTEND.md). Starter tokens are not approved branding.
+shadcn components in `src/components/ui` are primitives. Custom public components and the school visual system are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
 
 For commit or PR tasks, use the repository-local [github-pr skill](.agents/skills/github-pr/SKILL.md). Ordinary editing does not authorize commits, pushes, merges, deployments, or branch-protection changes. Preserve authorization already given by the user instead of requesting it again.
 

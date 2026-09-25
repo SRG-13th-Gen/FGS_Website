@@ -6,7 +6,7 @@ Follow [SPEC_WORKFLOW.md](../../docs/SPEC_WORKFLOW.md).
 - Keep stable requirement, decision, feature, and test IDs. Do not reuse retired IDs or claim approval because a document was merged.
 - Update the canonical source for the changed concern: requirements, decisions, architecture, contracts, security, local operations, or verification. Link instead of duplicating large specifications.
 - Link new docs from [docs/README.md](../../docs/README.md) or the feature index. Use repository-relative Markdown links and stable headings.
-- Keep the conceptual implementation draft unchanged; it is historical input. Preserve the empty designer/CI_CD files until their work is requested.
+- Keep the conceptual implementation draft unchanged; it is historical input. Preserve the designer's existing DESIGN guidance and the empty CI_CD placeholder until CI/CD work is requested.
 - Label planned commands, interfaces, directories, and environment names honestly. Never imply nonexistent tools or deployments are working.
 - Use a focused feature spec for substantial new behavior/contracts; ordinary editorial fixes do not need a heavyweight approval process.
 - Record owner instructions that resolve a decision, with their scope and date. Do not re-request authorization already present in the task.

@@ -1,6 +1,6 @@
 # Delivery roadmap
 
-Status: proposed delivery sequence, not a dated commitment. SPEC-006 supplies the runnable repository scaffold and local services; CMS integration and other product features remain **Unimplemented**. The design document and CI/CD placeholder are intentionally empty.
+Status: proposed delivery sequence, not a dated commitment. The public site, WordPress read adapter, section editors, and article management are implemented locally. The design document now records the frontend system; CI/CD remains an empty placeholder. Production identity, role controls, native CMS event refresh, inquiries, and launch readiness remain open.
 
 | Phase                             | Deliverable                                                                 | Prerequisites and exit evidence                                                                                                                 |
 | --------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,7 +12,7 @@ Status: proposed delivery sequence, not a dated commitment. SPEC-006 supplies th
 | 5. Inquiry forms                  | Validated, abuse-controlled inquiry delivery                                | SPEC-005 accepted; DEC-104/106/110 resolved for inquiry scope; privacy notice, sandbox delivery, duplicate and uncertain-outcome tests verified |
 | 6. Launch readiness               | Verified hosting, production content, recovery and operating instructions   | DEC-107/110/112 resolved for launch; runtime/cache, backup/restore, rollback, accessibility and budget evidence; school content approval        |
 
-Phases may overlap when independent prerequisites are met. Public, admin, and inquiry specifications can be drafted independently. Full release acceptance depends on revalidation even if public pages are built first. Resolve storage/identity decisions before creating optional application tables.
+Phases overlap in the current code: local work for phases 1–3 and SPEC-007 is present, while the accepted production identity and release checks are still outstanding. Public, admin, and inquiry specifications can be drafted independently. Full release acceptance depends on revalidation even though public pages are built. Resolve storage/identity decisions before creating optional application tables.
 
 The source-control path is typed work branches -> staging -> main. This does not provision staging hosting or CI/CD. Those are deferred under DEC-113, and [CI_CD.md](CI_CD.md) stays empty until requested. A manual deployment still needs a documented release/rollback procedure before launch.
 

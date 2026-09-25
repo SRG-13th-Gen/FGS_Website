@@ -2,7 +2,7 @@
 
 Baseline date: 2026-09-19. Audience: school visitors, school content editors, and the development team. V1 scope is accepted in DEC-006; detailed behavior remains proposed where indicated.
 
-Product requirements below remain **Unimplemented**. SPEC-006 implements the local Docker topology in NFR-008 and provides partial toolchain/configuration evidence for NFR-001/NFR-009; full product acceptance is not implied. Requirement status describes approval only. See [TESTING.md](TESTING.md) for actual versus planned evidence and the [feature index](specs/README.md) for specification status.
+Requirement status in the tables describes approval, not implementation. The public landing page, WordPress article reads/detail, seven structured site sections, and local admin section/article editing are implemented with evidence in [SPEC-003](specs/003-team-admin.md) and [SPEC-007](specs/007-site-content-management.md). Production team authentication, role enforcement, native WordPress event refresh, inquiries, full SEO scope, and release operations remain unfinished. See [TESTING.md](TESTING.md) for actual versus planned evidence.
 
 ## Functional requirements
 
@@ -42,6 +42,6 @@ Product requirements below remain **Unimplemented**. SPEC-006 implements the loc
 
 V1 includes inquiry submission to the school, not online enrollment, payments, student records, visitor accounts, file attachments, or a help-desk inbox. These capabilities are not established requirements. Search and analytics are deferred by DEC-006/114.
 
-Native WordPress remains the editor for informational pages and full Gutenberg layouts. The proposed custom admin initially manages announcement posts, categories, and media selection/upload. Detailed page/block editing there is deferred; do not treat a simple post form as a compatible Gutenberg editor without a content round-trip policy.
+Native WordPress remains the editor for full Gutenberg layouts. The implemented custom admin edits seven public sections through fixed structured fields and manages published articles and media. Arbitrary page/block editing and taxonomy administration remain outside that workflow. Articles the simple editor cannot safely round-trip open read-only with a link to WordPress; see [SPEC-003](specs/003-team-admin.md).
 
 Resolve the relevant entries in [DECISIONS.md](DECISIONS.md) before turning proposals into implementation. Keep IDs stable when wording changes; retire rather than reuse removed requirement IDs.

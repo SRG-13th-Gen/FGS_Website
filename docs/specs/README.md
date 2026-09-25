@@ -1,6 +1,6 @@
 # Feature specification index
 
-SPEC-001 through SPEC-005 remain **Draft outline / Unimplemented**. [SPEC-006: repository scaffold](006-repository-scaffold.md) records the accepted developer foundation and its verification. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is being specified, then link its implementation evidence here.
+SPEC-001 and SPEC-002 remain draft outlines, although their WordPress read and public-page behavior has been implemented. [SPEC-003](003-team-admin.md) records the implemented article workflows and the unfinished production identity/role controls. SPEC-004 and SPEC-005 remain unimplemented. [SPEC-006](006-repository-scaffold.md) records the development foundation, and [SPEC-007](007-site-content-management.md) records the implemented WordPress-backed section editors. Create remaining feature documents from [_TEMPLATE.md](_TEMPLATE.md) when each feature is specified, then link its implementation evidence here.
 
 Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACTS.md), [decisions](../DECISIONS.md), [workflow](../SPEC_WORKFLOW.md), and [test matrix](../TESTING.md). Cross-cutting requirements may apply to more than one feature.
 
@@ -50,4 +50,4 @@ Common sources: [requirements](../FRS_NFRS.md), [contracts](../DATA_API_CONTRACT
 
 - Scope: WordPress-backed structured content for every public site section (Hero, About, Admission, Clubs, Gallery, Contact, School Info), the admin CMS shell/dashboard, and section editors. Fixed fields only — no page-layout/block editing.
 - Dependencies: SPEC-001 (WordPress adapter), SPEC-003 (admin shell/auth base), DEC-114 (narrowed).
-- Evidence: see the spec's own verification table. Partially implemented — Hero and School Info editors built and verified; About/Admission/Contact/Clubs/Gallery editors and the articles list/edit/trash flow remain pending.
+- Evidence: see the spec's verification table. All seven section editors and the article list/edit/trash flow are implemented and locally verified; production identity and release readiness remain separate work.
