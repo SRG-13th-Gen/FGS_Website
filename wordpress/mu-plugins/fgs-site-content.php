@@ -5,7 +5,7 @@
  * (SPEC-007) uses to manage public site sections through WordPress pages.
  * Must-use plugin: always active, not toggled from the Plugins screen. See
  * docs/specs/007-site-content-management.md.
- * Version: 1.1.0
+ * Version: 1.1.1
  *
  * References consulted 2026-09-20:
  * https://developer.wordpress.org/reference/functions/register_post_meta/
@@ -92,6 +92,18 @@ function fgs_section_slug($post) {
     $slugs = ['site-hero', 'site-school-info', 'site-about', 'site-admission', 'site-contact', 'site-clubs', 'site-gallery'];
     return $post && in_array($post->post_name, $slugs, true) ? $post->post_name : null;
 }
+
+// Published section pages must stay public for the Next.js REST reader, but
+// WordPress may automatically add them to its own navigation menu.
+add_filter('wp_nav_menu_objects', function ($items) {
+    return array_values(array_filter($items, function ($item) {
+        if (($item->object ?? '') !== 'page') {
+            return true;
+        }
+        $page_id = isset($item->object_id) ? (int) $item->object_id : 0;
+        return $page_id < 1 || fgs_section_slug(get_post($page_id)) === null;
+    }));
+});
 
 add_action('wp_after_insert_post', function ($post_id, $post, $update, $post_before) {
     if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
