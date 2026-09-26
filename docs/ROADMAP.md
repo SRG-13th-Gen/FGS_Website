@@ -1,6 +1,6 @@
 # Delivery roadmap
 
-Status: proposed delivery sequence, not a dated commitment. The public site, WordPress read adapter, section editors, and article management are implemented locally. The design document records the frontend system. A staging-to-preview workflow is prepared; GitHub environment key names exist, while branch protections, merge, and a hosted run remain. Production identity, role controls, native CMS event refresh, inquiries, and launch readiness remain open.
+Status: proposed delivery sequence, not a dated commitment. The public site, WordPress read adapter, section editors, and article management are implemented locally. The design document records the frontend system. The first staging-to-preview workflow failed at SSH transfer; an API-only revision is prepared. GitHub environment key names exist, while branch protections and a successful hosted run remain. Production identity, role controls, native CMS event refresh, inquiries, and launch readiness remain open.
 
 | Phase                             | Deliverable                                                                 | Prerequisites and exit evidence                                                                                                                 |
 | --------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
