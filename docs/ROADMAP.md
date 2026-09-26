@@ -1,6 +1,6 @@
 # Delivery roadmap
 
-Status: proposed delivery sequence, not a dated commitment. The public site, WordPress read adapter, section editors, and article management are implemented locally. The design document now records the frontend system; CI/CD remains an empty placeholder. Production identity, role controls, native CMS event refresh, inquiries, and launch readiness remain open.
+Status: proposed delivery sequence, not a dated commitment. The public site, WordPress read adapter, section editors, and article management are implemented locally. The design document records the frontend system. A staging-to-preview workflow is prepared; GitHub environment key names exist, while branch protections, merge, and a hosted run remain. Production identity, role controls, native CMS event refresh, inquiries, and launch readiness remain open.
 
 | Phase                             | Deliverable                                                                 | Prerequisites and exit evidence                                                                                                                 |
 | --------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -14,7 +14,7 @@ Status: proposed delivery sequence, not a dated commitment. The public site, Wor
 
 Phases overlap in the current code: local work for phases 1–3 and SPEC-007 is present, while the accepted production identity and release checks are still outstanding. Public, admin, and inquiry specifications can be drafted independently. Full release acceptance depends on revalidation even though public pages are built. Resolve storage/identity decisions before creating optional application tables.
 
-The source-control path is typed work branches -> staging -> main. This does not provision staging hosting or CI/CD. Those are deferred under DEC-113, and [CI_CD.md](CI_CD.md) stays empty until requested. A manual deployment still needs a documented release/rollback procedure before launch.
+The source-control path is typed work branches -> staging -> main. The owner requested automatic staging-to-preview deployment under DEC-113 on 2026-09-27; [CI_CD.md](CI_CD.md) records the prepared workflow and pending setup. Production deployment and rollback automation remain deferred. A manual release/rollback procedure is still needed before launch.
 
 Search, analytics, advanced custom-admin page/block editing, and additional content types remain deferred. If existing school content must migrate, activate migration planning before release. No enrollment, payments, or student-record system is included.
 

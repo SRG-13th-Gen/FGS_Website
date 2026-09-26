@@ -1,0 +1,123 @@
+name: Deploy preview
+
+on:
+  push:
+    branches: [staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostinger-preview
+  cancel-in-progress: false
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    environment: preview
+    timeout-minutes: 20
+    env:
+      HOSTINGER_ACCOUNT_USERNAME: ${{ vars.HOSTINGER_ACCOUNT_USERNAME }}
+      HOSTINGER_PREVIEW_DOMAIN: ${{ vars.HOSTINGER_PREVIEW_DOMAIN }}
+      HOSTINGER_SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST }}
+      HOSTINGER_SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT }}
+
+    steps:
+      - name: Check out merged staging commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Verify preview target and required configuration
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+          SSH_PASSWORD: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == "refs/heads/staging" ]]
+          [[ "$HOSTINGER_ACCOUNT_USERNAME" == "u414393871" ]]
+          [[ "$HOSTINGER_PREVIEW_DOMAIN" == "preview.flordegraceschoolinc.com" ]]
+          [[ "$HOSTINGER_SSH_HOST" == "46.202.138.125" ]]
+          [[ "$HOSTINGER_SSH_PORT" == "65002" ]]
+          [[ -n "$HOSTINGER_API_TOKEN" && -n "$SSH_PASSWORD" && -n "$SSH_KNOWN_HOSTS" ]]
+
+      - name: Package the exact merged commit
+        run: |
+          set -euo pipefail
+          archive="fgs-staging-${GITHUB_SHA}.zip"
+          git archive --format=zip --output="$RUNNER_TEMP/$archive" "$GITHUB_SHA"
+          test -s "$RUNNER_TEMP/$archive"
+          echo "ARCHIVE_NAME=$archive" >> "$GITHUB_ENV"
+
+      - name: Transfer source archive over SSH
+        env:
+          SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          remote_root="/home/$HOSTINGER_ACCOUNT_USERNAME/domains/$HOSTINGER_PREVIEW_DOMAIN/public_html"
+          remote="$HOSTINGER_ACCOUNT_USERNAME@$HOSTINGER_SSH_HOST"
+          ssh_options=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15)
+          sshpass -e ssh "${ssh_options[@]}" -p "$HOSTINGER_SSH_PORT" "$remote" "test -d '$remote_root'"
+          sshpass -e scp "${ssh_options[@]}" -P "$HOSTINGER_SSH_PORT" \
+            "$RUNNER_TEMP/$ARCHIVE_NAME" "$remote:$remote_root/$ARCHIVE_NAME"
+          local_size=$(stat -c %s "$RUNNER_TEMP/$ARCHIVE_NAME")
+          remote_size=$(sshpass -e ssh "${ssh_options[@]}" -p "$HOSTINGER_SSH_PORT" \
+            "$remote" "stat -c %s '$remote_root/$ARCHIVE_NAME'")
+          [[ "$local_size" == "$remote_size" ]]
+
+      - name: Confirm Hostinger can read the archive
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_PREVIEW_DOMAIN/nodejs/builds"
+          curl --fail-with-body --silent --show-error --get \
+            --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            --data-urlencode "archive_path=$ARCHIVE_NAME" \
+            "$api/settings/from-archive" > "$RUNNER_TEMP/archive-settings.json"
+
+      - name: Build and publish preview with Hostinger
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_PREVIEW_DOMAIN/nodejs/builds"
+          jq -n --arg archive "$ARCHIVE_NAME" '{
+            node_version: 24,
+            app_type: "next",
+            root_directory: ".",
+            output_directory: ".next",
+            build_script: "build",
+            package_manager: "pnpm",
+            source_type: "archive",
+            source_options: {archive_path: $archive}
+          }' > "$RUNNER_TEMP/build-request.json"
+          curl --fail-with-body --silent --show-error \
+            --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data-binary "@$RUNNER_TEMP/build-request.json" \
+            "$api" > "$RUNNER_TEMP/build-response.json"
+          build_id=$(jq -r '.uuid // .data.uuid // empty' "$RUNNER_TEMP/build-response.json")
+          [[ -n "$build_id" ]] || { echo 'Hostinger did not return a build ID.' >&2; exit 1; }
+          echo "Hostinger build: $build_id"
+          for attempt in {1..60}; do
+            curl --fail-with-body --silent --show-error \
+              --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+              "$api/$build_id" > "$RUNNER_TEMP/build-status.json"
+            state=$(jq -r '.state // .data.state // empty' "$RUNNER_TEMP/build-status.json")
+            case "$state" in
+              completed) echo 'Preview deployment completed.'; exit 0 ;;
+              failed) echo "Hostinger build $build_id failed. Check its build logs in hPanel." >&2; exit 1 ;;
+              pending|running) sleep 15 ;;
+              *) echo "Unexpected Hostinger build state: $state" >&2; exit 1 ;;
+            esac
+          done
+          echo "Hostinger build $build_id did not finish within 15 minutes." >&2
+          exit 1
