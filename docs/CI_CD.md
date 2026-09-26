@@ -25,7 +25,7 @@ The failed SSH run showed that this account cannot execute the shell command the
 
    The previous workflow's `HOSTINGER_SSH_PASSWORD` and `HOSTINGER_SSH_KNOWN_HOSTS` secrets and its SSH host/port variables are no longer used by CI. They can be removed from the GitHub `preview` environment after confirming no other workflow needs them. The ignored local `.env.hostinger-ssh.local` is not available to GitHub Actions.
 
-5. Protect `staging` as described below. The current preview continues to serve its last successful version if a new managed build fails.
+5. `staging` protection was configured on 2026-09-27 as described below. The current preview continues to serve its last successful version if a new managed build fails.
 
 ## Pull request merge rules
 
@@ -37,6 +37,8 @@ The [PR verification workflow](../.github/workflows/pr-verify.yml) runs `pnpm ve
 | `main` | Required, promoted from `staging` | `verify` once available on promotion PRs | 1 independent approval; dismiss stale approvals after new commits | Resolve conversations; enforce for administrators; block force pushes and deletion. |
 
 GitHub branch protection is the enforcement point. A local passing `pnpm verify` does not override a failing GitHub check. Before making `verify` mandatory on a branch, confirm a pull request into that branch actually publishes a passing check with that exact name. If the workflow is absent from `main`, first promote it through a reviewed pull request, then require the check for future promotions. Do not bypass the review requirement to bootstrap it.
+
+As checked on 2026-09-27, `staging` requires `verify`, a pull request, zero approvals, resolved conversations, and current-base checks. `main` requires a pull request, one approval, resolved conversations, and a new approval after a fresh push. Both rules apply to administrators and block force pushes and deletion. `main` does not yet require `verify` because the workflow has not been promoted there.
 
 ## Failure and recovery
 
