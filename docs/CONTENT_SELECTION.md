@@ -1,6 +1,6 @@
 # Launch content selection
 
-Status 2026-09-26: source inventory and repository fallback copy reviewed; no changes have been written to the hosted WordPress installation. The CMS copy and final public rendering remain to verify.
+Status 2026-09-26: source inventory and repository fallback copy reviewed. The original WordPress site has not been changed. The independent CMS copy completed, its homepage and REST API load, and the seven structured-content sections were seeded. Preview renders the CMS sections and a CMS image passed Next.js optimization.
 
 The source is the existing site's public WordPress REST API at `https://flordegraceschoolinc.com/wp-json/wp/v2` (read 2026-09-26). Its homepage itself returns HTTP 503. It exposes a published Home page, five published posts, and media. The copy flow preserves **all** original pages, posts, and uploads in the independent CMS website; only selected material enters the new site's structured sections and three public article categories.
 
@@ -14,10 +14,10 @@ Use the existing brand logo, hero photo, classroom image, and admission image al
 
 ## Posts and categories
 
-| Original post                                         | Launch choice                                                                                                                                |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `summer-class-2025-draft` (title “Summer Class 2026”) | Candidate for `events` after verifying its date/body/image on the CMS copy; it is the only substantive recent story.                         |
-| `fgs-22` (title “FGS @23!”)                           | Keep in the CMS archive; its 2025 publication and event age make it less useful as launch news.                                              |
-| `summer-class-2025`, `enrollment`, `test-post`        | Keep in the CMS archive. Their content is empty or stale, so do not map them to the three new public categories without an editorial update. |
+| Original post                                         | Launch choice                                                                                                                                                                                                |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `summer-class-2025-draft` (title “Summer Class 2026”) | Keep in the CMS archive for editorial correction. Its February 2026 publication date precedes the May 30, 2026 event described in the body, and the body has draft wording. Do not map it to `events` yet.   |
+| `fgs-22` (title “FGS @23!”)                           | Keep in the CMS archive; its 2025 publication and event age make it less useful as launch news.                                                                                                              |
+| `summer-class-2025`, `enrollment`, `test-post`        | Keep in the CMS archive. Their content is empty or stale, so do not map them to the three new public categories without an editorial update. The copy's `test-post` was moved from `clubs` to Uncategorized. |
 
-Create or verify `clubs`, `events`, and `announcements` categories on the CMS copy. Map only the selected, checked story to `events`; leave the other posts and all original media intact. A missing category or no suitable current story produces a truthful empty News state. This is a curated launch selection, not a deletion or rewrite of the old site.
+The `clubs`, `events`, and `announcements` categories now exist on the CMS copy with no posts. Leave all original posts and media intact. No story currently meets the launch check, so the public site shows an empty News state until the school corrects and approves one. This is a curated launch selection, not a deletion or rewrite of the old site.

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: accepted high-level boundaries from DEC-001 through DEC-005. Public WordPress reads, admin writes, Google OAuth authorization code, and CMS event revalidation code are implemented locally. The independent Hostinger preview's public Node routes passed partial smoke checks; hosted identity, CMS copy, live cutover, and inquiries remain unverified or unfinished.
+Status: accepted high-level boundaries from DEC-001 through DEC-005. Public WordPress reads, admin writes, Google OAuth authorization code, and CMS event revalidation code are implemented. The independent Hostinger CMS copy and Node preview are deployed; public reads and a native section cache event passed partial hosted checks. Hosted identity, full preview acceptance, live cutover, and inquiries remain unverified or unfinished.
 
 ## Accepted system boundaries
 
@@ -40,7 +40,7 @@ Current team-write flow, with full event coverage still proposed:
 3. Call `revalidatePath` for affected public routes. Native CMS category/media dependency mapping is in the authenticated webhook endpoint; hosted behavior remains to verify.
 4. If invalidation fails after the write succeeds, report that content was saved but refresh is pending. Do not repeat the write to fix the cache.
 
-The version-controlled WordPress must-use plugin emits post, section-page, category, and media events after edits. `/api/revalidate` checks a server-only shared secret, validates resource type/ID/slugs, and derives tags/paths itself. Old and new article slugs are invalidated; the public read cache retains a 60-second fallback if a webhook delivery fails. Hosted delivery, withdrawal freshness, and multi-instance behavior still need proof on preview.
+The version-controlled WordPress must-use plugin emits post, section-page, category, and media events after edits. `/api/revalidate` checks a server-only shared secret, validates resource type/ID/slugs, and derives tags/paths itself. Old and new article slugs are invalidated; the public read cache retains a 60-second fallback if a webhook delivery fails. One hosted section edit and restoration propagated to preview; article withdrawal freshness and multi-instance behavior still need proof.
 
 During a CMS outage, distinguish unavailable content from a genuine missing page. A previously published cache may be used only within the approved freshness/removal policy. No draft or private data may enter public caches. Do not claim immediate removal of cached content until verified.
 
@@ -52,7 +52,7 @@ The proposed default stores no inquiry message bodies in the application databas
 
 ## Hosting and environments
 
-Accepted target: Next.js at `flordegraceschoolinc.com`, independent WordPress at `cms.flordegraceschoolinc.com`, plus Node preview at `preview.flordegraceschoolinc.com`, all on Hostinger. Docker is local-only. The active Business plan and root WordPress installation were inspected through the Hostinger MCP; new site provisioning, DNS, TLS, and secrets are unverified. See [DEPLOYMENT.md](DEPLOYMENT.md).
+Accepted target: Next.js at `flordegraceschoolinc.com`, independent WordPress at `cms.flordegraceschoolinc.com`, plus Node preview at `preview.flordegraceschoolinc.com`, all on Hostinger. Docker is local-only. The independent CMS and preview websites were provisioned on the active Business plan; both respond over HTTPS, and server-only CMS credentials were configured on preview. The original root WordPress website remains in place. See [DEPLOYMENT.md](DEPLOYMENT.md) for evidence and remaining gates.
 
 Before selecting a deployment procedure, prove that the chosen Hostinger product supports the selected Next.js runtime, server operations, cache persistence/invalidation, and image handling. Decide how caches and sessions behave if more than one application instance runs. Self-hosted runtime concerns are described in the [Next.js self-hosting guide](https://nextjs.org/docs/app/guides/self-hosting) (consulted 2026-09-19); this is not evidence of a particular Hostinger plan's capabilities.
 

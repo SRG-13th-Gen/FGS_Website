@@ -24,9 +24,9 @@ import {
 type WpPost = z.infer<typeof wpPostSchema>;
 
 const ARTICLES_TAG = "wp:articles";
-// INTERIM: no DEC-105 webhook exists yet, so native WordPress edits are only
-// picked up by this short time-based revalidation. Admin-published articles
-// also get an immediate revalidatePath() call — see publish-actions.ts.
+// The CMS webhook invalidates native WordPress edits immediately. This short
+// time-based revalidation covers missed deliveries; admin publishing also
+// calls revalidatePath() — see publish-actions.ts.
 const ARTICLES_REVALIDATE_SECONDS = 60;
 
 async function fetchCoverImage(mediaId: number): Promise<ArticleImage | null> {

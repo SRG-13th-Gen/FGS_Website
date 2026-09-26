@@ -60,7 +60,7 @@ add_filter('rest_post_query', function ($args, $request) {
 
 /**
  * Notify the Next.js cache after native WordPress edits. Both values must be
- * defined in wp-config.php on the CMS copy. A failed delivery leaves the
+ * defined in a private server-side PHP config on the CMS copy. A failed delivery leaves the
  * 60-second read-cache fallback in place; it must never fail the CMS save.
  *
  * Hooks checked against WordPress core documentation 2026-09-26:

@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-The repository has an implemented public landing page and article detail route, WordPress-backed section content, admin section/article editing, Google OAuth code with an exact admin allowlist, a WordPress revalidation producer/endpoint, local WordPress/MariaDB Compose services, and quality tooling. The independent Hostinger preview's public routes passed partial smoke checks; hosted OAuth, CMS copy, live cutover, and inquiry delivery remain unverified or unfinished. [SPEC-003](specs/003-team-admin.md), [SPEC-007](specs/007-site-content-management.md), and the [deployment runbook](DEPLOYMENT.md) record scope and evidence. Passing local checks does not establish launch acceptance.
+The repository has an implemented public landing page and article detail route, WordPress-backed section content, admin section/article editing, Google OAuth code with an exact admin allowlist, a WordPress revalidation producer/endpoint, local WordPress/MariaDB Compose services, and quality tooling. An independent Hostinger CMS copy and Node preview are deployed; public CMS reads, images, and native section cache refresh passed partial checks. Hosted OAuth, WordPress updates, full preview acceptance, live cutover, and inquiry delivery remain unverified or unfinished. [SPEC-003](specs/003-team-admin.md), [SPEC-007](specs/007-site-content-management.md), and the [deployment runbook](DEPLOYMENT.md) record scope and evidence. Passing local checks does not establish launch acceptance.
 
 - **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
 - **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
