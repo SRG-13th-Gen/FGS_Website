@@ -19,8 +19,6 @@ jobs:
     env:
       HOSTINGER_ACCOUNT_USERNAME: ${{ vars.HOSTINGER_ACCOUNT_USERNAME }}
       HOSTINGER_PREVIEW_DOMAIN: ${{ vars.HOSTINGER_PREVIEW_DOMAIN }}
-      HOSTINGER_SSH_HOST: ${{ vars.HOSTINGER_SSH_HOST }}
-      HOSTINGER_SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT }}
 
     steps:
       - name: Check out merged staging commit
@@ -31,16 +29,12 @@ jobs:
       - name: Verify preview target and required configuration
         env:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
-          SSH_PASSWORD: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
-          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_REF" == "refs/heads/staging" ]]
           [[ "$HOSTINGER_ACCOUNT_USERNAME" == "u414393871" ]]
           [[ "$HOSTINGER_PREVIEW_DOMAIN" == "preview.flordegraceschoolinc.com" ]]
-          [[ "$HOSTINGER_SSH_HOST" == "46.202.138.125" ]]
-          [[ "$HOSTINGER_SSH_PORT" == "65002" ]]
-          [[ -n "$HOSTINGER_API_TOKEN" && -n "$SSH_PASSWORD" && -n "$SSH_KNOWN_HOSTS" ]]
+          [[ -n "$HOSTINGER_API_TOKEN" ]]
 
       - name: Package the exact merged commit
         run: |
@@ -50,27 +44,43 @@ jobs:
           test -s "$RUNNER_TEMP/$archive"
           echo "ARCHIVE_NAME=$archive" >> "$GITHUB_ENV"
 
-      - name: Transfer source archive over SSH
+      - name: Upload source archive through Hostinger API
         env:
-          SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
-          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq sshpass
-          install -d -m 700 "$HOME/.ssh"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 600 "$HOME/.ssh/known_hosts"
-          remote_root="/home/$HOSTINGER_ACCOUNT_USERNAME/domains/$HOSTINGER_PREVIEW_DOMAIN/public_html"
-          remote="$HOSTINGER_ACCOUNT_USERNAME@$HOSTINGER_SSH_HOST"
-          ssh_options=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15)
-          sshpass -e ssh "${ssh_options[@]}" -p "$HOSTINGER_SSH_PORT" "$remote" "test -d '$remote_root'"
-          sshpass -e scp "${ssh_options[@]}" -P "$HOSTINGER_SSH_PORT" \
-            "$RUNNER_TEMP/$ARCHIVE_NAME" "$remote:$remote_root/$ARCHIVE_NAME"
-          local_size=$(stat -c %s "$RUNNER_TEMP/$ARCHIVE_NAME")
-          remote_size=$(sshpass -e ssh "${ssh_options[@]}" -p "$HOSTINGER_SSH_PORT" \
-            "$remote" "stat -c %s '$remote_root/$ARCHIVE_NAME'")
-          [[ "$local_size" == "$remote_size" ]]
+          jq -n --arg username "$HOSTINGER_ACCOUNT_USERNAME" --arg domain "$HOSTINGER_PREVIEW_DOMAIN" \
+            '{username: $username, domain: $domain}' > "$RUNNER_TEMP/upload-url-request.json"
+          curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
+            --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data-binary "@$RUNNER_TEMP/upload-url-request.json" \
+            "https://developers.hostinger.com/api/hosting/v1/files/upload-urls" \
+            > "$RUNNER_TEMP/upload-url-response.json"
+          upload_url=$(jq -er '.url // .data.url // empty' "$RUNNER_TEMP/upload-url-response.json")
+          auth_key=$(jq -er '.auth_key // .data.auth_key // empty' "$RUNNER_TEMP/upload-url-response.json")
+          rest_auth_key=$(jq -er '.rest_auth_key // .data.rest_auth_key // empty' "$RUNNER_TEMP/upload-url-response.json")
+          [[ "$upload_url" == https://* ]]
+          upload_target="${upload_url%/}/${ARCHIVE_NAME}?override=true"
+          archive_path="$RUNNER_TEMP/$ARCHIVE_NAME"
+          archive_size=$(stat -c %s "$archive_path")
+          create_status=$(curl --silent --show-error --connect-timeout 15 --max-time 60 \
+            --output "$RUNNER_TEMP/upload-create-response" --write-out '%{http_code}' \
+            --request POST --header "X-Auth: $auth_key" --header "X-Auth-Rest: $rest_auth_key" \
+            --header 'Tus-Resumable: 1.0.0' --header "Upload-Length: $archive_size" \
+            --header 'Upload-Offset: 0' "$upload_target")
+          [[ "$create_status" == 201 ]] || { echo "Upload creation failed (HTTP $create_status)." >&2; exit 1; }
+          upload_status=$(curl --silent --show-error --connect-timeout 15 --max-time 300 \
+            --dump-header "$RUNNER_TEMP/upload-headers" \
+            --output "$RUNNER_TEMP/upload-patch-response" --write-out '%{http_code}' \
+            --request PATCH --header "X-Auth: $auth_key" --header "X-Auth-Rest: $rest_auth_key" \
+            --header 'Tus-Resumable: 1.0.0' \
+            --header 'Content-Type: application/offset+octet-stream' --header 'Upload-Offset: 0' \
+            --data-binary "@$archive_path" "$upload_target")
+          [[ "$upload_status" == 204 ]] || { echo "Archive upload failed (HTTP $upload_status)." >&2; exit 1; }
+          uploaded_size=$(tr -d '\r' < "$RUNNER_TEMP/upload-headers" |
+            awk -F': ' 'tolower($1) == "upload-offset" {print $2}' | tail -n 1)
+          [[ "$uploaded_size" == "$archive_size" ]] || { echo 'Archive upload size was not confirmed.' >&2; exit 1; }
 
       - name: Confirm Hostinger can read the archive
         env:

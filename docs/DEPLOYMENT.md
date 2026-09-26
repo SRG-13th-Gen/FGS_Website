@@ -37,7 +37,7 @@ The installed Hostinger MCP covers account, website, files, SSL, Node deployment
 
 ## Staging preview automation
 
-The owner requested a `staging` merge to update the existing Node preview automatically. The prepared [GitHub Actions workflow and setup guide](CI_CD.md) use SSH only to transfer a source ZIP, then Hostinger's API to run the managed build. The GitHub environment has the required key names; branch restrictions and protection remain unconfigured, and no hosted run has succeeded. It does not target the original root WordPress site, the CMS copy, or the future production Node site.
+The owner requested a `staging` merge to update the existing Node preview automatically. The first [GitHub Actions workflow](CI_CD.md) failed during SSH transfer because the hosting account could not execute `/sbin/nologin`. The revised workflow uses Hostinger's upload and managed build APIs. The GitHub environment has the required API token and target variable names; branch restrictions and protection remain unconfigured, and no hosted run has succeeded. It does not target the original root WordPress site, the CMS copy, or the future production Node site.
 
 ## 2026-09-26 recovery assets and CMS copy
 
