@@ -85,7 +85,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   return (
     <header
       id="main-navbar"
-      className={`fixed top-0 right-0 left-0 z-50 transition-shadow duration-300 ${
+      className={`fixed top-0 right-0 left-0 z-50 text-neutral-900 transition-shadow duration-300 ${
         scrolled ? "bg-white/95 shadow-md backdrop-blur-sm" : "bg-white"
       }`}
     >
@@ -135,7 +135,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
                 className={`relative inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
                   activeSection === item.href
                     ? "text-school-green-dark"
-                    : "text-foreground/70"
+                    : "text-neutral-700"
                 }`}
               >
                 {item.label}
@@ -154,7 +154,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-foreground/70 transition-colors hover:bg-school-green-light hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-neutral-700 transition-colors hover:bg-school-green-light hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none md:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
@@ -189,7 +189,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
                 className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
                   activeSection === item.href
                     ? "bg-school-green-light text-school-green-dark"
-                    : "text-foreground/70 hover:bg-muted hover:text-foreground"
+                    : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                 }`}
               >
                 {item.label}
