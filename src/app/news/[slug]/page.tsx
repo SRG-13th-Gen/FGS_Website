@@ -36,12 +36,14 @@ export async function generateMetadata({
   if (result.status !== "ok") {
     return {
       title: "Article Not Found | Flor de Grace School Inc.",
+      robots: { index: false, follow: false },
     };
   }
 
   return {
     title: `${result.article.title} | Flor de Grace School Inc.`,
     description: result.article.excerpt,
+    alternates: { canonical: `/news/${result.article.slug}` },
   };
 }
 

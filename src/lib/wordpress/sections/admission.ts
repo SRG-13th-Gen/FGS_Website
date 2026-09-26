@@ -103,7 +103,7 @@ export const ADMISSION_DEFAULTS: AdmissionContent = {
     {
       title: "Inquire",
       description:
-        "Visit the school or reach out through our contact form to learn about available slots and requirements.",
+        "Visit the school, call, or email to ask about available slots and current requirements.",
     },
     {
       title: "Submit Requirements",

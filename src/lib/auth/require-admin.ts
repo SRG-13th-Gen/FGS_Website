@@ -1,32 +1,26 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
-import {
-  isDevLoginAvailable,
-  SESSION_COOKIE_NAME,
-  verifyDevSessionToken,
-} from "@/lib/auth/dev-login";
+import { isApprovedAdminEmail } from "@/lib/auth/allowlist";
+import { authOptions, isGoogleSignInConfigured } from "@/lib/auth/options";
 
 export interface AdminSession {
   email: string;
 }
 
-/**
- * Reads and verifies the admin session cookie. Returns null when there is no
- * valid session, including whenever dev login is unavailable (production).
- * When DEC-103 replaces the dev login, only this internals + dev-login.ts +
- * the login page change — callers keep using requireAdmin()/getAdminSession().
- */
 export async function getAdminSession(): Promise<AdminSession | null> {
-  if (!isDevLoginAvailable()) return null;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const payload = verifyDevSessionToken(token);
-  if (!payload) return null;
-
-  return { email: payload.email };
+  if (!isGoogleSignInConfigured()) return null;
+  try {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email;
+    // Recheck on every protected read/action so allowlist revocation takes
+    // effect without waiting for an eight-hour session to expire.
+    if (!isApprovedAdminEmail(email)) return null;
+    return { email: email! };
+  } catch {
+    return null;
+  }
 }
 
 /** Call in every protected admin layout, server action, and route handler. */

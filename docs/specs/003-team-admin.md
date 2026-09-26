@@ -1,14 +1,14 @@
 # SPEC-003: Team Admin & Article Management
 
-| Field                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Feature ID            | SPEC-003                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Approval status       | Accepted (per owner instruction 2026-09-20)                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Implementation status | Partially implemented — public reads, admin publishing, and the All Articles list/edit/trash flow (FR-007/FR-008/FR-009) are built and verified locally; team authentication (FR-005) remains the temporary dev-only login pending DEC-103; FR-006 role enforcement is deferred to DEC-111. The admin lives inside the [SPEC-007](007-site-content-management.md) CMS shell at `/admin/articles` (list), `/admin/articles/new` (publish), and `/admin/articles/<id>/edit` (edit or read-only). |
-| Responsible owner     | Engineering                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md)                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Acceptance evidence   | See [Verification and evidence](#verification-and-evidence) below                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Field                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature ID            | SPEC-003                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Approval status       | Accepted (per owner instruction 2026-09-20)                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Implementation status | Partially implemented — public reads, admin publishing, the All Articles list/edit/trash flow, and Google OAuth/allowlist code are built and locally tested; hosted identity configuration and acceptance remain pending. First release uses Administrator permission; Editor/Viewer roles are deferred. The admin lives inside the [SPEC-007](007-site-content-management.md) CMS shell at `/admin/articles`, `/admin/articles/new`, and `/admin/articles/<id>/edit`. |
+| Responsible owner     | Engineering                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Requirement IDs       | [FR-005, FR-006, FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003](../FRS_NFRS.md)                                                                                                                                                                                                                                                                                                                                                                                    |
+| Decision IDs          | [DEC-103, DEC-104, DEC-111](../DECISIONS.md)                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Acceptance evidence   | See [Verification and evidence](#verification-and-evidence) below                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ## Outcome and scope
 
@@ -105,11 +105,11 @@ home page news section and `/news/[slug]`:
   including `env/schema.ts` rejecting a non-HTTPS `WORDPRESS_URL` outside
   development). The UI shows a calm "unavailable"/"no news yet" state, never a
   false not-found or fabricated sample content.
-- **Interim revalidation (not DEC-105)**: no CMS webhook producer exists yet, so
-  reads use a 60-second `fetch` `revalidate` window as a stopgap for native
-  WordPress edits. Admin-published articles additionally get an immediate
-  `revalidatePath("/")` + `revalidatePath("/news/<slug>")` call. This interim
-  window is not a substitute for the accepted DEC-105 webhook design.
+- **Revalidation**: the CMS must-use plugin emits native WordPress events to
+  [SPEC-004](004-content-revalidation.md)'s authenticated endpoint. Reads retain
+  a 60-second `fetch` expiry fallback if delivery fails. Admin-published articles
+  additionally call `revalidatePath("/")` and `revalidatePath("/news/<slug>")`.
+  Hosted event delivery still needs preview acceptance tests.
 
 ## Admin publishing (FR-007/FR-008, implemented)
 
@@ -301,26 +301,11 @@ interim revalidation window.
 - No CMS credentials or private tokens are ever exposed to the client or browser bundle (enforcing [NFR-001](../FRS_NFRS.md)).
 - Direct access to `/admin` requires authenticated session validation.
 
-### Interim development login (temporary, not FR-005)
+### Google administrator sign-in (FR-005, local implementation)
 
-DEC-103 (managed OIDC team login) is on hold pending access to the school's Google
-account. Until it is resolved, `/admin` is gated by a temporary, dev-only seeded
-login (`src/lib/auth/dev-login.ts`) so admin UI work can continue locally:
+DEC-103 selects Google OAuth through `next-auth@4.24.15`. The callback accepts only a verified Google email in the exact, case-normalized `ADMIN_ALLOWED_EMAILS` list. `getAdminSession()` rechecks that list on every protected read/action so removal revokes access even with a valid encrypted JWT. Sessions last eight hours. Missing credentials or list deny access; no development password fallback remains. Sign-out uses the auth library's CSRF-protected endpoint. `requireAdmin()` remains the server entry-point guard.
 
-- Credentials come only from `ADMIN_DEV_EMAIL`/`ADMIN_DEV_PASSWORD` in `.env.local`;
-  the session cookie is signed with `ADMIN_DEV_SESSION_SECRET`, is httpOnly/sameSite=lax,
-  and expires after 8 hours.
-- It only functions outside production (`NODE_ENV !== "production"`). In a
-  production build, `/admin/login` shows a disabled-sign-in message and every
-  `/admin` route denies access; there is no open-access fallback.
-- `requireAdmin()` (`src/lib/auth/require-admin.ts`) is the actual authorization
-  check, called from the protected admin layout; the proxy-level redirect is only
-  an optimistic UX shortcut.
-- This has no rate limiting, lockout, password rules, allowlist, or roles.
-
-FR-005 and this spec's authentication requirement remain **unimplemented** until
-DEC-103 is accepted and built; the interim login is scaffolding, not the accepted
-solution.
+The OAuth client and initial administrator list were not supplied for this local change. Preview/live Google sign-in, denied-account flows, cookie properties, and real admin writes must be verified before cutover. The first release has only Administrator permission; Editor/Viewer roles remain deferred (DEC-111). Local evidence: `tests/unit/admin-auth.test.ts`, `tests/unit/admin-session.test.ts`, `tests/e2e/admin-login.spec.ts` (anonymous/login shell only).
 
 ---
 

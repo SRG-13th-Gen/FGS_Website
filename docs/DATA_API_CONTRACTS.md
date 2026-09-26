@@ -1,6 +1,6 @@
 # Data and API contracts
 
-Status: WordPress is the accepted integration boundary. The public article reads, admin article create/edit/trash and media operations, and all seven site-section read/write contracts are implemented and locally verified (`src/lib/wordpress/`; see [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence)). Category administration and the authenticated revalidation endpoint remain proposed and unimplemented. Production team identity is also pending.
+Status: WordPress is the accepted integration boundary. Public article reads, admin article create/edit/trash and media operations, all seven section read/write contracts, and the authenticated revalidation endpoint/WordPress producer are implemented locally (`src/lib/wordpress/`, `src/app/api/revalidate/`, `wordpress/mu-plugins/`). Category administration remains unimplemented. Google admin identity code exists but hosted credentials and acceptance tests are pending.
 
 ## WordPress resource mapping
 
@@ -30,7 +30,7 @@ Official references consulted 2026-09-19: [posts](https://developer.wordpress.or
 | Category write              | Unimplemented                                                                                         | ID when editing; permitted name/slug/parent fields                                                                                | Validated CMS result; no arbitrary WordPress endpoint proxy                                                                                                                                                                     |
 | Media upload                | **Implemented** (part of admin post write above)                                                      | Allowed file (jpeg/png/webp/avif, sniffed by content not extension) plus caption/alt text, ≤10 MB                                 | WordPress media ID + URL after successful upload; a retry reuses an already-uploaded image by ID instead of re-uploading                                                                                                        |
 | Cache refresh (admin write) | **Implemented** — interim                                                                             | N/A (called automatically after a successful publish)                                                                             | `revalidatePath("/")` + `revalidatePath("/news/<slug>")`; a failure is reported as `cacheWarning`, not a publish failure                                                                                                        |
-| Cache refresh (webhook)     | Unimplemented — see [Proposed revalidation endpoint](#proposed-revalidation-endpoint)                 | Validated content event                                                                                                           | Invalidate server-derived dependencies; do not repeat an already successful CMS write                                                                                                                                           |
+| Cache refresh (webhook)     | Implemented locally — see [Revalidation endpoint](#revalidation-endpoint)                             | Validated content event                                                                                                           | Invalidate server-derived dependencies; do not repeat an already successful CMS write                                                                                                                                           |
 
 Proposed admin operations use Server Actions; explicit external callbacks use Route Handlers. This avoids inventing a public `/api/admin/*` contract before it is needed. Each entry point must independently validate input and authorize the actor. A layout redirect is not a server authorization check.
 
@@ -58,15 +58,15 @@ after `requireAdmin()` and zod validation. A missing page is a configuration err
 seed script"), not a normal not-found — section pages are only ever created by
 `pnpm wp:seed-content`, never by a save action.
 
-## Proposed revalidation endpoint
+## Revalidation endpoint
 
-`POST /api/revalidate` accepts a server-originated event describing the resource kind, resource ID, and change type. The final producer-specific schema, event identity, and old-slug strategy belong to SPEC-004 and DEC-105.
+`POST /api/revalidate` accepts the CMS must-use-plugin event `{ kind: "post" | "page" | "category" | "media", id: positive integer, oldSlug?, newSlug? }`. Slugs apply only to post/page events; section-page slugs are restricted to the seven known names. The `X-FGS-Revalidation-Secret` header must exactly match `REVALIDATION_SECRET`. `src/lib/revalidation/event.ts` derives affected tags and paths; the caller cannot provide a path, tag, or URL. Post events include old/new slugs when known; page events invalidate site sections; category/media events invalidate their broader dependent resources. The producer uses `FGS_REVALIDATION_URL` and `FGS_REVALIDATION_SECRET` in WordPress server configuration.
 
-- Authenticate with a secret in a request header over HTTPS, never a query-string credential. Compare securely and support rotation through configuration.
+- Authenticate with a secret in a request header over HTTPS, never a query-string credential. Compare securely and rotate both sides together through configuration.
 - Allowlist event kinds and derive affected cache dependencies on the server. Reject arbitrary paths, tags, or URLs from untrusted callers.
 - Missing/invalid authentication returns `401`; malformed/unsupported events return `400`; successful invalidation returns `200`; dependency/processing failure returns a retryable `503` where retry is safe.
-- Repeated valid events must be harmless. Agree replay controls and retries with the chosen producer. A successful response means invalidation was accepted/completed per the selected cache API, not that every visitor already received regenerated content.
-- Include publication, unpublication, deletion, old/new slug, category, and media dependencies in acceptance tests. No webhook producer exists yet.
+- Repeated valid events are harmless. A failed delivery does not fail the WordPress save; 60-second public read expiry is the fallback. A successful response means invalidation was accepted/completed per the selected cache API, not that every visitor already received regenerated content.
+- Hosted publication, withdrawal, deletion, old/new slug, category, and media acceptance tests remain pending. The producer uses `wp_after_insert_post`, `before_delete_post`, category hooks, and attachment deletion hooks. References: [WordPress after-insert hook](https://developer.wordpress.org/reference/hooks/wp_after_insert_post/), [delete hook](https://developer.wordpress.org/reference/hooks/before_delete_post/) (consulted 2026-09-26).
 
 ## Proposed inquiry endpoint
 

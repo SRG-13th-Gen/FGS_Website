@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-The repository has an implemented public landing page and article detail route, WordPress-backed section content, a local admin CMS for section and article editing, local WordPress/MariaDB Compose services, and quality tooling. [SPEC-003](specs/003-team-admin.md) and [SPEC-007](specs/007-site-content-management.md) record implementation evidence. Production team authentication, role enforcement, native WordPress revalidation events, inquiry delivery, and deployment remain unfinished. Passing local checks does not establish product or launch acceptance.
+The repository has an implemented public landing page and article detail route, WordPress-backed section content, admin section/article editing, Google OAuth code with an exact admin allowlist, a WordPress revalidation producer/endpoint, local WordPress/MariaDB Compose services, and quality tooling. The independent Hostinger preview's public routes passed partial smoke checks; hosted OAuth, CMS copy, live cutover, and inquiry delivery remain unverified or unfinished. [SPEC-003](specs/003-team-admin.md), [SPEC-007](specs/007-site-content-management.md), and the [deployment runbook](DEPLOYMENT.md) record scope and evidence. Passing local checks does not establish launch acceptance.
 
 - **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
 - **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
@@ -32,6 +32,8 @@ Owners below are responsibilities to assign, not named people already appointed.
 | [FRONTEND.md](FRONTEND.md)                         | Installed primitives, custom-component ownership, and developer commands | Engineering with frontend designer |
 | [DESIGN.md](DESIGN.md)                             | Visual design system, brand tokens, typography, and component patterns   | Frontend designer                  |
 | [DOCKER.md](DOCKER.md)                             | Local services, setup, and operational safeguards                        | Engineering                        |
+| [DEPLOYMENT.md](DEPLOYMENT.md)                     | Hostinger release gates, configuration, smoke tests, and recovery        | Engineering with school owner      |
+| [CONTENT_SELECTION.md](CONTENT_SELECTION.md)       | Source inventory and selected launch copy/news                           | Engineering with school owner      |
 | [CI_CD.md](CI_CD.md)                               | Intentionally empty; CI/CD deferred                                      | Engineering                        |
 | [DATA_API_CONTRACTS.md](DATA_API_CONTRACTS.md)     | Resource mappings and proposed interfaces                                | Engineering                        |
 | [SECURITY.md](SECURITY.md)                         | Trust boundaries, access, secrets, privacy                               | Engineering with school owner      |

@@ -8,8 +8,8 @@ import {
 } from "@/lib/wordpress/types";
 
 const CATEGORIES_TAG = "wp:categories";
-// Categories change rarely; revalidate hourly, well within DEC-105's interim window.
-const CATEGORIES_REVALIDATE_SECONDS = 60 * 60;
+// A short fallback window covers missed WordPress webhook deliveries.
+const CATEGORIES_REVALIDATE_SECONDS = 60;
 
 /**
  * Resolves each allowed category slug to its live WordPress category ID.

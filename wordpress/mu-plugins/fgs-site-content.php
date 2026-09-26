@@ -5,7 +5,7 @@
  * (SPEC-007) uses to manage public site sections through WordPress pages.
  * Must-use plugin: always active, not toggled from the Plugins screen. See
  * docs/specs/007-site-content-management.md.
- * Version: 1.0.0
+ * Version: 1.1.0
  *
  * References consulted 2026-09-20:
  * https://developer.wordpress.org/reference/functions/register_post_meta/
@@ -57,3 +57,94 @@ add_filter('rest_post_query', function ($args, $request) {
     }
     return $args;
 }, 10, 2);
+
+/**
+ * Notify the Next.js cache after native WordPress edits. Both values must be
+ * defined in wp-config.php on the CMS copy. A failed delivery leaves the
+ * 60-second read-cache fallback in place; it must never fail the CMS save.
+ *
+ * Hooks checked against WordPress core documentation 2026-09-26:
+ * https://developer.wordpress.org/reference/hooks/wp_after_insert_post/
+ * https://developer.wordpress.org/reference/hooks/before_delete_post/
+ * https://developer.wordpress.org/reference/hooks/edited_terms/
+ */
+function fgs_send_revalidation_event($event) {
+    if (!defined('FGS_REVALIDATION_URL') || !defined('FGS_REVALIDATION_SECRET')) {
+        return;
+    }
+    $url = FGS_REVALIDATION_URL;
+    $secret = FGS_REVALIDATION_SECRET;
+    if (!is_string($url) || !str_starts_with($url, 'https://') || !is_string($secret) || $secret === '') {
+        return;
+    }
+    wp_remote_post($url, [
+        'timeout' => 4,
+        'redirection' => 0,
+        'headers' => [
+            'Content-Type' => 'application/json',
+            'X-FGS-Revalidation-Secret' => $secret,
+        ],
+        'body' => wp_json_encode($event),
+    ]);
+}
+
+function fgs_section_slug($post) {
+    $slugs = ['site-hero', 'site-school-info', 'site-about', 'site-admission', 'site-contact', 'site-clubs', 'site-gallery'];
+    return $post && in_array($post->post_name, $slugs, true) ? $post->post_name : null;
+}
+
+add_action('wp_after_insert_post', function ($post_id, $post, $update, $post_before) {
+    if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
+        return;
+    }
+    if ($post->post_type === 'post') {
+        $event = ['kind' => 'post', 'id' => $post_id];
+        if ($post_before && $post_before->post_name) $event['oldSlug'] = $post_before->post_name;
+        if ($post->post_name) $event['newSlug'] = $post->post_name;
+        fgs_send_revalidation_event($event);
+    } elseif ($post->post_type === 'page') {
+        $old = fgs_section_slug($post_before);
+        $new = fgs_section_slug($post);
+        if (!$old && !$new) return;
+        $event = ['kind' => 'page', 'id' => $post_id];
+        if ($old) $event['oldSlug'] = $old;
+        if ($new) $event['newSlug'] = $new;
+        fgs_send_revalidation_event($event);
+    } elseif ($post->post_type === 'attachment') {
+        fgs_send_revalidation_event(['kind' => 'media', 'id' => $post_id]);
+    }
+}, 10, 4);
+
+add_action('before_delete_post', function ($post_id, $post) {
+    if ($post->post_type === 'post') {
+        fgs_send_revalidation_event(['kind' => 'post', 'id' => $post_id, 'oldSlug' => $post->post_name]);
+    } elseif ($post->post_type === 'page') {
+        $slug = fgs_section_slug($post);
+        if ($slug) fgs_send_revalidation_event(['kind' => 'page', 'id' => $post_id, 'oldSlug' => $slug]);
+    }
+}, 10, 2);
+
+add_action('delete_attachment', function ($post_id) {
+    fgs_send_revalidation_event(['kind' => 'media', 'id' => $post_id]);
+});
+
+// Attachment alt text and file metadata may be changed outside a post update.
+function fgs_revalidate_attachment_meta($meta_id, $object_id, $meta_key) {
+    if (in_array($meta_key, ['_wp_attachment_image_alt', '_wp_attachment_metadata'], true)
+        && get_post_type($object_id) === 'attachment') {
+        fgs_send_revalidation_event(['kind' => 'media', 'id' => $object_id]);
+    }
+}
+add_action('added_post_meta', 'fgs_revalidate_attachment_meta', 10, 3);
+add_action('updated_post_meta', 'fgs_revalidate_attachment_meta', 10, 3);
+add_action('deleted_post_meta', 'fgs_revalidate_attachment_meta', 10, 3);
+
+add_action('created_category', function ($term_id) {
+    fgs_send_revalidation_event(['kind' => 'category', 'id' => $term_id]);
+});
+add_action('edited_category', function ($term_id) {
+    fgs_send_revalidation_event(['kind' => 'category', 'id' => $term_id]);
+});
+add_action('delete_category', function ($term_id) {
+    fgs_send_revalidation_event(['kind' => 'category', 'id' => $term_id]);
+});
