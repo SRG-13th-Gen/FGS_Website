@@ -1,6 +1,6 @@
 # Preview deployment from `staging`
 
-Status: the first `staging` run on 2026-09-27 [failed during SSH transfer](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/36258028584) because the hosting account could not execute `/sbin/nologin`. The revised workflow uses Hostinger's file-upload API instead; that revision has not had a hosted run. A local API preflight was blocked by Cloudflare 1010 for the Python client, so API authorization remains unverified. The GitHub `preview` environment has the required API token secret and account/domain variable names, but their values have not been verified. The environment has no branch restriction and `staging` has no branch protection. This automates **preview only**; production release and rollback remain manual.
+Status: the first `staging` run on 2026-09-27 [failed during SSH transfer](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/36258028584) because the hosting account could not execute `/sbin/nologin`. The revised workflow uses Hostinger's file-upload API instead. A later [GitHub run succeeded](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/36258492134), and the corresponding Hostinger managed build completed. The GitHub `preview` environment has the required API token secret and account/domain variables. Its branch restriction remains to be configured. This automates **preview only**; production release and rollback remain manual.
 
 The [workflow](../.github/workflows/ci-cd.yml) runs on a push to `staging`. With branch protection requiring pull requests, a successful merge causes that push. It archives the exact pushed commit, uploads the ZIP into the preview website's `public_html` using Hostinger's [upload URL API](https://github.com/hostinger/api-python-sdk/blob/main/docs/HostingFilesApi.md), asks Hostinger to inspect the archive, then starts and polls a managed Node.js build through the Hostinger API. The API build publishes the new version only when it completes. A direct push to `staging` would also trigger this workflow, so enforce the desired merge-only policy with GitHub branch protection.
 
@@ -25,7 +25,18 @@ The failed SSH run showed that this account cannot execute the shell command the
 
    The previous workflow's `HOSTINGER_SSH_PASSWORD` and `HOSTINGER_SSH_KNOWN_HOSTS` secrets and its SSH host/port variables are no longer used by CI. They can be removed from the GitHub `preview` environment after confirming no other workflow needs them. The ignored local `.env.hostinger-ssh.local` is not available to GitHub Actions.
 
-5. Protect `staging` so it accepts changes only through merged pull requests; it was unprotected when checked on 2026-09-27. Merge the revised workflow to `staging` and check **Actions → Deploy preview** for the build ID and final state. The current preview continues to serve its last successful version if a new managed build fails. Do not assume setup is complete until one hosted run has succeeded.
+5. Protect `staging` as described below. The current preview continues to serve its last successful version if a new managed build fails.
+
+## Pull request merge rules
+
+The [PR verification workflow](../.github/workflows/pr-verify.yml) runs `pnpm verify` for pull requests into `staging` and `main`. Its `verify` check runs before merge; `deploy-preview` runs after a merge into `staging` and must not be used as a premerge check.
+
+| Branch | Pull request | Required check | Required approvals | Other rules |
+| --- | --- | --- | --- | --- |
+| `staging` | Required | `verify` | 0; authors may merge their own PR after the check passes | Resolve conversations; apply checks to the current base commit; enforce for administrators; block force pushes and deletion. |
+| `main` | Required, promoted from `staging` | `verify` once available on promotion PRs | 1 independent approval; dismiss stale approvals after new commits | Resolve conversations; enforce for administrators; block force pushes and deletion. |
+
+GitHub branch protection is the enforcement point. A local passing `pnpm verify` does not override a failing GitHub check. Before making `verify` mandatory on a branch, confirm a pull request into that branch actually publishes a passing check with that exact name. If the workflow is absent from `main`, first promote it through a reviewed pull request, then require the check for future promotions. Do not bypass the review requirement to bootstrap it.
 
 ## Failure and recovery
 

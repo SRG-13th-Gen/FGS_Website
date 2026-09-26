@@ -8,7 +8,7 @@ feature/*, fix/*, docs/*, chore/*, refactor/*, test/*, build/*, ci/*, perf/*
 staging -> main
 ```
 
-`main` is the production branch. Treat `main` and `staging` as protected integration branches; actual GitHub protection settings are not yet verified/configured. After bootstrap, do not commit or push directly to them. Routine typed work branches target `staging`; production promotion has head exactly `staging` and base `main`. No routine direct-main exception is defined.
+`main` is the production branch. Treat `main` and `staging` as protected integration branches; verify actual GitHub protection settings when changing merge policy. After bootstrap, do not commit or push directly to them. Routine typed work branches target `staging`; production promotion has head exactly `staging` and base `main`. The owner requires passing PR checks for staging self-merges and an independent approval for main (DEC-117). No routine direct-main exception is defined.
 
 Base new work on current remote `staging`. Reuse a related typed work branch after checking its history and target. If uncommitted work is on an integration branch, preserve it on an appropriate work branch before committing; if moving to the right base is unsafe, resolve that narrowly without discarding work. Do not silently retarget an existing PR.
 
