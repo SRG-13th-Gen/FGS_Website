@@ -24,7 +24,7 @@ The documentation index defines authority, document ownership, and task-specific
 - Privileged WordPress calls and credentials stay server-side. No secrets in browser code, public environment variables, logs, or committed files.
 - Docker is for local WordPress/database development only. Hostinger is the production target; its exact runtime capabilities remain unverified until recorded.
 - The optional application database is only for accepted application-owned needs. Do not create illustrative schemas automatically.
-- Preserve the frontend designer's implemented visual guidance in [DESIGN.md](docs/DESIGN.md). Keep [CI_CD.md](docs/CI_CD.md) empty until that work is requested; do not invent CI/CD configuration.
+- Preserve the frontend designer's implemented visual guidance in [DESIGN.md](docs/DESIGN.md). The owner requested staging preview automation on 2026-09-27; keep its scope and setup status accurate in [CI_CD.md](docs/CI_CD.md).
 - Preserve [the initial conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) as historical input. Update maintained specifications instead.
 - Preserve unrelated user changes. Document actual implementation and verification status honestly.
 
@@ -35,6 +35,8 @@ The repository contains a Next.js/TypeScript/Tailwind site, the selected shadcn 
 shadcn components in `src/components/ui` are primitives. Custom public components and the school visual system are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
 
 For commit or PR tasks, use the repository-local [github-pr skill](.agents/skills/github-pr/SKILL.md). Ordinary editing does not authorize commits, pushes, merges, deployments, or branch-protection changes. Preserve authorization already given by the user instead of requesting it again.
+
+For authorized Hostinger shell or management API access, use the repository-local [hostinger-ssh skill](.agents/skills/hostinger-ssh/SKILL.md). Keep local SSH and API credentials in the ignored `.env.hostinger-ssh.local` file, never in tracked files.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

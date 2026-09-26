@@ -35,6 +35,10 @@ The CMS must-use plugin sends JSON to `POST /api/revalidate` with `X-FGS-Revalid
 
 The installed Hostinger MCP covers account, website, files, SSL, Node deployment, runtime logs, and environment operations. It does **not** expose backup export or WordPress Copy Website, so those steps require signed-in hPanel. Hostinger's environment endpoint replaces the entire variable set; masked values returned by its list operation cannot be reused as values.
 
+## Staging preview automation
+
+The owner requested a `staging` merge to update the existing Node preview automatically. The prepared [GitHub Actions workflow and setup guide](CI_CD.md) use SSH only to transfer a source ZIP, then Hostinger's API to run the managed build. The GitHub environment has the required key names; branch restrictions and protection remain unconfigured, and no hosted run has succeeded. It does not target the original root WordPress site, the CMS copy, or the future production Node site.
+
 ## 2026-09-26 recovery assets and CMS copy
 
 - The original root backup selected in hPanel was displayed as `2026-09-26 00:52` local time. Downloaded archives are in the ignored local `backups/` directory: `u414393871.20260925165259.tar.gz` (files) and `u414393871_FXEn2.20260925165259.sql.gz` (database). SHA-256-matched copies are stored outside the repository at `C:\Users\MaChew\Documents\FGS Website Backups\2026-09-26`. Both archives streamed to completion; the files archive contained 79,738 entries including `wp-config.php`, `wp-content/uploads`, plugins, and themes. The 64,140,960-byte decompressed SQL included WordPress posts and options tables. Archive readability was checked, but a full restore drill has not been run.

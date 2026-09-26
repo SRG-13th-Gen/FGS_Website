@@ -34,7 +34,7 @@ Owners below are responsibilities to assign, not named people already appointed.
 | [DOCKER.md](DOCKER.md)                             | Local services, setup, and operational safeguards                        | Engineering                        |
 | [DEPLOYMENT.md](DEPLOYMENT.md)                     | Hostinger release gates, configuration, smoke tests, and recovery        | Engineering with school owner      |
 | [CONTENT_SELECTION.md](CONTENT_SELECTION.md)       | Source inventory and selected launch copy/news                           | Engineering with school owner      |
-| [CI_CD.md](CI_CD.md)                               | Intentionally empty; CI/CD deferred                                      | Engineering                        |
+| [CI_CD.md](CI_CD.md)                               | Staging preview workflow, GitHub setup, and recovery                     | Engineering                        |
 | [DATA_API_CONTRACTS.md](DATA_API_CONTRACTS.md)     | Resource mappings and proposed interfaces                                | Engineering                        |
 | [SECURITY.md](SECURITY.md)                         | Trust boundaries, access, secrets, privacy                               | Engineering with school owner      |
 | [TESTING.md](TESTING.md)                           | Verification strategy and traceability matrix                            | Engineering/QA                     |

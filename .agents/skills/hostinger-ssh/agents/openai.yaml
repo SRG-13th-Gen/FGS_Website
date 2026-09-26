@@ -1,0 +1,3 @@
+interface:
+  display_name: "Hostinger SSH and API"
+  short_description: "Access the FGS Hostinger shell and management API"
