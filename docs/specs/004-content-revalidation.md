@@ -15,7 +15,7 @@ The producer does not fail a WordPress save if delivery fails. Public WordPress 
 
 ## Security and configuration
 
-Set `FGS_REVALIDATION_URL` and `FGS_REVALIDATION_SECRET` privately in the CMS copy's `wp-config.php`; set the same secret as `REVALIDATION_SECRET` in each target Next.js environment. Use HTTPS and never put the secret in Git, a query string, or the browser. The CMS copy may send to preview during preview acceptance, then switch to the root after cutover. Hostinger's environment replacement requires the whole variable set on each update.
+Set `FGS_REVALIDATION_URL` and `FGS_REVALIDATION_SECRET` privately in the CMS copy's server-side PHP configuration (currently `wp-content/mu-plugins/00-fgs-revalidation-config.php`); set the same secret as `REVALIDATION_SECRET` in each target Next.js environment. Use HTTPS and never put the secret in Git, a query string, or the browser. The CMS copy sends to preview during preview acceptance, then switches to the root after cutover. Hostinger's environment replacement requires the whole variable set on each update.
 
 ## Evidence and remaining work
 

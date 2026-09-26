@@ -13,6 +13,7 @@
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import { SECTION_REGISTRY } from "../src/lib/wordpress/sections/registry";
 import {
@@ -35,7 +36,8 @@ import { SECTION_META_KEY } from "../src/lib/wordpress/sections/meta-key";
 import { shouldSeedSectionContent } from "../src/lib/wordpress/sections/seed-logic";
 
 function readEnvLocal(key: string): string {
-  const envPath = fileURLToPath(new URL("../.env.local", import.meta.url));
+  const repoRoot = fileURLToPath(new URL("../", import.meta.url));
+  const envPath = resolve(repoRoot, process.env.FGS_ENV_FILE || ".env.local");
   const content = readFileSync(envPath, "utf8");
   const line = content.split(/\r?\n/).find((l) => l.startsWith(`${key}=`));
   return line ? line.slice(key.length + 1) : "";
@@ -49,7 +51,7 @@ const PASSWORD = readEnvLocal("WORDPRESS_APPLICATION_PASSWORD");
 
 if (!USERNAME || !PASSWORD) {
   console.error(
-    "WORDPRESS_USERNAME / WORDPRESS_APPLICATION_PASSWORD are not set in .env.local. " +
+    "WORDPRESS_USERNAME / WORDPRESS_APPLICATION_PASSWORD are not set in the selected local env file. " +
       "Create a dedicated WordPress integration account first (see docs/DOCKER.md).",
   );
   process.exit(1);
