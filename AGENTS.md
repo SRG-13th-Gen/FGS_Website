@@ -37,6 +37,8 @@ shadcn components in `src/components/ui` are primitives. Custom public component
 
 For commit or PR tasks, use the repository-local [github-pr skill](.agents/skills/github-pr/SKILL.md). Ordinary editing does not authorize commits, pushes, merges, deployments, or branch-protection changes. Preserve authorization already given by the user instead of requesting it again.
 
+For PR code-review requests, use the repository-local [github-pr-review skill](.agents/skills/github-pr-review/SKILL.md). It accepts a URL/number or discovers the intended open PR. Review findings do not authorize external comments, approval, edits or merging.
+
 For authorized Hostinger shell or management API access, use the repository-local [hostinger-ssh skill](.agents/skills/hostinger-ssh/SKILL.md). Keep local SSH and API credentials in the ignored `.env.hostinger-ssh.local` file, never in tracked files.
 
 <!-- BEGIN:nextjs-agent-rules -->
