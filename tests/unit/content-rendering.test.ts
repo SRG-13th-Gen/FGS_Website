@@ -35,6 +35,30 @@ describe("content rendering and migration", () => {
     expect(html).toContain('href="/news/old-story"');
     expect(html).toContain("&lt;school&gt;");
   });
+  it.each([
+    "https://example.org/topic_(school)",
+    "https://example.org/topic_(school_(primary))?a=1&b=2",
+    "/news/topic_(school)",
+  ])("preserves balanced parentheses in imported links: %s", (url) => {
+    const normalized = normalizeLegacyArticle(
+      '<p>Read <a href="' + url + '">the reference</a>.</p>',
+    );
+    const html = sanitizeArticleHtml(buildArticleContent(normalized.body, []));
+    expect(html).toContain('href="' + url.replaceAll("&", "&amp;") + '"');
+    expect(sanitizeToPlainText(html)).toBe(normalized.body);
+  });
+  it("keeps enclosing parentheses and sentence punctuation outside links", () => {
+    const html = buildArticleContent(
+      "See (https://example.org/topic_(school)). Next https://example.org/page!",
+      [],
+    );
+    expect(html).toContain(
+      '<a href="https://example.org/topic_(school)">https://example.org/topic_(school)</a>).',
+    );
+    expect(html).toContain(
+      '<a href="https://example.org/page">https://example.org/page</a>!',
+    );
+  });
   it("excludes scripts, handlers, and foreign images", () => {
     const html = sanitizeArticleHtml(
       '<script>bad()</script><img src="https://evil.test/a.jpg" onerror="bad()"><img src="/media/a.jpg" onload="bad()"><a href="javascript:bad()">text</a>',

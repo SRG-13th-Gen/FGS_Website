@@ -28,6 +28,8 @@ Categories are `announcements`, `events` and `clubs`. Title is required; at leas
 
 Section images reference registered media IDs, not arbitrary URLs. Gallery selection is independent of library membership. Search uses bound SQL; IDs/page numbers are validated. Paragraphs/captions are escaped and imported HTML is sanitized.
 
+Uploads publish complete files through a same-directory atomic rename. Identical uploads reuse content; a retry repairs a partial file left by an earlier interrupted write. Article links preserve balanced parentheses in destinations while excluding enclosing prose punctuation.
+
 ## Public routes
 
 | Route                         | Behavior                                                                                             |
