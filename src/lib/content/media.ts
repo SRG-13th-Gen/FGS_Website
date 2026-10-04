@@ -1,6 +1,13 @@
 import "server-only";
-import { createHash } from "node:crypto";
-import { mkdir, writeFile, readFile, realpath } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import {
+  mkdir,
+  writeFile,
+  readFile,
+  realpath,
+  rename,
+  rm,
+} from "node:fs/promises";
 import path from "node:path";
 import { rows, mutate } from "./db";
 import { getServerEnvironment } from "@/lib/env/server";
@@ -64,16 +71,46 @@ export async function uploadMedia(file: File, alt: string, caption = "") {
     checksum.slice(0, 2) + "/" + checksum + "." + mime.split("/")[1];
   const target = safeMediaPath(mediaRoot(), filePath.split("/"));
   await mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
+  let complete = false;
   try {
-    await writeFile(target, bytes, { flag: "wx", mode: 0o600 });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    if (
+    complete =
       createHash("sha256")
         .update(await readFile(target))
-        .digest("hex") !== checksum
-    )
-      throw new Error("Existing media checksum mismatch.");
+        .digest("hex") === checksum;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  if (!complete) {
+    // Same-directory rename exposes only complete bytes. Identical concurrent
+    // uploads can replace each other safely; retries also repair old partial files.
+    const temporary = target + "." + randomUUID() + ".part";
+    try {
+      await writeFile(temporary, bytes, { flag: "wx", mode: 0o600 });
+      try {
+        await rename(temporary, target);
+      } catch (error) {
+        // Windows may deny replacing a file another upload just published.
+        // Accept that race only after verifying the complete destination bytes.
+        if (
+          !["EPERM", "EEXIST", "EACCES"].includes(
+            (error as NodeJS.ErrnoException).code ?? "",
+          )
+        )
+          throw error;
+        let identical = false;
+        try {
+          identical =
+            createHash("sha256")
+              .update(await readFile(target))
+              .digest("hex") === checksum;
+        } catch {
+          // Preserve the original publication error if no complete file exists.
+        }
+        if (!identical) throw error;
+      }
+    } finally {
+      await rm(temporary, { force: true });
+    }
   }
   const existing = await rows("SELECT id FROM media WHERE path = ?", [
     filePath,

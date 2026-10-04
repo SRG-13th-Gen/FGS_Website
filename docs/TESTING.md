@@ -47,3 +47,5 @@ October 4 release verification passed 110 tests across 13 files and the producti
 Hosted launch evidence separately covers Google sign-in, seven editors, image-only publication/edit/trash, media selection/upload, all five articles, redirects, assets, responsive presentation, indexing/canonicals, isolation, restart/redeploy persistence and disposable recovery. See [SPEC-008](specs/008-wordpress-removal.md). Staging's revised migration/build pipeline [passed](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/37193631397).
 
 For future releases, rerun checks appropriate to changed behavior and record date/scope. Static docs/link checks do not count as a fresh application or hosted acceptance run.
+
+Upload recovery regression coverage uses real temporary files with database doubles in `tests/integration/content-media-storage.test.ts`: partial-file repair, complete-file reuse, concurrent uploads and cleanup/retry after failed writes. `tests/unit/content-rendering.test.ts` covers imported links with balanced/nested parentheses and surrounding punctuation.

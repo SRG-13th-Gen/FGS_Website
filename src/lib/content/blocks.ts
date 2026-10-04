@@ -14,11 +14,23 @@ export interface BlockImage {
 }
 function paragraphHtml(text: string): string {
   const pattern =
-    /https?:\/\/[^\s<>()]+|(?:mailto:|tel:)[^\s<>()]+|(?<=\()\/(?!\/)[^\s<>()]*/g;
+    /https?:\/\/[^\s<>]+|(?:mailto:|tel:)[^\s<>]+|(?<=\()\/(?!\/)[^\s<>]*/g;
   let html = "";
   let cursor = 0;
   for (const match of text.matchAll(pattern)) {
-    const url = match[0].replace(/[.,;!?]+$/, "");
+    let destination = match[0];
+    let depth = 0;
+    for (let index = 0; index < destination.length; index++) {
+      if (destination[index] === "(") depth++;
+      else if (destination[index] === ")") {
+        if (depth === 0) {
+          destination = destination.slice(0, index);
+          break;
+        }
+        depth--;
+      }
+    }
+    const url = destination.replace(/[.,;!?]+$/, "");
     if (!url || url.includes("\\")) continue;
     html += escapeHtml(text.slice(cursor, match.index));
     html += '<a href="' + escapeHtml(url) + '">' + escapeHtml(url) + "</a>";
