@@ -33,10 +33,12 @@ A failed build retains the previous published version. A smoke-check failure aft
 
 ## Schema migrations and production checks
 
-On October 4, `main` was configured to require the GitHub Actions `verify` check with current-base verification, retaining its independent approval and administrator enforcement. The verification workflow is not yet on `main`: promotion PRs must include it and publish a passing check before merge. `staging` already requires `verify`; `master` does not exist.
+On October 4, `main` was configured to require the GitHub Actions `Lint, Types, Tests & Build` check with current-base verification, retaining its independent approval and administrator enforcement. The verification workflow is not yet on `main`: promotion PRs must include it and publish a passing check before merge. `staging` requires the same check; `master` does not exist.
 
 Migrations run inside Hostinger's build environment; Actions needs no database password or SSH tunnel. Normal builds and PR checks do not run migrations. Content import, backups and rollback remain manual.
 
 Use additive, backward-compatible migrations because the old application continues serving during builds. MySQL DDL commits implicitly: failed migrations or later builds can leave schema changes applied even when the previous app remains published. Make statements resumable/idempotent, never edit applied migrations, and use expand/contract releases for destructive changes. Keep fresh recoverable backups before schema-changing releases; CI does not back up or reverse migrations. The updated hosted build path still needs its first deployment run after these changes are committed and promoted.
 
 Applied SQL files are preserved byte-for-byte by `.gitattributes`; Git must not normalize their line endings because migration checksums include every byte.
+
+The PR workflow displays as **CI — Quality Checks**, with the required check **Lint, Types, Tests & Build**. Its internal job ID stays `verify`; the command stays `pnpm verify`. Both branch protection rules use the displayed check name.
