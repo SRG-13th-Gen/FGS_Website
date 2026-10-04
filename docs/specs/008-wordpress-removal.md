@@ -1,31 +1,38 @@
-# SPEC-008: Remove WordPress and migrate to production
+# SPEC-008: Application-owned content and production migration
 
-Accepted: owner implementation plan, October 4, 2026. This supersedes WordPress ownership in DEC-001/002/003/102/105 and the implementation contracts in SPEC-003/004/007. The design, seven sections, Google login and preview deployment automation remain.
+Accepted October 4, 2026; completed the same day. [DEC-118](../DECISIONS.md#current-decisions) supersedes WordPress ownership/native editing and its webhook cache policy. The conceptual draft is historical. Design, seven section editors and Google admin are preserved; inquiry delivery is deferred.
 
-## Scope
+## Delivered contract
 
-MySQL-backed server-only content services replace WordPress reads/writes. Filesystem storage is isolated by environment and outside deployments. Retain authorized section editing, article create/edit/trash, media picker, validated fields and result unions. Add optimistic revisions, transactional image relationships, soft deletion, idempotent creation, image-only stories, 20 photos, 10 MB per file and 60 MB total new uploads. Public content is dynamic without persistent caches.
+Server-only mysql2 services own sections, articles, ordered images, media metadata and old URL mappings. Environment-specific immutable files live outside deployments. Staging/production credentials and content are isolated. Transactions, edit revisions, idempotent creation and soft trash protect writes. Public content reads dynamically without persistent caches.
 
-Offline export merges both inventories using the CMS as section authority. Checksummed imports preserve original stories, media variants, captions, order, links and dates; source-key reruns preserve later edits. Reconciliation reports missing references, rejected conversions and duplicates. Legacy links redirect to new articles/media/homepage.
+Articles support paragraphs and up to 20 ordered captioned photos, including image-only stories; new files are limited to 10 MB each and 60 MB aggregate. HTML/links/files/paths are validated. Imports are resumable/checksummed and preserve later admin edits. Source galleries/cover blocks become the supported paragraph/photo presentation while retaining wording, dates, captions, links and order.
 
-Inquiry submission remains deferred. Preserve conceptual history and the existing visual design.
+## Final source snapshot
 
-## Acceptance
+The newer CMS copy supplied the seven edited sections. Both source inventories were reconciled; missing uploads and referenced variants were preserved. The final frozen export contains five articles, 352 source media records and 2,289 downloaded assets, with no failed downloads, broken references or rejected conversions. Earlier inspection counts were preliminary inventories, not final export totals.
 
-All five legacy articles are published and editable. Seven section editors and media workflows work after Google sign-in; denied accounts and direct protected operations are rejected. Staging cannot affect production. Application-owned content and uploads survive restart and redeployment. Fresh backups restore into disposable storage.
+| Original slug             | Published category |
+| ------------------------- | ------------------ |
+| `summer-class-2025-draft` | Events             |
+| `summer-class-2025`       | Events             |
+| `fgs-22`                  | Events             |
+| `enrollment`              | Announcements      |
+| `test-post`               | Announcements      |
 
-Only then replace the root WordPress site with a managed Node 24 application and deploy the verified archive/snapshot. Confirm HTTPS, indexing, canonicals, sitemap, redirects, assets and authenticated operations. After production acceptance and verified recovery backups, delete CMS and revoke obsolete integration credentials. Initial failure restores original root; subsequent app rollback preserves content/uploads.
+Titles/dates come from original records rather than slug interpretation. Old article URLs map to `/news/<original-slug>`, homepage aliases to `/`, and upload paths to migrated files. Library imports do not automatically expand the public Gallery. All five stories remain editable through admin.
 
-## Evidence
+## Acceptance evidence
 
-- Fresh root/CMS full files and SQL backups captured October 4, downloaded and checksum/integrity checked; off-repository copies retained.
-- Source export: five posts, ten CMS pages, 352 media records, 2,289 downloaded assets, zero failed downloads.
-- `pnpm verify` passed. Combined unit/integration and real MySQL/importer suites: 120 tests across 15 files passed. Four authenticated isolated browser checks passed, including all seven editors, image-only upload/publish/edit/trash and responsive admin layouts.
-- Isolated stage/live/test databases and outside-site directories provisioned.
-- Actual hosted Google sign-in passed; Google accepts the root callback URI. Restart and redeployment preserved a saved section and uploaded file; production isolation passed. Root/CMS full backups and application backups were restored into disposable storage and verified.
-- All seven hosted editors saved and restored original content. Hosted image-only publishing, editing, trashing and library selection passed. Anonymous requests to protected pages redirect to login. Final frozen WordPress backups and the final production content backup restored successfully; all final source content/checksums match the prepared import.
-- The owner confirmed the staging file-selection/upload check. Production launched at `https://flordegraceschoolinc.com/` on October 4 using managed Node 24. Google root sign-in, all seven editors, authenticated save, image-only publish/edit/trash and library search passed. Uploaded production media appeared in the library and survived restart; original section content was restored and the test article soft-deleted.
-- Production passed 33 public/asset/redirect checks and four live browser checks covering indexing, canonicals, all five articles, anonymous admin protection and mobile layout. The accepted production backup restored into isolated test storage and was copied outside the repository. Both WordPress websites were removed; their integration credentials and runtime settings are obsolete. Preview remains an independent Node application.
-- Deployed archive SHA-256: `b698aabb412bb33ff324116185a18529a7f150e111c15449cbfcd0025e4c8693`; managed production build: `01a105b9-3fbc-70f2-bcd3-ec4375f7d1b1`.
+- Fresh full files/SQL backups of both WordPress installations were checksum/integrity checked, restored into disposable storage and copied outside the repository/account.
+- `pnpm verify` passed. Combined real MySQL/importer and unit/integration verification passed 120 tests across 15 files. Four authenticated isolated browser checks covered the seven editors, image-only upload/publish/edit/trash and responsive admin.
+- Actual hosted Google sign-in, anonymous protection, seven editor saves, image-only publication/edit/trash and library selection/search passed. The root Google callback was configured securely.
+- Production upload bytes and saved section content survived restart; staging content/media survived restart/redeployment and remained isolated. Application backups restored successfully in disposable storage. Temporary public/test content was cleaned up or soft-trashed.
+- Production launched at `https://flordegraceschoolinc.com/`. It passed 33 public/asset/redirect checks, homepage/upload redirects, indexing/sitemap checks and four live browser checks covering canonicals, five stories, anonymous protection and mobile layout.
+- Both WordPress websites were removed only after verified acceptance/recovery. Historical recovery credentials/assets remain private; no WordPress service or runtime integration remains.
 
-See [TESTING](../TESTING.md), [contracts](../DATA_API_CONTRACTS.md) and [deployment](../DEPLOYMENT.md).
+Initial production archive SHA-256: `b698aabb412bb33ff324116185a18529a7f150e111c15449cbfcd0025e4c8693`; Hostinger build `01a105b9-3fbc-70f2-bcd3-ec4375f7d1b1`. Recovery locations/checksums are in [DEPLOYMENT](../DEPLOYMENT.md).
+
+## Subsequent release policy
+
+The owner's later October 4 instruction authorizes branch-based deployment and schema migration before publication (DEC-119/120). Staging's revised pipeline passed; production branch promotion remains pending. Application rollback preserves live content/media. Schema rollback, recovery backups and offline imports remain manual. See [CI/CD](../CI_CD.md), [testing](../TESTING.md) and [contracts](../DATA_API_CONTRACTS.md).

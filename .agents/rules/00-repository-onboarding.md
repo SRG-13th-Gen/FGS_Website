@@ -9,10 +9,10 @@
 ## Repository map
 
 - Root README: project overview and current state.
-- `docs/`: maintained engineering specifications; `docs/specs/`: feature index/template and future feature specs.
+- `docs/`: maintained engineering specifications; `docs/specs/`: feature index/template and feature contracts and migration evidence.
 - `docs/conceptual/`: preserved historical inputs, not the place to maintain current requirements.
 - `.agents/rules/`: repository conduct and engineering constraints.
 - `.agents/skills/`: scoped repository workflows.
-- `.github/`: review template; automation is not configured by this scaffold.
+- `.github/`: review template; PR quality checks and branch-based Hostinger deployment workflows.
 
 `src/app` contains the public site, article detail, admin, OAuth callback, media and legacy redirect routes; `src/components/public` and `src/components/admin` contain the custom interfaces; `src/components/ui` contains shadcn primitives. `src/lib/content` holds server-only database and media services, `src/lib/auth` Google session/allowlist checks, and `src/lib/env` server configuration validation. `tests/` and `scripts/` cover current workflows and local tooling. Hosted identity and production acceptance passed on October 4; inquiry delivery remains deferred. Follow the authority model in the documentation index; record significant scope/decision changes in the maintained sources.
