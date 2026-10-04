@@ -11,6 +11,7 @@ dist/
 next-env.d.ts
 coverage/
 playwright-report/
+playwright/.auth/
 test-results/
 .cache/
 .scaffold/
@@ -29,6 +30,7 @@ test-results/
 backups/
 *.sql
 *.sql.gz
+!db/migrations/*.sql
 
 # Logs and machine/editor state
 *.log

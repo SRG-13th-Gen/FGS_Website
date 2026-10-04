@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { isDevLoginAvailable } from "@/lib/auth/dev-login";
+import { isGoogleSignInConfigured } from "@/lib/auth/options";
 import { getAdminSession } from "@/lib/auth/require-admin";
 
 import { LoginForm } from "./login-form";
@@ -13,11 +13,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLoginPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await getAdminSession();
   if (session) {
     redirect("/admin");
   }
+  const { error } = await searchParams;
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-neutral-50 px-4 py-12 sm:px-6">
@@ -38,7 +45,16 @@ export default async function AdminLoginPage() {
         </div>
 
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-8">
-          {isDevLoginAvailable() ? (
+          {error ? (
+            <p
+              role="alert"
+              className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+            >
+              Sign-in was not accepted. Use an approved school Google account or
+              contact the school administrator.
+            </p>
+          ) : null}
+          {isGoogleSignInConfigured() ? (
             <LoginForm />
           ) : (
             <p

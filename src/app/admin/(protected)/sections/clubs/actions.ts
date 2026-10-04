@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { checkSectionRevision } from "@/lib/content/sections/adapter";
+
 import { requireAdmin } from "@/lib/auth/require-admin";
-import type { ClubsContent } from "@/lib/wordpress/sections/clubs";
-import { clubsContent } from "@/lib/wordpress/sections/content";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { ClubsContent } from "@/lib/content/sections/clubs";
+import { clubsContent } from "@/lib/content/sections/content";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 function parseJsonField<T>(formData: FormData, name: string, fallback: T): T {
   const raw = formData.get(name);
@@ -22,6 +24,11 @@ export async function saveClubsAction(
   formData: FormData,
 ): Promise<SectionSaveResult> {
   await requireAdmin();
+  const revisionError = await checkSectionRevision(
+    "site-clubs",
+    Number(formData.get("revision")),
+  );
+  if (revisionError) return { status: "error", message: revisionError };
 
   const input: ClubsContent = {
     sectionLabel: String(formData.get("sectionLabel") ?? ""),
@@ -30,7 +37,10 @@ export async function saveClubsAction(
     clubs: parseJsonField(formData, "clubsJson", []),
   };
 
-  const result = await clubsContent.save(input);
+  const result = await clubsContent.save(
+    input,
+    Number(formData.get("revision")),
+  );
   if (result.status !== "success") return result;
 
   let cacheWarning = false;

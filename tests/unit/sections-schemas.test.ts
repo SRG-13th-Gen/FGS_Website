@@ -1,25 +1,25 @@
 import { describe, expect, it } from "vitest";
 
-import { ABOUT_DEFAULTS, aboutSchema } from "@/lib/wordpress/sections/about";
+import { ABOUT_DEFAULTS, aboutSchema } from "@/lib/content/sections/about";
 import {
   ADMISSION_DEFAULTS,
   admissionSchema,
-} from "@/lib/wordpress/sections/admission";
-import { CLUBS_DEFAULTS, clubsSchema } from "@/lib/wordpress/sections/clubs";
+} from "@/lib/content/sections/admission";
+import { CLUBS_DEFAULTS, clubsSchema } from "@/lib/content/sections/clubs";
 import {
   CONTACT_DEFAULTS,
   contactSchema,
-} from "@/lib/wordpress/sections/contact";
+} from "@/lib/content/sections/contact";
 import {
   GALLERY_DEFAULTS,
   gallerySchema,
-} from "@/lib/wordpress/sections/gallery";
-import { HERO_DEFAULTS, heroSchema } from "@/lib/wordpress/sections/hero";
+} from "@/lib/content/sections/gallery";
+import { HERO_DEFAULTS, heroSchema } from "@/lib/content/sections/hero";
 import {
   SCHOOL_INFO_DEFAULTS,
   schoolInfoSchema,
-} from "@/lib/wordpress/sections/school-info";
-import { imageRefSchema } from "@/lib/wordpress/sections/types";
+} from "@/lib/content/sections/school-info";
+import { imageRefSchema } from "@/lib/content/sections/types";
 
 describe("every section's default content satisfies its own schema", () => {
   // Text-only sections: the default is exactly what the schema expects.

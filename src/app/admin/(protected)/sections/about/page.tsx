@@ -1,8 +1,12 @@
-import { aboutContent } from "@/lib/wordpress/sections/content";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { getSectionRevision } from "@/lib/content/sections/adapter";
+import { aboutContent } from "@/lib/content/sections/content";
 
 import { AboutForm } from "./about-form";
 
 export default async function AdminAboutSectionPage() {
+  await requireAdmin();
+  const revision = await getSectionRevision("site-about");
   const initial = await aboutContent.get();
 
   return (
@@ -12,7 +16,7 @@ export default async function AdminAboutSectionPage() {
         About Us section — in the order they appear on the homepage.
       </p>
       <div className="pt-5">
-        <AboutForm initial={initial} />
+        <AboutForm initial={initial} revision={revision} />
       </div>
     </div>
   );

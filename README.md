@@ -1,72 +1,70 @@
-# Flordegrace School Website
+<p align="center">
+  <img src="public/images/logo/fgs-logo-website-1.webp" alt="Flor de Grace School crest" width="112" />
+</p>
 
-A Next.js App Router application backed by headless WordPress. WordPress owns public content and media; privileged CMS access will stay on the Next.js server.
+<h1 align="center">Flor de Grace School</h1>
 
-## Current state
+<p align="center">School information, stories, and simple content management.</p>
 
-The repository includes the application/toolchain scaffold, Tailwind CSS, all 61 installable components from the selected shadcn Radix Nova registry, local WordPress/MariaDB services, and executable quality checks. The public landing page is built, and the news/announcements area reads real published articles from WordPress (`src/lib/wordpress/`) in the `clubs`/`events`/`announcements` categories, with a calm "unavailable"/"no news yet" state when the CMS can't be read. `/admin` is a small CMS shell (sidebar + dashboard) behind a temporary dev-only login (see below): every landing page section — Hero, School Info, About, Admission, Contact, Clubs, and Gallery — is editable end to end (text + images, WordPress-backed, per [SPEC-007](docs/specs/007-site-content-management.md)), and News & Events (articles, still `posts` in WordPress) is fully manageable — publish a new one, search/filter/page through All News, edit an existing article's title/category/body/photos, and move one to trash (never a permanent delete). An article whose WordPress content the simple editor can't safely reproduce (headings, lists, custom formatting, etc.) opens read-only with a link to edit it natively in WordPress instead — see [SPEC-003](docs/specs/003-team-admin.md#read-only-detection-rule) for the exact rule. Every image field — section images, gallery photos, article photos, the school logo — shares one media library picker: reuse an existing WordPress photo (no duplicate, no re-upload) or upload a new one, see [SPEC-007](docs/specs/007-site-content-management.md#media-library-picker). Team authentication (DEC-103), role enforcement (DEC-111), the CMS revalidation webhook (DEC-105), and inquiry delivery remain future feature work — see [SPEC-003](docs/specs/003-team-admin.md) and [SPEC-007](docs/specs/007-site-content-management.md) for exactly what is and isn't implemented.
+<p align="center">
+  <a href="https://flordegraceschoolinc.com/">Website</a> ·
+  <a href="https://preview.flordegraceschoolinc.com/">Staging</a> ·
+  <a href="docs/README.md">Documentation</a>
+</p>
 
-**shadcn provides primitives.** The custom public components and visual guidance are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
+<p align="center"><strong>Next.js 16 · React 19 · TypeScript · MySQL · Node 24</strong></p>
 
-## Quick start
+## Built for the school
 
-Prerequisites: Node.js 24 LTS (tested on 24.13.0), pnpm 10.30.2, and Docker Desktop/Compose for the local CMS. Use the pinned package manager; the repository has one pnpm lockfile.
+A responsive public website and Google-authenticated `/admin`, with application-owned content and persistent uploads.
+
+- **Seven section editors** — Hero, About, Admission, Clubs, Gallery, Contact, and School Info.
+- **News and media** — publish, edit, and trash stories; search/upload photos; preserve captions and image order. Image-only stories are supported.
+- **Reliable editing** — revision conflicts protect concurrent saves, articles use soft deletion, and staging content stays separate from production.
+
+Production is live with all five migrated legacy articles. WordPress is retired. Inquiry submission remains deferred.
+
+## Tech stack
+
+| Layer           | Tools                                                  |
+| --------------- | ------------------------------------------------------ |
+| Application     | Next.js 16 App Router, React 19, TypeScript            |
+| Interface       | Tailwind CSS 4, shadcn/ui, Lucide icons                |
+| Forms           | React Hook Form, Zod                                   |
+| Authentication  | NextAuth.js, Google OAuth, verified-email allowlist    |
+| Content & media | Hostinger MySQL, mysql2, persistent filesystem uploads |
+| Development     | Node.js 24, pnpm 10.30.2, Docker/MariaDB               |
+| Quality         | Vitest, Testing Library, Playwright, ESLint, Prettier  |
+| Delivery        | GitHub Actions, Hostinger managed Node.js builds       |
+
+Exact dependency versions are pinned in [package.json](package.json) and [pnpm-lock.yaml](pnpm-lock.yaml).
+
+## Get running
+
+Requires **Node 24**, **pnpm 10.30.2**, and **Docker**.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm setup:env
 pnpm docker:up
+pnpm db:migrate
 pnpm dev
 ```
 
-- Application: [localhost:3000](http://localhost:3000).
-- WordPress setup/admin: [localhost:8080/wp-admin](http://localhost:8080/wp-admin).
-- The database stays inside the Compose network; it has no published host port.
+Open **http://localhost:3000**. MariaDB runs on `127.0.0.1:3307`; local media lives in `.data/media`. Add Google OAuth credentials and `ADMIN_ALLOWED_EMAILS` to ignored `.env.local` to use admin. See [local setup](docs/DOCKER.md).
 
-`setup:env` creates an ignored `.env.local` with random development values and tops up any keys it manages that are missing, without overwriting values already set; it does not print secrets. Complete WordPress's local installer to create your school-editor account, then select a permalink structure for `/wp-json` routes. Create a separate integration account for the implemented CMS reads and writes.
+## Check, then ship
 
-`setup:env` also seeds `ADMIN_DEV_EMAIL`, `ADMIN_DEV_PASSWORD`, and `ADMIN_DEV_SESSION_SECRET` in `.env.local` for the temporary dev-only `/admin` login (see [SPEC-003](docs/specs/003-team-admin.md)). Check `.env.local` yourself for the generated email/password — they are never printed to the terminal. This login only works outside production and is scaffolding for FR-005, not the accepted DEC-103 team sign-in.
+| Command              | Purpose                                                      |
+| -------------------- | ------------------------------------------------------------ |
+| `pnpm verify`        | Lint, types, tests, formatting, and production build         |
+| `pnpm test:e2e`      | Browser smoke tests                                          |
+| `pnpm test:database` | Database/importer tests; requires guarded disposable storage |
 
-The public site renders without Docker or CMS credentials (the news area shows its "unavailable" state), so frontend work can begin with `pnpm install --frozen-lockfile` and `pnpm dev`. Reading real articles/sections or publishing from `/admin` needs `pnpm docker:up` plus a dedicated WordPress integration account with the **Editor** role (SPEC-007 needs `edit_pages`, not just `edit_posts`): create an Application Password for it in `/wp-admin`, then set `WORDPRESS_USERNAME`/`WORDPRESS_APPLICATION_PASSWORD` in `.env.local` yourself (never commit real values — `.env.example` keeps empty placeholders). The local WordPress/PHP image's default upload limits (2 MB) are below SPEC-003's 10 MB-per-image cap; `docker/php/uploads.ini` raises them for local use only — see [DOCKER.md](docs/DOCKER.md). Docker is local-only; no production deployment is configured.
+Protected PRs pass **Lint, Types, Tests & Build**. Pushes to `staging` deploy preview; `main`/`master` target production. Hostinger applies schema migrations before building. Production branch promotion remains pending; staging automation is verified. [CI/CD](docs/CI_CD.md) · [Test prerequisites](docs/TESTING.md)
 
-Once Docker and the integration account are set up, run `pnpm wp:seed-content` once to import the current site copy and bundled images into WordPress (creates one page per section holding a structured content field; safe to re-run — it never overwrites a page's content once seeded or edited, and reuses already-uploaded images instead of duplicating them). Without seeding, every section falls back to the same default content, so the site still renders.
+## Find your way
 
-## Development commands
+[Architecture](docs/ARCHITECTURE.md) · [Content contracts](docs/DATA_API_CONTRACTS.md) · [Design](docs/DESIGN.md) · [Security](docs/SECURITY.md) · [Recovery](docs/DEPLOYMENT.md)
 
-| Command                                     | Purpose                                                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `pnpm dev`                                  | Next.js development server                                                                  |
-| `pnpm build` / `pnpm start`                 | Production build / run that build                                                           |
-| `pnpm verify`                               | Lint, types, unit tests, format check, production build                                     |
-| `pnpm test` / `pnpm test:coverage`          | Unit tests / coverage                                                                       |
-| `pnpm exec playwright install chromium`     | Install the browser used by smoke tests                                                     |
-| `pnpm test:e2e`                             | Build and run production browser smoke checks on port 3100                                  |
-| `pnpm format` / `pnpm format:check`         | Format / check maintained source and docs                                                   |
-| `pnpm docker:config` / `pnpm docker:status` | Validate local Compose / inspect service health                                             |
-| `pnpm docker:stop` / `pnpm docker:down`     | Stop services / remove containers and network, retaining volumes                            |
-| `pnpm wp:seed-content`                      | Idempotently seed WordPress with default site section content and bundled images (SPEC-007) |
-| `pnpm ui:add <name>` / `pnpm ui:all`        | Use the pinned shadcn CLI; review changes before regeneration                               |
-
-See [DOCKER.md](docs/DOCKER.md) for local service details and [TESTING.md](docs/TESTING.md) for verification scope. `verify` does not start Docker or send email. Production hosting capabilities still need verification before deployment.
-
-## Repository map
-
-- `src/app`: routes, layout, public pages, admin routes, not-found page, and global CSS.
-- `src/components/public` and `src/components/admin`: custom public sections and admin CMS interfaces; `src/components/ui` contains shadcn primitives.
-- `src/components/providers.tsx`: theme, tooltip, and toast wiring.
-- `src/lib/env`: server-only configuration boundary and pure validation.
-- `src/lib/auth`: server-only session/authorization helpers, including the temporary dev-only admin login (`dev-login.ts`).
-- `src/lib/wordpress`: server-only WordPress REST adapter — public reads, HTML sanitization, category resolution, the admin publish flow (media upload + Gutenberg content building), and `sections/` (SPEC-007 structured site content: schemas, the per-section read/save adapter, media resolution).
-- `src/components/admin`: the admin CMS shell (sidebar, topbar, dashboard) and reusable section-editor form fields.
-- `wordpress/mu-plugins`: the must-use plugin registering the site-section content field — must also be present wherever WordPress runs in production.
-- `scripts`: cross-platform local environment/Docker commands, and the site content seed script.
-- `tests`: unit, integration, and production browser smoke tests.
-- `docs`: requirements, decisions, architecture, contracts, and feature specifications.
-
-## Specifications and contributing
-
-Start with [AGENTS.md](AGENTS.md) and the [documentation index](docs/README.md). [Requirements](docs/FRS_NFRS.md), [decisions](docs/DECISIONS.md), [SPEC-003](docs/specs/003-team-admin.md), and [SPEC-007](docs/specs/007-site-content-management.md) distinguish implemented behavior from outstanding requirements.
-
-Typed work branches target `staging`; promotion uses `staging` -> `main`. Actual branch protection and CI/CD remain unconfigured. Use the local [GitHub PR skill](.agents/skills/github-pr/SKILL.md) when commits or PRs are requested.
-
-The [initial conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) is preserved unchanged. Maintained specifications govern implementation.
+Contributor guidance lives in [AGENTS.md](AGENTS.md). Launch evidence is recorded in [SPEC-008](docs/specs/008-wordpress-removal.md); the [original conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) is historical.

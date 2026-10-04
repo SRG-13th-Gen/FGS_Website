@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ArrowRight, ChevronUp } from "lucide-react";
 
-import type { ArticleListResult } from "@/lib/wordpress/types";
+import type { ArticleListResult } from "@/lib/content/types";
 import {
   ARTICLE_CATEGORY_LABELS,
   formatArticleDate,
-} from "@/lib/wordpress/display";
+} from "@/lib/content/display";
 
 export function NewsSection({ result }: { result: ArticleListResult }) {
   const [expanded, setExpanded] = useState(false);

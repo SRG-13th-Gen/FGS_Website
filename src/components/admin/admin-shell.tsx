@@ -7,18 +7,16 @@ import { AdminTopbar } from "./admin-topbar";
 
 export function AdminShell({
   email,
-  signOutAction,
   children,
 }: {
   email: string;
-  signOutAction: () => Promise<void>;
   children: ReactNode;
 }) {
   return (
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset className="bg-neutral-50/70">
-        <AdminTopbar email={email} signOutAction={signOutAction} />
+        <AdminTopbar email={email} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>

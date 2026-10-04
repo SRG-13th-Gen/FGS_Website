@@ -3,18 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ExternalLink, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { getAdminPageTitle } from "./admin-nav";
 
-export function AdminTopbar({
-  email,
-  signOutAction,
-}: {
-  email: string;
-  signOutAction: () => Promise<void>;
-}) {
+export function AdminTopbar({ email }: { email: string }) {
   const pathname = usePathname();
   const title = getAdminPageTitle(pathname);
 
@@ -41,15 +36,16 @@ export function AdminTopbar({
           <span className="hidden max-w-[10rem] truncate text-xs text-neutral-500 sm:inline lg:max-w-none">
             {email}
           </span>
-          <form action={signOutAction}>
+          <div>
             <button
-              type="submit"
+              type="button"
+              onClick={() => void signOut({ callbackUrl: "/admin/login" })}
               className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Sign out</span>
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </header>

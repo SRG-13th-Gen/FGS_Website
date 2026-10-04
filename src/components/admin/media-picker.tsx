@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
   MediaLibraryItem,
   MediaLibraryListResult,
-} from "@/lib/wordpress/media-library";
+} from "@/lib/content/media-library";
 
 import { listMediaAction } from "@/app/admin/(protected)/media-actions";
 
@@ -112,8 +112,7 @@ export function MediaPickerDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Reuse a photo already in the WordPress media library, or upload a
-            new one.
+            Reuse a photo already in the media library, or upload a new one.
           </DialogDescription>
         </DialogHeader>
 

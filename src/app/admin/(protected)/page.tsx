@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth/require-admin";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -22,12 +23,12 @@ import {
   galleryContent,
   heroContent,
   schoolInfoContent,
-} from "@/lib/wordpress/sections/content";
-import { getPublishedArticles } from "@/lib/wordpress/reads";
+} from "@/lib/content/sections/content";
+import { getPublishedArticles } from "@/lib/content/reads";
 import {
   ARTICLE_CATEGORY_LABELS,
   formatArticleDate,
-} from "@/lib/wordpress/display";
+} from "@/lib/content/display";
 import { formatLastUpdated } from "@/components/admin/format";
 
 const SECTION_CARDS = [
@@ -76,6 +77,7 @@ const SECTION_CARDS = [
 ] as const;
 
 export default async function AdminDashboardPage() {
+  await requireAdmin();
   const [lastModifiedBySection, articlesResult] = await Promise.all([
     Promise.all(SECTION_CARDS.map((card) => card.adapter.getLastModified())),
     getPublishedArticles(),
@@ -160,7 +162,7 @@ export default async function AdminDashboardPage() {
 
         {articlesResult.status === "unavailable" ? (
           <p className="mt-4 rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-            News is unavailable right now. Check the local WordPress connection.
+            News is unavailable right now. Check the content connection.
           </p>
         ) : recentArticles.length === 0 ? (
           <p className="mt-4 rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">

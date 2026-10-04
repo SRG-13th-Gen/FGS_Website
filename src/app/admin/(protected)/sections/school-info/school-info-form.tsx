@@ -13,8 +13,8 @@ import {
 } from "@/components/admin/fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { SchoolInfoView } from "@/lib/wordpress/sections/school-info";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { SchoolInfoView } from "@/lib/content/sections/school-info";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveSchoolInfoAction } from "./actions";
 
@@ -29,7 +29,14 @@ function toImageFieldValue(view: SchoolInfoView): ImageFieldValue {
   };
 }
 
-export function SchoolInfoForm({ initial }: { initial: SchoolInfoView }) {
+export function SchoolInfoForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: SchoolInfoView;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [schoolName, setSchoolName] = useState(initial.schoolName);
   const [shortName, setShortName] = useState(initial.shortName);
@@ -66,6 +73,7 @@ export function SchoolInfoForm({ initial }: { initial: SchoolInfoView }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({
         schoolName,
@@ -113,6 +121,7 @@ export function SchoolInfoForm({ initial }: { initial: SchoolInfoView }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input type="hidden" name="logoMediaId" value={logo.mediaId} />
       <input type="hidden" name="logoAlt" value={logo.alt} />
       {logo.pendingFile && (

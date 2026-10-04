@@ -8,13 +8,19 @@ function randomSecret() {
   return randomBytes(32).toString("base64url");
 }
 
-// Keys this script keeps filled in .env.local, without ever overwriting a
-// value that is already set. ADMIN_DEV_* seed the temporary dev-only admin
-// login (see src/lib/auth/dev-login.ts) and are never printed.
+// Keys this script keeps filled in .env.local without overwriting existing
+// values. Real OAuth client credentials and admin emails are supplied separately.
 const managedDefaults = {
-  ADMIN_DEV_EMAIL: () => "admin@fgs.local",
-  ADMIN_DEV_PASSWORD: randomSecret,
-  ADMIN_DEV_SESSION_SECRET: randomSecret,
+  NEXTAUTH_SECRET: randomSecret,
+  DB_HOST: () => "127.0.0.1",
+  DB_PORT: () => "3307",
+  DB_NAME: () => "fgs_content",
+  DB_USER: () => "fgs_content",
+  DB_PASSWORD: randomSecret,
+  MARIADB_ROOT_PASSWORD: randomSecret,
+  MEDIA_STORAGE_PATH: () => ".data/media",
+  NEXTAUTH_URL: () => "http://localhost:3000",
+  SITE_INDEXABLE: () => "false",
 };
 
 function parseValues(contents) {

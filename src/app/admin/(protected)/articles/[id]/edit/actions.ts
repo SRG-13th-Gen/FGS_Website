@@ -3,12 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { updateArticle } from "@/lib/wordpress/edit-article";
+import { updateArticle } from "@/lib/content/edit-article";
 import type {
   ArticleImageInput,
   PublishArticleInput,
   PublishArticleResult,
-} from "@/lib/wordpress/types";
+} from "@/lib/content/types";
 
 function parseExistingMediaId(value: FormDataEntryValue | null): number | null {
   if (typeof value !== "string" || !value.trim()) return null;
@@ -50,7 +50,11 @@ export async function updateArticleAction(
     images: parseImages(formData),
   };
 
-  const result = await updateArticle({ ...input, postId });
+  const result = await updateArticle({
+    ...input,
+    postId,
+    expectedRevision: Number(formData.get("revision")),
+  });
   if (result.status !== "success") {
     return result;
   }

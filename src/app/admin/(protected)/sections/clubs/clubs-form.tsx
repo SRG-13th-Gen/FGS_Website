@@ -11,14 +11,21 @@ import {
 } from "@/components/admin/fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { ClubItem, ClubsContent } from "@/lib/wordpress/sections/clubs";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { ClubItem, ClubsContent } from "@/lib/content/sections/clubs";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveClubsAction } from "./actions";
 
 const initialActionState: SectionSaveResult | null = null;
 
-export function ClubsForm({ initial }: { initial: ClubsContent }) {
+export function ClubsForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: ClubsContent;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [sectionLabel, setSectionLabel] = useState(initial.sectionLabel);
   const [heading, setHeading] = useState(initial.heading);
@@ -50,6 +57,7 @@ export function ClubsForm({ initial }: { initial: ClubsContent }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({ sectionLabel, heading, intro, clubs });
     }
@@ -75,6 +83,7 @@ export function ClubsForm({ initial }: { initial: ClubsContent }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input type="hidden" name="clubsJson" value={JSON.stringify(clubs)} />
 
       <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">

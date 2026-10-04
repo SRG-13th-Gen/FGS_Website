@@ -2,11 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
+import {
+  checkSectionRevision,
+  zodIssuesToFieldErrors,
+} from "@/lib/content/sections/adapter";
+
 import { requireAdmin } from "@/lib/auth/require-admin";
-import type { AdmissionContent } from "@/lib/wordpress/sections/admission";
-import { admissionContent } from "@/lib/wordpress/sections/content";
-import { uploadSectionImage } from "@/lib/wordpress/sections/media";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { AdmissionContent } from "@/lib/content/sections/admission";
+import { admissionContent } from "@/lib/content/sections/content";
+import { uploadSectionImage } from "@/lib/content/sections/media";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 function parseJsonField<T>(formData: FormData, name: string, fallback: T): T {
   const raw = formData.get(name);
@@ -23,18 +28,14 @@ export async function saveAdmissionAction(
   formData: FormData,
 ): Promise<SectionSaveResult> {
   await requireAdmin();
+  const revisionError = await checkSectionRevision(
+    "site-admission",
+    Number(formData.get("revision")),
+  );
+  if (revisionError) return { status: "error", message: revisionError };
 
   const bgAlt = String(formData.get("backgroundImageAlt") ?? "");
-  let bgMediaId = Number(formData.get("backgroundImageMediaId") ?? 0);
-
-  const file = formData.get("backgroundImageFile");
-  if (file instanceof File && file.size > 0) {
-    const uploaded = await uploadSectionImage(file, bgAlt);
-    if ("error" in uploaded) {
-      return { status: "error", message: uploaded.error };
-    }
-    bgMediaId = uploaded.mediaId;
-  }
+  const bgMediaId = Number(formData.get("backgroundImageMediaId") ?? 0);
 
   const input: AdmissionContent = {
     sectionLabel: String(formData.get("sectionLabel") ?? ""),
@@ -50,7 +51,27 @@ export async function saveAdmissionAction(
     enrollmentSteps: parseJsonField(formData, "enrollmentStepsJson", []),
   };
 
-  const result = await admissionContent.save(input);
+  const file = formData.get("backgroundImageFile");
+  const draft = structuredClone(input);
+  if (file instanceof File && file.size > 0) draft.backgroundImage.mediaId = 1;
+  const parsed = admissionContent.schema.safeParse(draft);
+  if (!parsed.success)
+    return {
+      status: "validation_error",
+      fieldErrors: zodIssuesToFieldErrors(parsed.error),
+    };
+  if (file instanceof File && file.size > 0) {
+    const uploaded = await uploadSectionImage(file, bgAlt);
+    if ("error" in uploaded) {
+      return { status: "error", message: uploaded.error };
+    }
+    input.backgroundImage.mediaId = uploaded.mediaId;
+  }
+
+  const result = await admissionContent.save(
+    input,
+    Number(formData.get("revision")),
+  );
   if (result.status !== "success") return result;
 
   let cacheWarning = false;

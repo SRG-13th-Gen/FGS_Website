@@ -5,12 +5,12 @@ import Image from "next/image";
 import { ArrowDown, ArrowUp, Plus, Trash2, UploadCloud } from "lucide-react";
 
 import { MediaPickerDialog } from "@/components/admin/media-picker";
-import { reorderArray } from "@/lib/wordpress/sections/reorder";
+import { reorderArray } from "@/lib/content/sections/reorder";
 import {
   SECTION_ICON_NAMES,
   SECTION_ICON_OPTIONS,
   type SectionIconName,
-} from "@/lib/wordpress/sections/icons";
+} from "@/lib/content/sections/icons";
 
 const fieldLabelClass = "block text-sm font-bold text-neutral-800";
 const helperTextClass = "mt-1 text-xs text-neutral-500";

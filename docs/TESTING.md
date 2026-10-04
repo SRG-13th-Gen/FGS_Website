@@ -1,83 +1,51 @@
-# Testing and verification
+# Testing and evidence
 
-Status: the repository has executable scaffold, WordPress adapter, section-editor, article-management, and browser smoke checks. The detailed T-001 through T-022 matrix below remains a release acceptance plan; its older "Not run" cells do not mean there are no related local tests. [SPEC-003](specs/003-team-admin.md#verification-and-evidence) and [SPEC-007](specs/007-site-content-management.md#verification-and-evidence) record feature-level evidence and limits. CI/CD is not configured, and local checks do not establish production acceptance.
+## Commands
 
-## Available commands
+| Command              | Coverage / prerequisites                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------- |
+| `pnpm verify`        | ESLint, Next type generation/TypeScript, Vitest unit/mocked integration, Prettier and production build   |
+| `pnpm test:e2e`      | Production build plus Chromium smoke tests; install browser with `pnpm exec playwright install chromium` |
+| `pnpm test:e2e:run`  | Browser tests against an already-built app                                                               |
+| `pnpm test:database` | Real MySQL/importer tests; guarded disposable database required                                          |
+| `pnpm docker:config` | Compose configuration; generated local database passwords required                                       |
 
-| Command              | Coverage                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------------------- |
-| `pnpm lint`          | Next.js/TypeScript/React lint rules across maintained source                                            |
-| `pnpm typecheck`     | Next.js route type generation plus strict TypeScript, including every installed UI primitive            |
-| `pnpm test`          | Unit and mocked integration tests for environment, auth, WordPress reads/writes, sections, and articles |
-| `pnpm test:coverage` | The same Vitest suite with V8 coverage                                                                  |
-| `pnpm format:check`  | Prettier/Tailwind formatting; historical draft and empty placeholders excluded                          |
-| `pnpm build`         | Production Next.js build without network fonts or CMS access                                            |
-| `pnpm verify`        | Lint, types, unit tests, formatting and production build                                                |
-| `pnpm test:e2e`      | Build then Chromium smoke tests against a dedicated production server on port 3100                      |
-| `pnpm test:e2e:run`  | Reuse an already-built artifact for browser tests; does not rebuild                                     |
-| `pnpm docker:config` | Quiet Compose validation after `pnpm setup:env`                                                         |
+PR CI runs `verify`, not browser or real-database tests. Public browser smoke tests assume unavailable content storage and non-indexable local configuration. Passing them does not establish hosted OAuth or data acceptance.
 
-Install the browser once with `pnpm exec playwright install chromium`. The browser test runner manages its own server, refuses to reuse an unknown process, and stores failures under ignored report/trace directories. It does not start the CMS or send email. Current test groups are [unit](../tests/unit), [mocked integration](../tests/integration), and [browser smoke checks](../tests/e2e). The browser suite uses a production build, where the temporary development login is disabled; it does not establish a real authenticated production admin flow.
+## Database integration
 
-## Verification layers
+Use an isolated database ending in `_fgstest`. Set `DB_*` and `FGS_TEST_DATABASE` to that exact name in an ignored `.env.database-test.local`; configure database connectivity/tunneling explicitly. Apply migrations against that environment, then:
 
-- Documentation changes: validate links, status/authority consistency, requirement references, and whitespace; preserve the existing DESIGN guidance and the empty CI_CD placeholder.
-- Pure logic: use installed Vitest for validation and isolated behavior; add permission/adapter tests as those features are implemented.
-- Integration: exercise CMS adapters against controlled fixtures and, when available, disposable local WordPress. Include failure and permission paths.
-- Browser workflows: extend the installed Playwright suite for public content, admin, and inquiries; include keyboard, error, and responsive states. Real email sends are not a default test action.
-- Operations: verify local volumes/networking, production capability assumptions, restore, rollback, and approved performance/freshness targets when environments exist.
+```sh
+node --env-file=.env.database-test.local node_modules/vitest/vitest.mjs run --config vitest.database.config.ts
+```
 
-Inspect actual manifests before running checks. Run checks proportional to the changed behavior and record exact commands, results, and limitations. Product criteria still require their own tests; passing local checks does not establish release acceptance.
+Both database suites delete disposable content rows. They cover transactions, revision conflicts, published-only reads, idempotent publication, soft trash, search/pagination, media reuse, upload bounds and repeat imports preserving edits. Files use temporary test storage. Never target staging/production data for routine tests.
 
-Implementation references consulted 2026-09-19: [Next.js with Vitest](https://nextjs.org/docs/app/guides/testing/vitest), [Next.js with Playwright](https://nextjs.org/docs/app/guides/testing/playwright), and [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Tool selection is accepted in DEC-109; the formal accessibility target remains proposed.
+## Authenticated browser fixtures
 
-## Requirement-to-scenario matrix
+`E2E_ADMIN_STORAGE_STATE` enables sidebar/media checks with an authorized private session fixture. The content workflow also requires `FGS_E2E_CONTENT=true`, seeded seven-section content, an isolated database/media root and `.data/e2e-photo.png`. It saves sections and publishes/edits/trashes a story; never enable it against production. These private fixtures are not generated by the default test command. Without them, four authenticated checks skip; a skipped check is not a pass.
 
-Feature definitions are in the [feature index](specs/README.md). The matrix below tracks full acceptance scenarios, including production-only conditions that local mocked tests cannot satisfy. Current local evidence is grouped here so a "Not run" full scenario is not confused with untested code:
+## Coverage map
 
-| Implemented area                           | Local evidence                                                                                                                                                                                                                                     | Remaining acceptance limit                                                       |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Public WordPress articles and safe display | `tests/unit/wordpress-reads.test.ts`, `wordpress-sanitize.test.ts`, `article-content.test.ts`; `tests/e2e/news-resilience.spec.ts`                                                                                                                 | Real CMS publication/withdrawal, complete SEO and accessibility checks           |
-| Admin article create/edit/trash and media  | `tests/integration/wordpress-publish.test.ts`, `admin-articles.test.ts`, `edit-article.test.ts`, `article-management-actions.test.ts`, `media-library.test.ts`, `media-actions.test.ts`; feature-level local WordPress manual evidence in SPEC-003 | Production team identity/roles, concurrency policy, live cache-event integration |
-| Seven site sections and editors            | `tests/unit/sections-*.test.ts`; `tests/integration/sections-content.test.ts`, `section-actions.test.ts`; feature-level local WordPress manual evidence in SPEC-007                                                                                | Production CMS/plugin deployment and final content/design acceptance             |
-| Development login and browser shell        | `tests/unit/dev-login.test.ts`; `tests/e2e/admin-login.spec.ts`, `admin-sidebar.spec.ts`, `media-picker.spec.ts`                                                                                                                                   | Temporary login is disabled in production and does not satisfy FR-005/FR-006     |
+| Behavior / requirement                                  | Current test sources                                                                                                                    |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Google allowlist and sessions; FR-005/006               | `tests/unit/admin-auth.test.ts`, `admin-session.test.ts`; `tests/integration/content-actions.test.ts`                                   |
+| SQL reads/actions and publication; FR-001/002/007       | `tests/integration/content-queries.test.ts`, `content-actions.test.ts`; `tests/database/content.test.ts`                                |
+| Upload/HTML/path safety; FR-008, NFR-001/002            | `tests/unit/content-validation.test.ts`, `content-svg.test.ts`, `content-rendering.test.ts`; `tests/integration/content-routes.test.ts` |
+| Section validation/revisions; FR-002/009                | `tests/unit/sections-schemas.test.ts`, `sections-reorder.test.ts`; database/action suites                                               |
+| Import/restore and source conversion                    | `tests/database/migration.test.ts`; rendering fixtures; disposable hosted recovery exercises                                            |
+| SEO, outage states and anonymous access; FR-003/004/015 | Robots unit tests; `tests/e2e/admin-login.spec.ts`, `news-resilience.spec.ts`, `scaffold.spec.ts`                                       |
+| Admin browser workflows                                 | `tests/e2e/content-workflows.spec.ts`, `admin-sidebar.spec.ts`, `media-picker.spec.ts`                                                  |
 
-Replace pending full-acceptance evidence with exact test paths and run/PR references as launch work arrives.
+Legacy T-001–T-023 references remain traceability IDs in requirements/history; only the coverage listed above is asserted. Formal accessibility/performance audits, inquiry tests and a general durable audit log are not completed acceptance evidence.
 
-| Test ID | Requirements              | Scenario / expected observation                                                                                                                                                       | Feature                      | Evidence                                                                                                                   |
-| ------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| T-001   | FR-001                    | Inspect persistence boundaries; CMS resource reads/writes use REST; no editable content mirror or CMS SQL                                                                             | SPEC-001                     | Not run                                                                                                                    |
-| T-002   | FR-002                    | Publish fictional content through native WordPress and consume it from the application                                                                                                | SPEC-001                     | Not run                                                                                                                    |
-| T-003   | FR-003                    | Approved information page, missing page, CMS outage, and empty content produce distinct correct states                                                                                | SPEC-002                     | Not run                                                                                                                    |
-| T-004   | FR-004                    | Published-only listing/detail, pagination, invalid page values, draft/private exclusion, and missing media                                                                            | SPEC-002                     | Not run                                                                                                                    |
-| T-005   | FR-005, FR-006            | Anonymous, expired/revoked session, unknown role, and each matrix role attempt reads/writes directly at server entry points                                                           | SPEC-003                     | Not run                                                                                                                    |
-| T-006   | FR-007                    | Draft creation, editing, publication, withdrawal, trash, concurrent edits, and uncertain CMS write outcome without duplicate creation                                                 | SPEC-003                     | Not run                                                                                                                    |
-| T-007   | FR-008                    | Category create/edit and media upload/select; invalid type/size and unauthorized requests cause no write                                                                              | SPEC-003                     | Not run                                                                                                                    |
-| T-008   | FR-009, NFR-005           | Team and native CMS edits invalidate dependencies; invalid secret is rejected; duplicate event harmless; old/new slug and withdrawal/deletion refresh; saved-but-refresh-failed state | SPEC-003, SPEC-004           | Not run                                                                                                                    |
-| T-009   | FR-010, FR-011            | Valid inquiry reaches stub; missing/invalid/oversized/header-injection inputs never send; client bypass still validates server-side                                                   | SPEC-005                     | Not run                                                                                                                    |
-| T-010   | FR-012                    | Approved rate-limit boundary, concurrent clients, bot rejection, inaccessible-control fallback, and unavailable required abuse configuration                                          | SPEC-005                     | Not run                                                                                                                    |
-| T-011   | FR-013, NFR-005           | Provider accepted, rejected, timed out, and accepted-before-timeout cases; no false delivery claim or blind repeat send                                                               | SPEC-005                     | Not run                                                                                                                    |
-| T-012   | FR-014                    | Concurrent same-key/same-content requests across workers and restart yield one provider submission; changed content conflicts; expiry and ambiguous recovery follow approved policy   | SPEC-005                     | Not run                                                                                                                    |
-| T-013   | FR-015                    | Canonical public URLs, metadata, sitemap entries, and exclusion of private/admin resources                                                                                            | SPEC-002                     | Not run                                                                                                                    |
-| T-014   | NFR-001                   | Inspect browser assets, responses, environment exposure, and logs for seeded fake secrets; authenticated production CMS transport uses HTTPS                                          | SPEC-001, SPEC-003           | Partial: environment tests and browser asset secret scan in SPEC-006; privileged CMS flow pending                          |
-| T-015   | NFR-002                   | Malicious CMS HTML/URLs/uploads, forged origin, privilege escalation, and direct server calls are rejected or safely rendered                                                         | SPEC-001, SPEC-003, SPEC-005 | Not run                                                                                                                    |
-| T-016   | NFR-003                   | Keyboard/focus, labels, error announcements, contrast, responsive layouts and reduced motion against accepted accessibility scope                                                     | SPEC-002, SPEC-003, SPEC-005 | Not run                                                                                                                    |
-| T-017   | NFR-004                   | Representative page/cache measurements against accepted budgets; blocked until targets and environment are defined                                                                    | SPEC-002, SPEC-004           | Not run                                                                                                                    |
-| T-018   | NFR-005                   | CMS failure at uncached and cached reads; no fabricated not-found; stale/removal handling meets accepted policy                                                                       | SPEC-001, SPEC-002           | Not run                                                                                                                    |
-| T-019   | NFR-006                   | No message/email leakage in logs; recipient tampering fails; storage/provider/mailbox retention configuration and privacy notice reviewed                                             | SPEC-005                     | Not run                                                                                                                    |
-| T-020   | NFR-007                   | Safe correlated operation outcomes and actor attribution; no credentials or inquiry content in audit records                                                                          | SPEC-003, SPEC-004, SPEC-005 | Not run                                                                                                                    |
-| T-021   | NFR-008, NFR-009          | Host-to-CMS and container-to-host connectivity, health/readiness, and persistent uploads/database after restart                                                                       | SPEC-001                     | Partial: Compose health, installer HTTP, configuration persistence verified; installed-content and callback checks pending |
-| T-022   | NFR-009                   | Restore CMS database/media and rehearse application rollback in an isolated environment against accepted recovery objectives                                                          | SPEC-001                     | Not run                                                                                                                    |
-| T-023   | NFR-001, NFR-008, NFR-009 | Repository scaffold: dependency/type/build checks, safe environment parsing, generated UI subscriptions, browser smoke checks and local Docker setup                                  | SPEC-006                     | Passed 2026-09-19; exact evidence and scope in SPEC-006                                                                    |
+## Recorded evidence
 
-## Fixtures and side effects
+October 4 release verification passed 110 tests across 13 files and the production build. Public browser rerun: 7 passed, 4 authenticated checks skipped. Earlier migration verification passed 120 combined unit/integration/MySQL/importer tests and four authenticated isolated browser checks.
 
-Use fictional school content and synthetic contact details. Default automated tests use CMS/email doubles; opt-in integration tests use disposable local resources or an approved sandbox. Tests must not change production content, email real recipients, or erase persistent local volumes without explicit scope authorization.
+Hosted launch evidence separately covers Google sign-in, seven editors, image-only publication/edit/trash, media selection/upload, all five articles, redirects, assets, responsive presentation, indexing/canonicals, isolation, restart/redeploy persistence and disposable recovery. See [SPEC-008](specs/008-wordpress-removal.md). Staging's revised migration/build pipeline [passed](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/37193631397).
 
-Test observable behavior and trust boundaries rather than duplicating implementation details or snapshotting prose. Do not weaken validations or test expectations to hide failures. Use official documentation matching locked versions for framework-specific behavior.
+For future releases, rerun checks appropriate to changed behavior and record date/scope. Static docs/link checks do not count as a fresh application or hosted acceptance run.
 
-## Completion evidence
-
-Each feature spec records requirement IDs, test IDs, actual test paths, exact commands, results, environment/version information where relevant, and outstanding limitations. A feature is not **Verified** until its accepted criteria have evidence. Manual design/privacy/operational checks remain explicit when automation cannot establish them.
-
-CI/CD implementation stays deferred. A missing pipeline does not waive applicable local verification or launch-readiness checks.
+Upload recovery regression coverage uses real temporary files with database doubles in `tests/integration/content-media-storage.test.ts`: partial-file repair, complete-file reuse, concurrent uploads and cleanup/retry after failed writes. `tests/unit/content-rendering.test.ts` covers imported links with balanced/nested parentheses and surrounding punctuation.

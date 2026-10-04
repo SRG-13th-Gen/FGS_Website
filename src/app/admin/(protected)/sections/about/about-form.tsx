@@ -13,8 +13,8 @@ import {
 } from "@/components/admin/fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { AboutView } from "@/lib/wordpress/sections/about";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { AboutView } from "@/lib/content/sections/about";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveAboutAction } from "./actions";
 
@@ -29,7 +29,14 @@ function toImageFieldValue(view: AboutView): ImageFieldValue {
   };
 }
 
-export function AboutForm({ initial }: { initial: AboutView }) {
+export function AboutForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: AboutView;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [sectionLabel, setSectionLabel] = useState(initial.sectionLabel);
   const [heading, setHeading] = useState(initial.heading);
@@ -73,6 +80,7 @@ export function AboutForm({ initial }: { initial: AboutView }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({
         sectionLabel,
@@ -129,6 +137,7 @@ export function AboutForm({ initial }: { initial: AboutView }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
         name="bannerImageMediaId"

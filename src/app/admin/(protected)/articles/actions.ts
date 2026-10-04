@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import {
   trashArticle,
   type TrashArticleResult,
-} from "@/lib/wordpress/edit-article";
+} from "@/lib/content/edit-article";
 
 export type TrashArticleActionResult =
   | { status: "success"; cacheWarning: boolean }
