@@ -42,3 +42,5 @@ Use additive, backward-compatible migrations because the old application continu
 Applied SQL files are preserved byte-for-byte by `.gitattributes`; Git must not normalize their line endings because migration checksums include every byte.
 
 The PR workflow displays as **CI — Quality Checks**, with the required check **Lint, Types, Tests & Build**. Its internal job ID stays `verify`; the command stays `pnpm verify`. Both branch protection rules use the displayed check name.
+
+Hostinger invokes the deployment script with the configured pnpm version, but nested `pnpm` commands can resolve its older global binary. `build:deploy` uses `npm run db:migrate && npm run build` to retain fail-fast ordering without invoking that global pnpm.
