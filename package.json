@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
-    "build:deploy": "pnpm db:migrate && pnpm build",
+    "build:deploy": "npm run db:migrate && npm run build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "next typegen && tsc --noEmit",
