@@ -1,10 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-// The production build's WORDPRESS_URL is local http (docs/DOCKER.md), which
-// src/lib/env/schema.ts deliberately rejects outside development. The home
-// page and article routes must still render a calm, truthful "unavailable"
-// state rather than fail — see docs/specs/003-team-admin.md.
-test("the home page renders and shows a truthful unavailable state when WordPress reads are rejected", async ({
+// This smoke suite runs without a configured content database. Public pages
+// must report unavailable content honestly rather than invent missing records.
+test("the home page renders and shows a truthful unavailable state when the content database reads are rejected", async ({
   page,
 }) => {
   const response = await page.goto("/");

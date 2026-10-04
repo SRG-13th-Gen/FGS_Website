@@ -1,4 +1,6 @@
 node_modules/
+.data/
+backups/
 .next/
 .scaffold/
 pnpm-lock.yaml

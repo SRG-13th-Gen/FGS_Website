@@ -1,45 +1,48 @@
-name: Deploy preview
+name: Deploy website
 
 on:
   push:
-    branches: [staging]
+    branches: [staging, main, master]
 
 permissions:
   contents: read
 
 concurrency:
-  group: hostinger-preview
+  group: hostinger-${{ github.ref_name == 'staging' && 'preview' || 'production' }}
   cancel-in-progress: false
 
 jobs:
-  deploy-preview:
+  deploy:
     runs-on: ubuntu-latest
-    environment: preview
+    environment: ${{ github.ref_name == 'staging' && 'preview' || 'production' }}
     timeout-minutes: 20
     env:
       HOSTINGER_ACCOUNT_USERNAME: ${{ vars.HOSTINGER_ACCOUNT_USERNAME }}
-      HOSTINGER_PREVIEW_DOMAIN: ${{ vars.HOSTINGER_PREVIEW_DOMAIN }}
+      HOSTINGER_DEPLOY_DOMAIN: ${{ vars.HOSTINGER_DEPLOY_DOMAIN }}
 
     steps:
-      - name: Check out merged staging commit
+      - name: Check out pushed commit
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
-      - name: Verify preview target and required configuration
+      - name: Verify branch target and required configuration
         env:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
-          [[ "$GITHUB_REF" == "refs/heads/staging" ]]
           [[ "$HOSTINGER_ACCOUNT_USERNAME" == "u414393871" ]]
-          [[ "$HOSTINGER_PREVIEW_DOMAIN" == "preview.flordegraceschoolinc.com" ]]
+          case "$GITHUB_REF" in
+            refs/heads/staging) [[ "$HOSTINGER_DEPLOY_DOMAIN" == "preview.flordegraceschoolinc.com" ]] ;;
+            refs/heads/main|refs/heads/master) [[ "$HOSTINGER_DEPLOY_DOMAIN" == "flordegraceschoolinc.com" ]] ;;
+            *) echo 'Unsupported deployment branch.' >&2; exit 1 ;;
+          esac
           [[ -n "$HOSTINGER_API_TOKEN" ]]
 
-      - name: Package the exact merged commit
+      - name: Package the exact pushed commit
         run: |
           set -euo pipefail
-          archive="fgs-staging-${GITHUB_SHA}.zip"
+          archive="fgs-${GITHUB_REF_NAME}-${GITHUB_SHA}.zip"
           git archive --format=zip --output="$RUNNER_TEMP/$archive" "$GITHUB_SHA"
           test -s "$RUNNER_TEMP/$archive"
           echo "ARCHIVE_NAME=$archive" >> "$GITHUB_ENV"
@@ -49,7 +52,7 @@ jobs:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
-          jq -n --arg username "$HOSTINGER_ACCOUNT_USERNAME" --arg domain "$HOSTINGER_PREVIEW_DOMAIN" \
+          jq -n --arg username "$HOSTINGER_ACCOUNT_USERNAME" --arg domain "$HOSTINGER_DEPLOY_DOMAIN" \
             '{username: $username, domain: $domain}' > "$RUNNER_TEMP/upload-url-request.json"
           curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
             --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
@@ -87,24 +90,24 @@ jobs:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
-          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_PREVIEW_DOMAIN/nodejs/builds"
+          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_DEPLOY_DOMAIN/nodejs/builds"
           curl --fail-with-body --silent --show-error --get \
             --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
             --data-urlencode "archive_path=$ARCHIVE_NAME" \
             "$api/settings/from-archive" > "$RUNNER_TEMP/archive-settings.json"
 
-      - name: Build and publish preview with Hostinger
+      - name: Build and publish website with Hostinger
         env:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
-          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_PREVIEW_DOMAIN/nodejs/builds"
+          api="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_ACCOUNT_USERNAME/websites/$HOSTINGER_DEPLOY_DOMAIN/nodejs/builds"
           jq -n --arg archive "$ARCHIVE_NAME" '{
             node_version: 24,
             app_type: "next",
             root_directory: ".",
             output_directory: ".next",
-            build_script: "build",
+            build_script: "build:deploy",
             package_manager: "pnpm",
             source_type: "archive",
             source_options: {archive_path: $archive}
@@ -123,7 +126,7 @@ jobs:
               "$api/$build_id" > "$RUNNER_TEMP/build-status.json"
             state=$(jq -r '.state // .data.state // empty' "$RUNNER_TEMP/build-status.json")
             case "$state" in
-              completed) echo 'Preview deployment completed.'; exit 0 ;;
+              completed) echo 'Website deployment completed.'; exit 0 ;;
               failed) echo "Hostinger build $build_id failed. Check its build logs in hPanel." >&2; exit 1 ;;
               pending|running) sleep 15 ;;
               *) echo "Unexpected Hostinger build state: $state" >&2; exit 1 ;;
@@ -131,3 +134,11 @@ jobs:
           done
           echo "Hostinger build $build_id did not finish within 15 minutes." >&2
           exit 1
+
+      - name: Check deployed public routes
+        run: |
+          set -euo pipefail
+          for path in / /admin/login /sitemap.xml; do
+            curl --fail --silent --show-error --location --retry 5 --retry-delay 5 --retry-all-errors \
+              --connect-timeout 15 --max-time 60 --output /dev/null "https://$HOSTINGER_DEPLOY_DOMAIN$path"
+          done

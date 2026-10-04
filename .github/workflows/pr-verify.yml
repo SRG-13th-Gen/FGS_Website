@@ -1,8 +1,8 @@
-name: Verify pull request
+name: CI — Quality Checks
 
 on:
   pull_request:
-    branches: [staging, main]
+    branches: [staging, main, master]
 
 permissions:
   contents: read
@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   verify:
+    name: Lint, Types, Tests & Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -32,5 +33,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify application
+      - name: Run lint, type checks, tests, formatting and build
         run: pnpm verify

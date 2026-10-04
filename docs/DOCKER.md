@@ -1,105 +1,16 @@
-# Local Docker development
+# Local database
 
-The root [compose.yaml](../compose.yaml) runs **WordPress 7.1.1 / PHP 8.3** and **MariaDB 11.8.9** for local development. Next.js runs on the host. Production Hostinger infrastructure is not configured by this stack; production database/runtime parity remains DEC-107.
-
-## Setup
+Docker runs MariaDB only; there is no WordPress or PHP service.
 
 ```sh
 pnpm setup:env
 pnpm docker:config
 pnpm docker:up
-pnpm dev
+pnpm db:migrate
 ```
 
-Install/start Docker Desktop or a supported Docker Engine with Compose first. Commands use [scripts/docker.mjs](../scripts/docker.mjs) to pass the ignored `.env.local` explicitly and select the repository working directory on Windows, macOS, or Linux. They do not require shell-specific environment assignment.
+The database listens on 127.0.0.1:3307. Compose reads local generated credentials from ignored `.env.local`; media uses `.data/media`. Production uses Hostinger databases and absolute outside-deployment storage.
 
-`pnpm setup:env` creates `.env.local` from [.env.example](../.env.example), generates random local database/revalidation secrets, and preserves an existing file. Never use those development credentials in production. On Windows, filesystem ACLs govern local file access; the setup script's POSIX mode is not an ACL configuration tool.
+`docker:stop` stops services. `docker:down` removes containers/network and preserves volumes. Do not remove volumes without explicit data-loss authorization. The new content volume is distinct from the former WordPress database volume, preserving old local data.
 
-Open [WordPress setup](http://localhost:8080/wp-admin/install.php) to choose a local admin account. Set a permalink structure in WordPress so the REST API is available at `/wp-json/wp/v2`. Create a separate Editor-role integration user and Application Password for the implemented server-side CMS writes; section editing requires `edit_pages`. Set the credentials only in ignored `.env.local`, then run `pnpm wp:seed-content` to create the seven section pages and upload bundled defaults. The seed script is safe to rerun and does not overwrite edited section content.
-
-## Topology and storage
-
-| Service         | Address / persistence                                                                           |
-| --------------- | ----------------------------------------------------------------------------------------------- |
-| Next.js on host | `http://localhost:3000`; normal host development process                                        |
-| WordPress       | `http://localhost:8080`; bound to `127.0.0.1`; named `wordpress_data` volume at `/var/www/html` |
-| MariaDB         | `database:3306` inside Compose; no host port; named `database_data` volume                      |
-
-Compose project name: `fgs-website-local`. WordPress waits for the database health check. Its own check verifies the HTTP listener, not installation completion or authenticated API functionality. Data volumes survive stop, restart, and `docker:down`.
-
-The local-only WordPress configuration sets `WP_ENVIRONMENT_TYPE=local`, the configured home/site URL, and disables the dashboard file editor. This configuration must not be deployed to production. The host alias `host.docker.internal` is mapped to the Docker host for future CMS callbacks; no revalidation webhook is installed yet.
-
-## Configuration
-
-| Variable                                               | Current use                                                                                                                                                                                                                                   |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WORDPRESS_URL`                                        | Local site/home URL and server CMS base; defaults to `http://localhost:8080` in the example                                                                                                                                                   |
-| `WORDPRESS_PORT`                                       | Host loopback port; update WORDPRESS_URL as well if changed                                                                                                                                                                                   |
-| `MARIADB_DATABASE`, `MARIADB_USER`                     | Local CMS database/user names                                                                                                                                                                                                                 |
-| `MARIADB_PASSWORD`, `MARIADB_ROOT_PASSWORD`            | Required random local credentials generated by setup                                                                                                                                                                                          |
-| `WORDPRESS_USERNAME`, `WORDPRESS_APPLICATION_PASSWORD` | Used by the server-only WordPress adapter (`src/lib/wordpress/client.ts`) for admin page/post/media writes; set manually after creating a dedicated Editor-role integration account and Application Password in `/wp-admin` — never committed |
-| `REVALIDATION_SECRET`                                  | Generated local shared secret for the CMS webhook endpoint; configure the same value privately in WordPress when testing events                                                                                                               |
-
-`pnpm setup:env` seeds `NEXTAUTH_SECRET` locally. Google OAuth client credentials, `NEXTAUTH_URL`, and exact `ADMIN_ALLOWED_EMAILS` must be supplied separately for admin access. No optional application database is provisioned. WordPress connects through the `database` service hostname; Next.js uses the host-facing CMS URL. A callback from inside a container cannot use `localhost` to address host Next.js.
-
-Changing database passwords in `.env.local` does **not** change credentials already initialized in persistent MariaDB storage. Rotate through the database's supported process or intentionally recreate disposable development data; do not delete volumes as an automatic fix.
-
-## Local PHP upload limits
-
-The official WordPress/PHP image defaults to `upload_max_filesize=2M` and
-`post_max_size=8M`, both below SPEC-003's 10 MB-per-image cap. `compose.yaml`
-mounts `docker/php/uploads.ini` read-only into the WordPress container's
-`conf.d` (`upload_max_filesize=12M`, `post_max_size=24M`, `memory_limit=256M`)
-so the local admin publishing flow can be exercised end-to-end. This is a
-local-only override for exercising the scaffold, not evidence of any
-production PHP configuration (DEC-107 remains unverified). Apply it (or
-changes to it) with `pnpm docker:up`, which recreates the WordPress container;
-confirm the new limits with:
-
-```sh
-docker exec fgs-website-local-wordpress-1 php -i | grep -E "upload_max_filesize|post_max_size"
-```
-
-## Site content must-use plugin (SPEC-007)
-
-`compose.yaml` mounts `wordpress/mu-plugins` read-only into the WordPress container's
-`wp-content/mu-plugins`. WordPress auto-loads every PHP file placed directly in that
-directory with no activation step ("must-use" plugins are always active). Currently:
-
-- `fgs-site-content.php` — registers the `fgs_section_data` post meta field on the `page`
-  post type (`register_post_meta`, `show_in_rest: true`, `auth_callback` requiring
-  `edit_pages`), which the SPEC-007 site section content model depends on entirely. Without
-  it, section reads/writes fail (public reads fall back to defaults; admin saves error with
-  "run the seed script").
-
-**Production requirement**: whatever hosts WordPress in production (DEC-107, still
-unverified) must also have this file present at `wp-content/mu-plugins/fgs-site-content.php`
-— it is not something WordPress ships with, and there is no fallback if it's missing.
-Deploying the CMS without it is a functional regression for every site section, not a
-degraded-but-working state.
-
-## Operations
-
-| Command              | Effect                                                                          |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `pnpm docker:config` | Validate Compose quietly without printing interpolated secrets                  |
-| `pnpm docker:up`     | Start services and wait for health (180-second readiness timeout after startup) |
-| `pnpm docker:status` | Show service health and ports                                                   |
-| `pnpm docker:logs`   | Recent service logs; inspect locally and redact sensitive data before sharing   |
-| `pnpm docker:stop`   | Stop without removing containers/volumes                                        |
-| `pnpm docker:down`   | Remove project containers/network, preserving named volumes                     |
-
-A volume reset is intentionally not a convenience script. Only delete identified local project volumes when disposable data or backup coverage is confirmed and the user requests that reset. Never reuse the reset procedure against production. No production backup/restore guarantee follows from persistent local volumes.
-
-## Troubleshooting and limits
-
-- Docker unavailable: start Docker Desktop/Engine, then rerun validation/startup.
-- Port conflict: choose a free `WORDPRESS_PORT`, update `WORDPRESS_URL`, and recreate the local service.
-- Installer still shown: containers can be healthy before WordPress setup is complete.
-- Database access denied after editing credentials: existing volume credentials are unchanged by environment edits.
-- API `401`/`403`: check the dedicated account's capabilities and Application Password locally without printing credentials.
-- API `404`: complete installation and save the permalink configuration; distinguish Apache routing from a missing CMS resource.
-- Broken images: check the CMS home/site URL, media response, and remote image patterns in `next.config.ts`.
-- Future callback fails: use the container-to-host address and verify Next.js binding/firewall and secret configuration.
-
-See [SPEC-006](specs/006-repository-scaffold.md) for measured verification and [TESTING.md](TESTING.md) for remaining CMS/restore checks. References consulted 2026-09-19: [WordPress image](https://hub.docker.com/_/wordpress), [MariaDB image](https://hub.docker.com/_/mariadb), and [Compose networking](https://docs.docker.com/compose/how-tos/networking/). Images use explicit release tags and verified registry digests; review and update both deliberately rather than relying on `latest`.
+Configure Google login separately. Never use production databases for routine tests. See [TESTING](TESTING.md) for the guarded disposable database suite.

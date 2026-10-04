@@ -12,8 +12,8 @@ import {
 } from "@/components/admin/fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { HeroView } from "@/lib/wordpress/sections/hero";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { HeroView } from "@/lib/content/sections/hero";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveHeroAction } from "./actions";
 
@@ -28,7 +28,14 @@ function toImageFieldValue(view: HeroView): ImageFieldValue {
   };
 }
 
-export function HeroForm({ initial }: { initial: HeroView }) {
+export function HeroForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: HeroView;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [heading, setHeading] = useState(initial.heading);
   const [tagline, setTagline] = useState(initial.tagline);
@@ -63,6 +70,7 @@ export function HeroForm({ initial }: { initial: HeroView }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({
         heading,
@@ -102,6 +110,7 @@ export function HeroForm({ initial }: { initial: HeroView }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
         name="backgroundImageMediaId"

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
-import type { SchoolInfoView } from "@/lib/wordpress/sections/school-info";
+import type { SchoolInfoView } from "@/lib/content/sections/school-info";
 
 /** Navigation items — each `href` targets a section id on the landing page. */
 const NAV_ITEMS = [

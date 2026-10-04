@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 
@@ -6,7 +8,7 @@ import { Footer } from "@/components/public/footer";
 import { NewsSection } from "@/components/public/news-section";
 import { ClubsSection } from "@/components/public/clubs-section";
 import { GallerySection } from "@/components/public/gallery-section";
-import { getPublishedArticles } from "@/lib/wordpress/reads";
+import { getPublishedArticles } from "@/lib/content/reads";
 import {
   aboutContent,
   admissionContent,
@@ -15,8 +17,8 @@ import {
   galleryContent,
   heroContent,
   schoolInfoContent,
-} from "@/lib/wordpress/sections/content";
-import { SECTION_ICON_OPTIONS } from "@/lib/wordpress/sections/icons";
+} from "@/lib/content/sections/content";
+import { SECTION_ICON_OPTIONS } from "@/lib/content/sections/icons";
 
 export default async function Home() {
   const [

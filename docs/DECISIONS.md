@@ -1,3 +1,5 @@
+> Current ownership: DEC-115 below supersedes prior WordPress ownership, native editing and cache integration. Earlier entries remain historical decision evidence.
+
 # Decision register
 
 Decision status and implementation status are separate. **Accepted** entries establish intent; they do not claim working software. **Proposed** entries need acceptance before implementation. **Open** entries identify information still required. **Deferred** entries are intentionally postponed.
@@ -53,3 +55,15 @@ Deferred does not mean permanently excluded. Migration planning becomes a launch
 ## Updating decisions
 
 For an accepted proposal, retain its ID and record the chosen alternative, rationale, named approver, date, and link to durable approval evidence (issue, PR, or recorded owner instruction). Update requirements and contracts together. Supersede earlier choices explicitly; do not erase their history or mark every proposal accepted merely because the documentation was merged.
+
+## DEC-115: Application-owned content and production migration
+
+**Accepted October 4, 2026:** the owner explicitly instructed implementation of the complete WordPress removal/migration plan. Use Hostinger MySQL through mysql2, persistent account filesystem media, isolated staging/live data, existing Google login and admin, all five legacy articles published, seven newer CMS sections, 20 photos/10 MB each/60 MB total, no persistent content caches. Inquiry submission is deferred. This supersedes the WordPress-specific portions of DEC-001/002/003/004/005/102/105 and earlier content selection.
+
+Deletion is authorized only after fresh recoverable backups, verified persistent media, secure OAuth/root callback, actual hosted sign-in and staging acceptance. Preserve design, conceptual history and preview automation. See [SPEC-008](specs/008-wordpress-removal.md) for scope and evidence.
+
+## October 4 branch deployment automation
+
+The owner requested automatic Hostinger builds on every push: `staging` targets preview, and `main`/`master` target production. This supersedes DEC-113's production automation deferral and SPEC-008's manual deployment policy. Existing branch review requirements remain; application environments, databases and media remain isolated. Rollbacks remain manual. See [CI_CD.md](CI_CD.md) for configuration and verification.
+
+The owner additionally requested mandatory production `verify` checks and automatic schema migrations before publishing. Hostinger uses `build:deploy` (migration then build); migration failures prevent publication, while schema rollback and recovery backups remain manual.

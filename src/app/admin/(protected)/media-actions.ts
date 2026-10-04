@@ -5,7 +5,7 @@ import {
   listMediaLibrary,
   type MediaLibraryListResult,
   type MediaLibraryQuery,
-} from "@/lib/wordpress/media-library";
+} from "@/lib/content/media-library";
 
 /**
  * Shared by every image field's "Choose from library" tab (section images,

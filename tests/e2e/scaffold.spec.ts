@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 
 /**
  * The homepage now renders content-driven sections (SPEC-007): the exact
- * hero heading text comes from WordPress (or its bundled local fallback when
- * WordPress is unreachable — src/lib/wordpress/sections/hero.ts), so it isn't
+ * hero heading text comes from the content database (or its bundled local fallback when
+ * the content database is unreachable â€” src/lib/content/sections/hero.ts), so it isn't
  * a fixed string this test can assert. What the app actually guarantees
  * regardless of CMS state: a 200 response, no client-side JS errors, a
  * single <h1> heading always rendered, a <main> landmark, and the site-wide
@@ -27,8 +27,10 @@ test("the homepage renders with no client-side errors, a heading, and the noinde
   expect(errors).toEqual([]);
 });
 
-test("unknown routes return an honest not-found response", async ({ page }) => {
+test("legacy lookup reports database unavailability honestly", async ({
+  page,
+}) => {
   const response = await page.goto("/not-a-school-page");
-  expect(response?.status()).toBe(404);
-  await expect(page.getByRole("link", { name: "Return home" })).toBeVisible();
+  expect(response?.status()).toBe(503);
+  await expect(page.getByText("Temporarily unavailable")).toBeVisible();
 });

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowRight, ChevronUp } from "lucide-react";
 
-import type { GalleryView } from "@/lib/wordpress/sections/gallery";
+import type { GalleryView } from "@/lib/content/sections/gallery";
 
 function chunkIntoFives<T>(items: T[]): T[][] {
   const chunks: T[][] = [];

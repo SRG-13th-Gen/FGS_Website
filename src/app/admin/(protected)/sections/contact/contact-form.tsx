@@ -14,14 +14,21 @@ import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes
 import type {
   ContactCard,
   ContactContent,
-} from "@/lib/wordpress/sections/contact";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+} from "@/lib/content/sections/contact";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveContactAction } from "./actions";
 
 const initialActionState: SectionSaveResult | null = null;
 
-export function ContactForm({ initial }: { initial: ContactContent }) {
+export function ContactForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: ContactContent;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [sectionLabel, setSectionLabel] = useState(initial.sectionLabel);
   const [heading, setHeading] = useState(initial.heading);
@@ -53,6 +60,7 @@ export function ContactForm({ initial }: { initial: ContactContent }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({ sectionLabel, heading, intro, cards });
     }
@@ -78,6 +86,7 @@ export function ContactForm({ initial }: { initial: ContactContent }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input type="hidden" name="cardsJson" value={JSON.stringify(cards)} />
 
       <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">

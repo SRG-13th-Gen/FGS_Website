@@ -71,9 +71,8 @@ export function TrashArticleButton({
             Move &quot;{title}&quot; to trash?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This article will disappear from the website. It stays in
-            WordPress&apos;s trash and is never permanently deleted — restore it
-            from wp-admin if needed.
+            This article will disappear from the website. It stays in the
+            archive and is never permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
