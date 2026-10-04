@@ -5,3 +5,5 @@
 *.webp binary
 *.ico binary
 *.woff2 binary
+# Applied SQL migrations are immutable, including line endings and final bytes.
+db/migrations/*.sql -text whitespace=-blank-at-eof,cr-at-eol

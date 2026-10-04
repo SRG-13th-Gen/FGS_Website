@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { reorderArray } from "@/lib/wordpress/sections/reorder";
+import { reorderArray } from "@/lib/content/sections/reorder";
 
 describe("reorderArray", () => {
   it("moves an item up", () => {

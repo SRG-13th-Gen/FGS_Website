@@ -6,31 +6,32 @@ This is the canonical instruction entry point for this repository. [CLAUDE.md](C
 
 Always read [onboarding](.agents/rules/00-repository-onboarding.md) and [docs/README.md](docs/README.md), then load only the rules relevant to the task:
 
-| Work                                                     | Applicable rule                                                                     |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| System boundaries, data ownership, application modules   | [10-architecture](.agents/rules/10-architecture.md)                                 |
-| CMS reads/writes, WordPress authentication, cache events | [20-wordpress-integration](.agents/rules/20-wordpress-integration.md)               |
-| Auth, secrets, inquiries, uploads, private data          | [30-security-privacy](.agents/rules/30-security-privacy.md)                         |
-| UI, forms, content presentation, design                  | [40-frontend-design](.agents/rules/40-frontend-design.md)                           |
-| Behavior changes or verification                         | [50-testing-quality](.agents/rules/50-testing-quality.md)                           |
-| Documentation, requirements, specifications              | [60-specifications-documentation](.agents/rules/60-specifications-documentation.md) |
-| Commits, branches, pushes, pull requests                 | [70-commits-pull-requests](.agents/rules/70-commits-pull-requests.md)               |
+| Work                                                   | Applicable rule                                                                     |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| System boundaries, data ownership, application modules | [10-architecture](.agents/rules/10-architecture.md)                                 |
+| Content reads/writes, media, offline migration         | [20-wordpress-integration](.agents/rules/20-wordpress-integration.md)               |
+| Auth, secrets, inquiries, uploads, private data        | [30-security-privacy](.agents/rules/30-security-privacy.md)                         |
+| UI, forms, content presentation, design                | [40-frontend-design](.agents/rules/40-frontend-design.md)                           |
+| Behavior changes or verification                       | [50-testing-quality](.agents/rules/50-testing-quality.md)                           |
+| Documentation, requirements, specifications            | [60-specifications-documentation](.agents/rules/60-specifications-documentation.md) |
+| Commits, branches, pushes, pull requests               | [70-commits-pull-requests](.agents/rules/70-commits-pull-requests.md)               |
 
 The documentation index defines authority, document ownership, and task-specific reading paths. Resolve conflicts explicitly. A proposal is not an accepted requirement simply because it appears in a merged document.
 
 ## Repository invariants
 
-- WordPress owns public content and media. Use its REST API; never create a second editable content store or directly access CMS tables from Next.js.
-- Privileged WordPress calls and credentials stay server-side. No secrets in browser code, public environment variables, logs, or committed files.
-- Docker is for local WordPress/database development only. Hostinger is the production target; its exact runtime capabilities remain unverified until recorded.
-- The optional application database is only for accepted application-owned needs. Do not create illustrative schemas automatically.
-- Preserve the frontend designer's implemented visual guidance in [DESIGN.md](docs/DESIGN.md). The owner requested staging preview automation on 2026-09-27; keep its scope and setup status accurate in [CI_CD.md](docs/CI_CD.md).
-- Preserve [the initial conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) as historical input. Update maintained specifications instead.
-- Preserve unrelated user changes. Document actual implementation and verification status honestly.
+- The application owns content in MySQL and uploads in persistent filesystem storage. WordPress is offline migration input only, per the owner's October 4 plan in [SPEC-008](docs/specs/008-wordpress-removal.md).
+- Privileged database/auth/media settings remain server-only; no secrets in browser code, logs or tracked files.
+- Staging and production databases, users and media directories are isolated. Media stays outside every deployment directory.
+- Authorize protected operations, validate inputs, parameterize SQL, sanitize HTML and validate images/paths. Use transactions, revisions and soft deletion.
+- Public content reads dynamically without persistent caches for this release. Report saved-but-refresh-failed outcomes accurately.
+- Docker is local MariaDB only. Hostinger Node 24 is production; mandatory storage, identity, backup and acceptance gates precede root deletion.
+- Preserve [DESIGN](docs/DESIGN.md), branch-based [CI/CD](docs/CI_CD.md), and the historical conceptual draft.
+- Preserve unrelated user changes and report actual verification honestly.
 
 ## Present repository state
 
-The repository contains a Next.js/TypeScript/Tailwind site, the selected shadcn registry, local WordPress/MariaDB Compose services, and executable quality checks. The public landing page and news detail route, WordPress-backed site sections, and admin section/article workflows are implemented. Google OAuth with an exact admin allowlist and WordPress content revalidation are implemented; an independent Hostinger CMS copy and Node preview are deployed, with partial public and cache-refresh checks passed. Hosted identity, full preview acceptance, root cutover, and inquiry delivery remain unfinished. Use `pnpm verify` for lint, types, unit tests, formatting and build; `pnpm test:e2e` for production browser checks; and `pnpm docker:config` for Compose validation after `pnpm setup:env`. See [TESTING.md](docs/TESTING.md) and [DEPLOYMENT.md](docs/DEPLOYMENT.md) for scope and prerequisites.
+The Next.js public and admin interfaces now use server-only services in `src/lib/content`. Seven section editors, article create/edit/trash and media selection/upload remain. Google verified-email allowlisting and eight-hour sessions remain. SQL migrations and offline migration/recovery tools are implemented; fresh WordPress backups and an export are retained outside Git. Hosted acceptance passed and production launched on October 4; evidence is recorded in SPEC-008. Inquiry submission is deferred. Use `pnpm verify`, `pnpm test:database`, and `pnpm test:e2e`; see [TESTING](docs/TESTING.md) and [DEPLOYMENT](docs/DEPLOYMENT.md).
 
 shadcn components in `src/components/ui` are primitives. Custom public components and the school visual system are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
 
@@ -42,8 +43,8 @@ For authorized Hostinger shell or management API access, use the repository-loca
 
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+This version has breaking changes â€” APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This block is written and re-added by `next dev` â€” verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->

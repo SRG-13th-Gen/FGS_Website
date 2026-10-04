@@ -1,8 +1,12 @@
-import { contactContent } from "@/lib/wordpress/sections/content";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { getSectionRevision } from "@/lib/content/sections/adapter";
+import { contactContent } from "@/lib/content/sections/content";
 
 import { ContactForm } from "./contact-form";
 
 export default async function AdminContactSectionPage() {
+  await requireAdmin();
+  const revision = await getSectionRevision("site-contact");
   const initial = await contactContent.get();
 
   return (
@@ -11,7 +15,7 @@ export default async function AdminContactSectionPage() {
         Fields appear in the same order as on the homepage Contact section.
       </p>
       <div className="pt-5">
-        <ContactForm initial={initial} />
+        <ContactForm initial={initial} revision={revision} />
       </div>
     </div>
   );

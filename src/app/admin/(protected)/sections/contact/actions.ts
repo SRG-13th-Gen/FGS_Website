@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { checkSectionRevision } from "@/lib/content/sections/adapter";
+
 import { requireAdmin } from "@/lib/auth/require-admin";
-import type { ContactContent } from "@/lib/wordpress/sections/contact";
-import { contactContent } from "@/lib/wordpress/sections/content";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { ContactContent } from "@/lib/content/sections/contact";
+import { contactContent } from "@/lib/content/sections/content";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 function parseJsonField<T>(formData: FormData, name: string, fallback: T): T {
   const raw = formData.get(name);
@@ -22,6 +24,11 @@ export async function saveContactAction(
   formData: FormData,
 ): Promise<SectionSaveResult> {
   await requireAdmin();
+  const revisionError = await checkSectionRevision(
+    "site-contact",
+    Number(formData.get("revision")),
+  );
+  if (revisionError) return { status: "error", message: revisionError };
 
   const input: ContactContent = {
     sectionLabel: String(formData.get("sectionLabel") ?? ""),
@@ -30,7 +37,10 @@ export async function saveContactAction(
     cards: parseJsonField(formData, "cardsJson", []),
   };
 
-  const result = await contactContent.save(input);
+  const result = await contactContent.save(
+    input,
+    Number(formData.get("revision")),
+  );
   if (result.status !== "success") return result;
 
   let cacheWarning = false;

@@ -30,6 +30,7 @@ test-results/
 backups/
 *.sql
 *.sql.gz
+!db/migrations/*.sql
 
 # Logs and machine/editor state
 *.log

@@ -1,12 +1,12 @@
 # Architecture rules
 
-Read [ARCHITECTURE.md](../../docs/ARCHITECTURE.md), the affected requirements, and contracts before changing boundaries.
+Read [ARCHITECTURE](../../docs/ARCHITECTURE.md), [SPEC-008](../../docs/specs/008-wordpress-removal.md) and contracts.
 
-- Keep one Next.js application with public and team admin surfaces. Server entry points call validated, authorized operations and adapters.
-- WordPress remains the public content/media authority. Use API resource IDs; caches are disposable delivery copies, not another CMS.
-- Do not query or modify WordPress tables from the application. Keep any app-owned tables separate and justified by accepted requirements.
-- Keep privileged CMS/email/auth integration behind server-only modules. Browser components must not construct authenticated upstream requests.
-- Distinguish completed CMS writes from failed cache refreshes. Recover refresh independently instead of replaying writes.
-- Verify the chosen hosting/runtime/cache model before adopting deployment-dependent behavior. Docker remains local-only.
-
-When a boundary changes, update the architecture, contracts, affected requirements, and decision record together. Do not add services, queues, databases, or custom content types merely because they might be useful later.
+- One Next.js application owns public content and admin.
+- Use server-only mysql2 services and versioned SQL migrations; no WordPress runtime adapters.
+- Separate staging/production databases, credentials and media roots.
+- Media lives outside every deployment directory; verify managed app access and restart/redeploy persistence.
+- Public content reads dynamically without persistent caches for this release.
+- Authorize protected operations; validate inputs, sanitize output and parameterize queries.
+- Use transactions and revisions; distinguish completed saves from refresh failures.
+- Docker is local database development only. Preserve conceptual history, design and preview automation.

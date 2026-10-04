@@ -20,8 +20,8 @@ import type {
   AdmissionProgram,
   AdmissionRequirementCategory,
   AdmissionView,
-} from "@/lib/wordpress/sections/admission";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+} from "@/lib/content/sections/admission";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveAdmissionAction } from "./actions";
 
@@ -36,7 +36,14 @@ function toImageFieldValue(view: AdmissionView): ImageFieldValue {
   };
 }
 
-export function AdmissionForm({ initial }: { initial: AdmissionView }) {
+export function AdmissionForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: AdmissionView;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [sectionLabel, setSectionLabel] = useState(initial.sectionLabel);
   const [heading, setHeading] = useState(initial.heading);
@@ -79,6 +86,7 @@ export function AdmissionForm({ initial }: { initial: AdmissionView }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({
         sectionLabel,
@@ -126,6 +134,7 @@ export function AdmissionForm({ initial }: { initial: AdmissionView }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
         name="backgroundImageMediaId"

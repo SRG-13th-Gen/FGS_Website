@@ -82,7 +82,7 @@ export function AdminSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border">
         <p className="px-2 py-1.5 text-xs text-muted-foreground">
-          Changes publish to the live site within a few minutes.
+          Saved changes appear on the live site.
         </p>
       </SidebarFooter>
     </Sidebar>

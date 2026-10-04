@@ -1,8 +1,12 @@
-import { schoolInfoContent } from "@/lib/wordpress/sections/content";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { getSectionRevision } from "@/lib/content/sections/adapter";
+import { schoolInfoContent } from "@/lib/content/sections/content";
 
 import { SchoolInfoForm } from "./school-info-form";
 
 export default async function AdminSchoolInfoSectionPage() {
+  await requireAdmin();
+  const revision = await getSectionRevision("site-school-info");
   const initial = await schoolInfoContent.get();
 
   return (
@@ -11,7 +15,7 @@ export default async function AdminSchoolInfoSectionPage() {
         Feeds the site navbar, footer, and article pages across the whole site.
       </p>
       <div className="pt-5">
-        <SchoolInfoForm initial={initial} />
+        <SchoolInfoForm initial={initial} revision={revision} />
       </div>
     </div>
   );

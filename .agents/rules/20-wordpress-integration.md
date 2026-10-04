@@ -1,14 +1,12 @@
-# WordPress integration rules
+# Content storage and migration rules
 
-Read [DATA_API_CONTRACTS.md](../../docs/DATA_API_CONTRACTS.md) and the relevant [decisions](../../docs/DECISIONS.md).
+The filename is retained for existing links. WordPress runtime integration is retired by the owner's October 4 [SPEC-008](../../docs/specs/008-wordpress-removal.md).
 
-- Verify API behavior against official WordPress documentation and the selected CMS/plugin versions. Record source links and consultation dates for behavior that affects contracts.
-- Keep conceptual DTO names distinct from WordPress wire fields. Validate pagination, resource IDs, status, and upstream responses at the adapter boundary.
-- Public reads expose published content only; privileged edit-context data must not enter public caches or responses.
-- Use a dedicated least-privilege Application Password account server-side. It is not a team login provider or a substitute for per-actor authorization.
-- Native WordPress is the school editor. Preserve Gutenberg content; do not overwrite unsupported blocks through a simplistic custom editor.
-- Define and verify revalidation for both native CMS edits and custom-admin mutations. Include slug changes, withdrawal/deletion, categories, and media dependencies.
-- Never assume WordPress already emits the proposed webhook. Select and configure its producer through an accepted feature spec.
-- Reconcile uncertain CMS mutations rather than blindly repeating potentially completed writes. Report saved-but-refresh-pending separately.
-
-Check official Next.js documentation against the installed version for caching APIs. Do not infer cache behavior solely from use of native `fetch`.
+- Current services live in `src/lib/content`; database/media credentials stay server-only.
+- Preserve DTOs and validated section fields; published-only public reads, explicit outage states.
+- Authorize protected operations before side effects. Use transactions, revisions and soft deletion.
+- Upload signatures, paths and aggregate sizes require validation; media storage must remain outside deployments.
+- Migration tools stay separate from runtime. Source identifiers/checksums make imports resumable without overwriting admin edits.
+- Preserve original wording, dates, captions, link destinations and image order; report rejected conversions and missing references.
+- Do not delete either source site until mandatory backup, identity, storage and acceptance gates pass.
+- Reconcile uncertain mutations before retrying; refresh failure is separate from save completion.

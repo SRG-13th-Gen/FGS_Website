@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
     "next-env.d.ts",
@@ -30,5 +31,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".scaffold", "playwright-report", "test-results"]
+  "exclude": [
+    "node_modules",
+    ".scaffold",
+    "playwright-report",
+    "test-results",
+    ".data",
+    "backups"
+  ]
 }

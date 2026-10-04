@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-import type { SchoolInfoView } from "@/lib/wordpress/sections/school-info";
+import type { SchoolInfoView } from "@/lib/content/sections/school-info";
 
 export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   const currentYear = new Date().getFullYear();

@@ -1,15 +1,17 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Tag, Phone, Mail } from "lucide-react";
 
-import { getArticleBySlug, getPublishedArticles } from "@/lib/wordpress/reads";
-import { schoolInfoContent } from "@/lib/wordpress/sections/content";
+import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
+import { schoolInfoContent } from "@/lib/content/sections/content";
 import {
   ARTICLE_CATEGORY_LABELS,
   formatArticleDate,
-} from "@/lib/wordpress/display";
+} from "@/lib/content/display";
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
 
@@ -19,23 +21,16 @@ interface ArticlePageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  const result = await getPublishedArticles();
-  // WordPress unreachable at build time: skip prerendering these, don't fail the build.
-  // dynamicParams stays on (the App Router default), so slugs still render on request.
-  if (result.status !== "ok") return [];
-  return result.articles.map((article) => ({ slug: article.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await getArticleBySlug(slug);
 
+  if (result.status === "not-found") notFound();
   if (result.status !== "ok") {
     return {
-      title: "Article Not Found | Flor de Grace School Inc.",
+      title: "Article Unavailable | Flor de Grace School Inc.",
       robots: { index: false, follow: false },
     };
   }
@@ -156,7 +151,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               </figure>
             )}
 
-            {/* Main Article Body — sanitized WordPress HTML (paragraphs, lists, links, headings, images with captions) */}
+            {/* Main Article Body — sanitized the content service HTML (paragraphs, lists, links, headings, images with captions) */}
             <div
               className="mt-10 max-w-[68ch] text-base leading-relaxed text-neutral-700 sm:text-lg sm:leading-8 [&_a]:text-school-green-dark [&_a]:underline [&_a]:underline-offset-2 [&_figcaption]:border-t [&_figcaption]:border-neutral-100 [&_figcaption]:bg-neutral-50/80 [&_figcaption]:px-4 [&_figcaption]:py-3 [&_figcaption]:text-center [&_figcaption]:text-xs [&_figcaption]:text-neutral-600 [&_figcaption]:italic [&_figure]:my-8 [&_figure]:overflow-hidden [&_figure]:rounded-2xl [&_figure]:border [&_figure]:border-neutral-200/80 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-neutral-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-neutral-900 [&_h4]:mt-6 [&_h4]:mb-2 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-neutral-900 [&_img]:w-full [&_img]:object-cover [&_li]:mb-2 [&_ol]:mb-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-6 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-900 [&_ul]:mb-6 [&_ul]:list-disc [&_ul]:pl-6"
               dangerouslySetInnerHTML={{ __html: article.contentHtml }}

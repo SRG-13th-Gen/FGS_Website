@@ -1,5 +1,7 @@
 # SPEC-006: Repository scaffold
 
+> Historical scaffold evidence: WordPress/PHP setup is superseded by the October 4 [SPEC-008](008-wordpress-removal.md). Current setup runs local MariaDB only; use [DOCKER](../DOCKER.md).
+
 | Field                 | Value                                                                                                                                                                       |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Approval status       | Accepted                                                                                                                                                                    |

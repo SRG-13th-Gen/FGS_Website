@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getPublishedArticles } from "@/lib/wordpress/reads";
+import { getPublishedArticles } from "@/lib/content/reads";
 
 export const dynamic = "force-dynamic";
 

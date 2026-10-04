@@ -8,8 +8,8 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { SECTION_ICON_OPTIONS } from "@/lib/wordpress/sections/icons";
-import type { ClubsContent } from "@/lib/wordpress/sections/clubs";
+import { SECTION_ICON_OPTIONS } from "@/lib/content/sections/icons";
+import type { ClubsContent } from "@/lib/content/sections/clubs";
 
 const ACCENT_STYLES = [
   {

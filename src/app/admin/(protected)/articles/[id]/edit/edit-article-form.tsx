@@ -11,9 +11,9 @@ import {
 } from "@/components/admin/article-fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { EditableArticle } from "@/lib/wordpress/admin-articles";
-import type { ArticleCategorySlug } from "@/lib/wordpress/types";
-import type { PublishArticleResult } from "@/lib/wordpress/types";
+import type { EditableArticle } from "@/lib/content/admin-articles";
+import type { ArticleCategorySlug } from "@/lib/content/types";
+import type { PublishArticleResult } from "@/lib/content/types";
 
 import { updateArticleAction } from "./actions";
 
@@ -42,6 +42,7 @@ function normalize(pictures: ArticlePicture[]) {
 export function EditArticleForm({ initial }: { initial: EditableArticle }) {
   const boundAction = updateArticleAction.bind(null, initial.id);
 
+  const [revision, setRevision] = useState(initial.revision);
   const [baseline, setBaseline] = useState(initial);
   const [title, setTitle] = useState(initial.title);
   const [category, setCategory] = useState<ArticleCategorySlug>(
@@ -79,6 +80,7 @@ export function EditArticleForm({ initial }: { initial: EditableArticle }) {
     setHandledState(state);
     if (state?.status === "success") {
       const nextBaseline: EditableArticle = {
+        revision: state.revision,
         id: initial.id,
         slug: initial.slug,
         title,
@@ -95,6 +97,7 @@ export function EditArticleForm({ initial }: { initial: EditableArticle }) {
           caption: p.caption,
         })),
       };
+      setRevision(state.revision);
       setBaseline(nextBaseline);
       setPictures(toPictures(nextBaseline));
     } else if (state && state.uploadedImages.length > 0) {
@@ -130,6 +133,7 @@ export function EditArticleForm({ initial }: { initial: EditableArticle }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <ArticlePictureFormFields pictures={pictures} />
 
       <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
@@ -180,7 +184,7 @@ export function EditArticleForm({ initial }: { initial: EditableArticle }) {
           onChange={(e) => setBody(e.target.value)}
           className="mt-3.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-sm leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
           aria-invalid={Boolean(fieldErrors.body)}
-          required
+          required={pictures.length === 0}
         />
         {fieldErrors.body && (
           <p className="mt-2 text-xs font-medium text-red-600">

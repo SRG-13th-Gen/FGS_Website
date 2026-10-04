@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   UploadCloud,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { MediaPickerDialog } from "@/components/admin/media-picker";
-import type { ArticleCategorySlug } from "@/lib/wordpress/types";
+import type { ArticleCategorySlug } from "@/lib/content/types";
 
 export const ARTICLE_CATEGORY_OPTIONS: Array<{
   id: ArticleCategorySlug;
@@ -221,17 +221,40 @@ export function ArticlePictureEditor({
   onChange: (next: ArticlePicture[]) => void;
   error?: string;
 }) {
+  const [limitError, setLimitError] = useState<string | null>(null);
+  const acceptPictures = (next: ArticlePicture[]) => {
+    const files = next.flatMap((picture) =>
+      picture.file ? [picture.file] : [],
+    );
+    if (next.length > 20) {
+      setLimitError("Choose up to 20 photos.");
+      return;
+    }
+    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
+      setLimitError("Each photo must be 10 MB or smaller.");
+      return;
+    }
+    if (
+      files.reduce((bytes, file) => bytes + file.size, 0) >
+      60 * 1024 * 1024
+    ) {
+      setLimitError("New photos must total no more than 60 MB.");
+      return;
+    }
+    setLimitError(null);
+    onChange(next);
+  };
   const addFiles = (files: File[]) => {
     if (files.length === 0) return;
-    onChange([...pictures, ...files.map(newArticlePicture)]);
+    acceptPictures([...pictures, ...files.map(newArticlePicture)]);
   };
 
   const addExisting = (item: { mediaId: number; url: string; alt: string }) => {
-    onChange([...pictures, newArticlePictureFromExisting(item)]);
+    acceptPictures([...pictures, newArticlePictureFromExisting(item)]);
   };
 
   const update = (id: string, patch: Partial<ArticlePicture>) => {
-    onChange(
+    acceptPictures(
       pictures.map((pic) => (pic.id === id ? { ...pic, ...patch } : pic)),
     );
   };
@@ -276,7 +299,8 @@ export function ArticlePictureEditor({
           </h2>
           <p className="text-xs text-neutral-500">
             Upload photos for your article. Each photo can have its own custom
-            caption and alt text.
+            caption and alt text. Up to 20 photos, 10 MB each and 60 MB total
+            for new uploads.
           </p>
         </div>
         <MediaPickerDialog
@@ -296,6 +320,11 @@ export function ArticlePictureEditor({
         />
       </div>
 
+      {limitError && (
+        <p role="alert" className="mt-3 text-xs font-medium text-red-600">
+          {limitError}
+        </p>
+      )}
       {pictures.length === 0 ? (
         <MediaPickerDialog
           title="Add a photo"

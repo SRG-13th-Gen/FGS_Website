@@ -1,51 +1,31 @@
 import { z } from "zod";
-
-const optionalSecret = z.preprocess(
-  (value) => (value === "" ? undefined : value),
+import { isAbsolute } from "node:path";
+const optional = z.preprocess(
+  (v) => (v === "" ? undefined : v),
   z.string().optional(),
 );
-
-const environmentSchema = z.object({
-  WORDPRESS_URL: z.url().refine((value) => {
-    if (!URL.canParse(value)) return false;
-    const url = new URL(value);
-    return (
-      ["http:", "https:"].includes(url.protocol) &&
-      !url.username &&
-      !url.password &&
-      !url.search &&
-      !url.hash
-    );
-  }),
-  WORDPRESS_USERNAME: optionalSecret,
-  WORDPRESS_APPLICATION_PASSWORD: optionalSecret,
-  REVALIDATION_SECRET: optionalSecret,
+const schema = z.object({
+  DB_HOST: optional,
+  DB_PORT: z.coerce.number().int().min(1).max(65535).default(3306),
+  DB_NAME: optional,
+  DB_USER: optional,
+  DB_PASSWORD: optional,
+  MEDIA_STORAGE_PATH: optional,
 });
-
 export function parseServerEnvironment(
   source: Record<string, string | undefined>,
 ) {
-  const result = environmentSchema.safeParse({
-    ...source,
-    WORDPRESS_URL:
-      source.WORDPRESS_URL ??
-      (source.NODE_ENV === "production" ? undefined : "http://localhost:8080"),
-  });
-
-  if (!result.success) {
-    const fields = [
-      ...new Set(result.error.issues.map((issue) => issue.path[0])),
-    ];
-    // Never include rejected values: URLs and credentials can contain secrets.
-    throw new Error(`Invalid server environment: ${fields.join(", ")}`);
-  }
-
+  const parsed = schema.safeParse(source);
+  if (!parsed.success)
+    throw new Error(
+      "Invalid server environment: " +
+        [...new Set(parsed.error.issues.map((i) => i.path[0]))].join(", "),
+    );
   if (
     source.NODE_ENV === "production" &&
-    new URL(result.data.WORDPRESS_URL).protocol !== "https:"
-  ) {
-    throw new Error("WORDPRESS_URL must use HTTPS in production.");
-  }
-
-  return result.data;
+    parsed.data.MEDIA_STORAGE_PATH &&
+    !isAbsolute(parsed.data.MEDIA_STORAGE_PATH)
+  )
+    throw new Error("MEDIA_STORAGE_PATH must be absolute in production.");
+  return parsed.data;
 }

@@ -12,6 +12,15 @@ function randomSecret() {
 // values. Real OAuth client credentials and admin emails are supplied separately.
 const managedDefaults = {
   NEXTAUTH_SECRET: randomSecret,
+  DB_HOST: () => "127.0.0.1",
+  DB_PORT: () => "3307",
+  DB_NAME: () => "fgs_content",
+  DB_USER: () => "fgs_content",
+  DB_PASSWORD: randomSecret,
+  MARIADB_ROOT_PASSWORD: randomSecret,
+  MEDIA_STORAGE_PATH: () => ".data/media",
+  NEXTAUTH_URL: () => "http://localhost:3000",
+  SITE_INDEXABLE: () => "false",
 };
 
 function parseValues(contents) {

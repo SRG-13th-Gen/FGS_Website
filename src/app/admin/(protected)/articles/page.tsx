@@ -1,16 +1,17 @@
+import { requireAdmin } from "@/lib/auth/require-admin";
 import Link from "next/link";
 import Image from "next/image";
 import { FilePlus, ImageOff, PenLine, Search } from "lucide-react";
 
-import { listArticlesForAdmin } from "@/lib/wordpress/admin-articles";
+import { listArticlesForAdmin } from "@/lib/content/admin-articles";
 import {
   ARTICLE_CATEGORIES,
   type ArticleCategorySlug,
-} from "@/lib/wordpress/types";
+} from "@/lib/content/types";
 import {
   ARTICLE_CATEGORY_LABELS,
   formatArticleDateFull,
-} from "@/lib/wordpress/display";
+} from "@/lib/content/display";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -56,6 +57,7 @@ export default async function AdminAllArticlesPage({
 }: {
   searchParams: Promise<{ q?: string; category?: string; page?: string }>;
 }) {
+  await requireAdmin();
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const category =
@@ -122,8 +124,7 @@ export default async function AdminAllArticlesPage({
       {result.status === "unavailable" ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-10 text-center">
           <p className="text-sm text-neutral-500">
-            Couldn&apos;t reach WordPress to load news. Check the local CMS
-            connection and try again.
+            News could not be loaded. Please try again shortly.
           </p>
         </div>
       ) : result.items.length === 0 ? (

@@ -13,8 +13,8 @@ import {
 } from "@/components/admin/fields";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
-import type { GalleryView } from "@/lib/wordpress/sections/gallery";
-import type { SectionSaveResult } from "@/lib/wordpress/sections/types";
+import type { GalleryView } from "@/lib/content/sections/gallery";
+import type { SectionSaveResult } from "@/lib/content/sections/types";
 
 import { saveGalleryAction } from "./actions";
 
@@ -43,7 +43,14 @@ function normalize(photos: GalleryPhotoForm[]) {
   }));
 }
 
-export function GalleryForm({ initial }: { initial: GalleryView }) {
+export function GalleryForm({
+  initial,
+  revision: initialRevision,
+}: {
+  initial: GalleryView;
+  revision: number;
+}) {
+  const [revision, setRevision] = useState(initialRevision);
   const [baseline, setBaseline] = useState(initial);
   const [sectionLabel, setSectionLabel] = useState(initial.sectionLabel);
   const [heading, setHeading] = useState(initial.heading);
@@ -77,6 +84,7 @@ export function GalleryForm({ initial }: { initial: GalleryView }) {
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
+    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
       setBaseline({
         sectionLabel,
@@ -111,6 +119,7 @@ export function GalleryForm({ initial }: { initial: GalleryView }) {
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
         name="photosJson"

@@ -3,12 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { publishArticle } from "@/lib/wordpress/publish";
+import { publishArticle } from "@/lib/content/publish";
 import type {
   ArticleImageInput,
   PublishArticleInput,
   PublishArticleResult,
-} from "@/lib/wordpress/types";
+} from "@/lib/content/types";
 
 function parseExistingMediaId(value: FormDataEntryValue | null): number | null {
   if (typeof value !== "string" || !value.trim()) return null;
@@ -43,6 +43,7 @@ export async function publishArticleAction(
   await requireAdmin();
 
   const input: PublishArticleInput = {
+    mutationKey: String(formData.get("mutationKey") ?? ""),
     title: String(formData.get("title") ?? ""),
     category: String(formData.get("category") ?? ""),
     body: String(formData.get("body") ?? ""),

@@ -1,8 +1,12 @@
-import { heroContent } from "@/lib/wordpress/sections/content";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { getSectionRevision } from "@/lib/content/sections/adapter";
+import { heroContent } from "@/lib/content/sections/content";
 
 import { HeroForm } from "./hero-form";
 
 export default async function AdminHeroSectionPage() {
+  await requireAdmin();
+  const revision = await getSectionRevision("site-hero");
   const initial = await heroContent.get();
 
   return (
@@ -12,7 +16,7 @@ export default async function AdminHeroSectionPage() {
         homepage.
       </p>
       <div className="pt-5">
-        <HeroForm initial={initial} />
+        <HeroForm initial={initial} revision={revision} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-The repository has an implemented public landing page and article detail route, WordPress-backed section content, admin section/article editing, Google OAuth code with an exact admin allowlist, a WordPress revalidation producer/endpoint, local WordPress/MariaDB Compose services, and quality tooling. An independent Hostinger CMS copy and Node preview are deployed; public CMS reads, images, and native section cache refresh passed partial checks. The CMS core, available plugins, and active theme's parent were updated. Hosted OAuth, full preview acceptance, live cutover, and inquiry delivery remain unverified or unfinished. [SPEC-003](specs/003-team-admin.md), [SPEC-007](specs/007-site-content-management.md), and the [deployment runbook](DEPLOYMENT.md) record scope and evidence. Passing local checks does not establish launch acceptance.
+The public and admin interfaces use application-owned MySQL content and persistent filesystem media. The owner's October 4 plan in [SPEC-008](specs/008-wordpress-removal.md) supersedes headless WordPress ownership and native editing. Seven editors, article workflows and Google login remain. Fresh recovery backups and isolated databases are retained; hosted acceptance passed and production launched on October 4. Inquiry submission is deferred. Passing local checks does not establish launch acceptance.
 
 - **Accepted**: established by the original draft or explicit owner direction. Acceptance is not evidence of implementation.
 - **Proposed**: a recommendation awaiting a decision; do not silently treat it as approved.
@@ -18,7 +18,7 @@ Authority for future work:
 4. Implementation and tests as evidence of actual behavior, not permission to override requirements.
 5. Proposed specifications, historical conceptual material, and external examples.
 
-[AGENTS.md](../AGENTS.md) governs contributor conduct. If authoritative documents conflict, surface the conflict and resolve the affected decision rather than silently choosing one. The [original draft](conceptual/IMPLEMENTATION_PLAN.md) stays unchanged; its accepted architecture is carried into the maintained documents below.
+[AGENTS.md](../AGENTS.md) governs contributor conduct. If authoritative documents conflict, surface the conflict and resolve the affected decision rather than silently choosing one. The [original draft](conceptual/IMPLEMENTATION_PLAN.md) stays unchanged; the current ownership decision supersedes its WordPress architecture.
 
 ## Document map
 
@@ -61,4 +61,4 @@ Owners below are responsibilities to assign, not named people already appointed.
 
 ## Keeping this index useful
 
-Link every added engineering document here or through the feature index. Keep requirements in FRS_NFRS, decision status in DECISIONS, wire contracts in DATA_API_CONTRACTS, and visual decisions in DESIGN. Other documents link to those sources instead of maintaining competing copies. See [SPEC_WORKFLOW.md](SPEC_WORKFLOW.md) for changes and traceability.
+Link every added engineering document here or through the feature index. The October 4 migration is specified in [SPEC-008](specs/008-wordpress-removal.md). Keep requirements in FRS_NFRS, decision status in DECISIONS, wire contracts in DATA_API_CONTRACTS, and visual decisions in DESIGN. Other documents link to those sources instead of maintaining competing copies. See [SPEC_WORKFLOW.md](SPEC_WORKFLOW.md) for changes and traceability.
