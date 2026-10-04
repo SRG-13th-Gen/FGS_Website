@@ -16,6 +16,10 @@ Typed work branches target `staging`; reviewed `staging` changes promote to `mai
 
 Production promotion must include the verification/deployment workflows: `main` still lacks them as of October 4. Required checks must pass before promotion; do not bypass protection.
 
+## Automatic review requests
+
+[CODEOWNERS](../.github/CODEOWNERS) assigns `@MaChewwwww` to all paths. GitHub requests the owner's review when the file exists on the PR's target branch. It does not require code-owner approval or change existing branch protections. PR authors cannot approve their own PRs; production still needs an eligible independent reviewer when MaChewwwww authors or last pushes the PR. Current PR #15 cannot obtain independent approval from its own author through this file.
+
 ## Deployment targets
 
 [Deploy website](../.github/workflows/ci-cd.yml) runs on branch pushes, including PR merges.
