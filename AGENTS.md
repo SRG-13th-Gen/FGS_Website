@@ -9,7 +9,7 @@ Always read [onboarding](.agents/rules/00-repository-onboarding.md) and [docs/RE
 | Work                                                   | Applicable rule                                                                     |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | System boundaries, data ownership, application modules | [10-architecture](.agents/rules/10-architecture.md)                                 |
-| Content reads/writes, media, offline migration         | [20-wordpress-integration](.agents/rules/20-wordpress-integration.md)               |
+| Content reads/writes, media, offline migration         | [20-content-storage](.agents/rules/20-content-storage.md)                           |
 | Auth, secrets, inquiries, uploads, private data        | [30-security-privacy](.agents/rules/30-security-privacy.md)                         |
 | UI, forms, content presentation, design                | [40-frontend-design](.agents/rules/40-frontend-design.md)                           |
 | Behavior changes or verification                       | [50-testing-quality](.agents/rules/50-testing-quality.md)                           |
@@ -25,7 +25,7 @@ The documentation index defines authority, document ownership, and task-specific
 - Staging and production databases, users and media directories are isolated. Media stays outside every deployment directory.
 - Authorize protected operations, validate inputs, parameterize SQL, sanitize HTML and validate images/paths. Use transactions, revisions and soft deletion.
 - Public content reads dynamically without persistent caches for this release. Report saved-but-refresh-failed outcomes accurately.
-- Docker is local MariaDB only. Hostinger Node 24 is production; mandatory storage, identity, backup and acceptance gates precede root deletion.
+- Docker is local MariaDB only. Hostinger Node 24 serves production and preview; retain verified recovery data and environment isolation.
 - Preserve [DESIGN](docs/DESIGN.md), branch-based [CI/CD](docs/CI_CD.md), and the historical conceptual draft.
 - Preserve unrelated user changes and report actual verification honestly.
 

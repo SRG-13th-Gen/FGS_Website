@@ -1,34 +1,55 @@
-# Content and API contracts
+# Content and route contracts
 
-Current authority: [SPEC-008](specs/008-wordpress-removal.md), accepted October 4, 2026. WordPress REST contracts and webhook producers are retired from runtime.
-
-## Configuration
-
-Server-only settings: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `MEDIA_STORAGE_PATH`, Google OAuth settings, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `ADMIN_ALLOWED_EMAILS`, `SITE_INDEXABLE`. Production media storage is absolute and outside all deployment directories. Database credentials and media roots differ by environment. Hostinger API/SSH credentials are operations-only.
+Source authority: `src/lib/content/types.ts`, section schemas/types and [SPEC-008](specs/008-wordpress-removal.md). WordPress REST/webhook contracts are retired from runtime.
 
 ## Stored resources
 
-| Resource       | Storage and constraints                                                                                          |
-| -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Sections       | Seven fixed slugs; JSON validated by existing section schemas; positive revision; UTC modification date          |
-| Articles       | Stable slug, title, category, paragraph body, published/draft/trash status, original UTC date, positive revision |
-| Article photos | Ordered foreign keys, alt and caption; index zero is cover; transaction with article mutation                    |
-| Media          | Immutable path, source key, original filename, MIME, bytes, SHA-256, alt, caption, creation date                 |
-| Variants       | Media IDs retained for old URL delivery but omitted from picker                                                  |
-| Legacy URLs    | Exact old path to validated same-origin path                                                                     |
+| Resource       | Contract                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| Sections       | Seven registry slugs; validated JSON, positive revision and UTC modification date                            |
+| Articles       | Unique slug, title, category, paragraph body, UTC dates, revision and `publish`/`draft`/`trash` status       |
+| Article images | Ordered media foreign keys, alt and caption; first image is cover; relationships written transactionally     |
+| Media          | Immutable registered path, filename, MIME, size, SHA-256, alt/caption, creation date and optional source key |
+| Variants       | Imported media IDs served for legacy references but excluded from picker results                             |
+| Legacy URLs    | Exact old paths mapped to validated relative destinations                                                    |
+| Schema history | Migration filename, checksum and application date                                                            |
 
-Application DTOs and result unions live in `src/lib/content/types.ts` and section types. A successful article/section mutation returns its new revision. Stale revisions return a safe conflict. Unknown database outcomes require reconciliation before another mutation. The create request's UUID remains stable for retries and changes after completed publication.
+Schemas can represent draft/trash, but the current admin creates published stories and lists published entries. It has no draft-authoring, trash-restore or permanent-delete UI. Admin articles paginate by 10; media paginate by 12. Public news reads all published articles.
 
-## Validation and delivery
+## Mutation results
 
-Article title is required; category is Announcements, Events or Clubs. Body is optional when at least one image exists. Maximum 20 photos, 10 MB per new file and 60 MB aggregate new file bytes. New files accept signature-validated JPEG, PNG, WebP and AVIF. Imported files retain all source metadata and checksums.
+Protected entry points authorize before invoking content services. Article edits and section saves submit the loaded revision; conflicts require reload. Creation retains one UUID across retries and resets it after publication. Trash marks status and increments revision; it does not delete rows or require a client revision.
 
-Public reads expose published articles only. Admin search/pagination use bound SQL parameters. Protected server actions authorize independently of page routing. HTML output escapes paragraph text and captions; sanitizer restricts allowed tags, links and local media paths.
+Article results distinguish `success`, `validation_error`, `error` and `uncertain`. Completed saves return their new revision and a `cacheWarning` when route refresh fails. Section forms use their own result union. Upload references allow retry reuse. An uncertain database outcome requires reconciliation before another mutation.
 
-`GET /media/<segments>` requires a registered database path and a contained real filesystem path. It returns immutable media with checksum ETag, safe MIME/disposition, nosniff and sandbox policy. `GET /<legacy-path>` returns a 301 to the stored local destination. Unknown paths return 404; dependency failure returns 503.
+## Validation
 
-## Offline commands
+Categories are `announcements`, `events` and `clubs`. Title is required; at least one paragraph or photo is required. Maximum 20 ordered photos, 10 MB per new file and 60 MB aggregate new uploads. Reused library media does not add uploaded bytes. New uploads accept signature-validated JPEG, PNG, WebP and AVIF. Imported variants retain original metadata/checksums; safe imported SVG/GIF may be served but are not new-upload formats.
 
-`db:migrate` applies ordered checksummed SQL under an advisory lock. `content:export <directory>` saves a dated snapshot outside Git. `content:import <directory>` verifies every byte and inserts missing source records without replacing subsequent edits. Its report includes broken references and rejected conversions; either makes the command fail.
+Section images reference registered media IDs, not arbitrary URLs. Gallery selection is independent of library membership. Search uses bound SQL; IDs/page numbers are validated. Paragraphs/captions are escaped and imported HTML is sanitized.
 
-`content:backup <directory>` reads a consistent database snapshot and checksum-verifies every media file. `content:restore <directory>` requires `FGS_RESTORE_DATABASE=DB_NAME`, an empty migrated database and empty media directory. It rejects modified backups and restores relational content transactionally. Run restoration against disposable storage before launch.
+## Public routes
+
+| Route                         | Behavior                                                                                             |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `/`                           | Dynamic published content; bundled section fallback and truthful news outage state                   |
+| `/news/[slug]`                | Published article, missing-record handling, or distinct unavailable state                            |
+| `/media/[...path]`            | Registered file and contained realpath; immutable caching, checksum ETag, nosniff and sandbox policy |
+| Legacy catch-all              | Exact mapped 301; unknown path 404; database outage 503                                              |
+| `/sitemap.xml`, `/robots.txt` | Production indexing controlled by `SITE_INDEXABLE`; admin/API excluded from crawl guidance           |
+
+Media paths reject traversal/symlink escape. Safe images are inline; other imported files download as attachments. A matching ETag returns 304. Crawl directives are not authorization.
+
+## Tool interfaces
+
+Scripts read `FGS_ENV_FILE` or default `.env.local`; existing process variables take precedence. Non-secret configuration is listed in [deployment](DEPLOYMENT.md).
+
+| Command                            | Behavior                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `pnpm db:migrate`                  | Ordered checksummed SQL under an advisory lock                                                    |
+| `pnpm content:export <directory>`  | Historical WordPress export into ignored `.data`/`backups`; source credentials supplied privately |
+| `pnpm content:import <directory>`  | Checksum-verified snapshot import; source-key reruns preserve later edits; reconciliation report  |
+| `pnpm content:backup <directory>`  | Consistent relational snapshot plus checksum-verified media                                       |
+| `pnpm content:restore <directory>` | Explicit `FGS_RESTORE_DATABASE=DB_NAME`; empty migrated content tables/media; checksums verified  |
+
+Content import is offline, not part of deployment. It can insert valid records before its reconciliation report fails; inspect that report before retrying. MySQL DDL and filesystem copies are not transactional rollback. See [CI/CD](CI_CD.md) and [recovery](DEPLOYMENT.md).

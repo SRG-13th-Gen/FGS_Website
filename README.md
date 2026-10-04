@@ -1,12 +1,16 @@
 # Flor de Grace School Website
 
-Next.js 16 public website and Google-authenticated `/admin`. The application owns content in MySQL and uploads in persistent filesystem storage. WordPress is used only by the offline migration exporter.
+Next.js 16 website with Google-authenticated `/admin`, MySQL content and persistent filesystem media. Production launched October 4, 2026. WordPress is retired; its exporter remains an offline recovery/migration tool.
 
-Seven section editors, article publishing/editing/trashing, and the media picker retain the existing design. Articles support paragraphs and up to 20 captioned photos, including image-only stories. Staging and production use separate databases and media directories.
+- Public homepage, five migrated news articles, SEO metadata and legacy redirects.
+- Seven section editors: Hero, About, Admission, Clubs, Gallery, Contact and School Info.
+- Article publishing, editing and soft trash; image-only stories and ordered captioned photos.
+- Searchable media picker and validated uploads. Staging and production content are isolated.
+- Inquiry submission remains deferred.
 
-## Development
+## Local development
 
-Use Node 24 and pnpm 10.30.2:
+Use Node 24 and pnpm 10.30.2; exact dependencies are pinned in `package.json` and `pnpm-lock.yaml`.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -16,17 +20,12 @@ pnpm db:migrate
 pnpm dev
 ```
 
-Compose runs MariaDB at 127.0.0.1:3307. Configure Google credentials and an exact email allowlist in ignored local settings to use admin. Without them, protected access fails closed. Public fallbacks support frontend work without a database; unavailable news is reported honestly.
+MariaDB listens on `127.0.0.1:3307`; media uses `.data/media`. Supply Google credentials and `ADMIN_ALLOWED_EMAILS` in ignored `.env.local` for admin access. Missing authentication settings deny access. Public fallback sections and honest news outage states allow frontend work without a database. See [local setup](docs/DOCKER.md).
 
-`pnpm verify` runs lint, types, unit/integration tests, formatting and a production build. `pnpm test:e2e` runs production browser smoke tests. `pnpm test:database` requires an explicitly named disposable test database; see [TESTING](docs/TESTING.md).
+## Quality and deployment
 
-## Boundaries and migration
+`pnpm verify` runs lint, type checks, unit/integration tests, formatting and a production build. `pnpm test:e2e` runs browser smoke tests; guarded database and authenticated fixtures are separate. See [testing](docs/TESTING.md).
 
-- `src/lib/content`: server-only database, media and content services.
-- `src/lib/auth`: Google OAuth, verified-email allowlisting and eight-hour sessions.
-- `db/migrations`: ordered, checksummed schema migrations.
-- `scripts/migration`, `content:export` and `content:import`: offline source conversion.
-- `content:backup` and `content:restore`: content plus checksummed media recovery.
-- `src/app/media`: validated file delivery; legacy URLs redirect through database mappings.
+PRs require **Lint, Types, Tests & Build**. Pushes to `staging` deploy [preview](https://preview.flordegraceschoolinc.com/); `main`/`master` target [production](https://flordegraceschoolinc.com/). Managed deployments apply pending schema migrations before building. Staging automation is verified; production still serves its accepted launch release until branch promotion. See [CI/CD](docs/CI_CD.md) and [recovery](docs/DEPLOYMENT.md).
 
-[Architecture](docs/ARCHITECTURE.md), [contracts](docs/DATA_API_CONTRACTS.md), [deployment](docs/DEPLOYMENT.md), and [SPEC-008](docs/specs/008-wordpress-removal.md) describe current ownership and launch gates. Production launched on October 4, 2026; both WordPress installations were removed after hosted acceptance and verified recovery backups. Inquiry submission remains deferred. The [historical conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) and [design guidance](docs/DESIGN.md) are preserved. Preview automation remains scoped to staging.
+Start with the [documentation index](docs/README.md). [AGENTS.md](AGENTS.md) defines contributor rules; [DESIGN.md](docs/DESIGN.md) defines the visual system. The [conceptual draft](docs/conceptual/IMPLEMENTATION_PLAN.md) is historical.

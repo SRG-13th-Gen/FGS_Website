@@ -8,4 +8,4 @@ Seven editors retain Hero, About, Admission, Clubs, Gallery, Contact and School 
 
 Imported images use local `/media/...` URLs through Next.js Image. Bundled fallback assets remain under `public/images`. No WordPress remote-image configuration, Gutenberg editor or native-editor fallback is required.
 
-Google login and allowlisting are implemented; hosted acceptance remains required. Contact information is displayed, while inquiry submission remains deferred. See [TESTING](TESTING.md) and [SPEC-008](specs/008-wordpress-removal.md) for verification.
+Google login and allowlisting are implemented; hosted sign-in passed October 4. Contact information is displayed, while inquiry submission remains deferred. See [TESTING](TESTING.md) and [SPEC-008](specs/008-wordpress-removal.md) for verification.

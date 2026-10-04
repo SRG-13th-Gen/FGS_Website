@@ -1,22 +1,22 @@
 ---
 name: hostinger-ssh
-description: Access the Flor de Grace School Hostinger shell or management API for authorized inspection and maintenance. Use for requests involving this Hostinger account; SSH access alone is not a Node.js deployment method.
+description: Access the school Hostinger account for authorized shell or management API operations; managed builds are the deployment mechanism.
 ---
 
-# Hostinger SSH
+# Hostinger access
 
-The Hostinger SSH endpoint supplied by the site owner is `u414393871@46.202.138.125` on port `65002`. In PowerShell, connect with:
+Production and preview are separate managed Node 24 websites. Both WordPress installations were retired after October 4 acceptance. Read [DEPLOYMENT](../../../docs/DEPLOYMENT.md) and [CI/CD](../../../docs/CI_CD.md) for current environment/recovery guidance.
+
+SSH is enabled at `u414393871@46.202.138.125`, port `65002`:
 
 ```powershell
 ssh -p 65002 u414393871@46.202.138.125
 ```
 
-Before connecting, check whether SSH is enabled for this hosting account. The preview endpoint was reachable on 2026-09-27, and its presented key matched the locally saved key. A GitHub Actions connection reached the host, but a remote command failed with `/sbin/nologin: No such file or directory`; shell access was unproven then; the owner enabled it and strict-host-key SSH commands succeeded on October 4, 2026. Check SSH status under the preview website's **Advanced â†’ SSH Access** page if connection fails. Do not interpret a connection failure as a bad password until SSH status and network reachability are checked.
+Use strict host-key checking. Verify a new fingerprint against a trusted record; stop and investigate a changed key. If shell access fails, check hPanel SSH status and connectivity before diagnosing credentials. SSH was verified October 4; earlier `/sbin/nologin` failures occurred while access was disabled.
 
-The owner may keep `HOSTINGER_SSH_PASSWORD` and `HOSTINGER_API_TOKEN` in the repository root's `.env.hostinger-ssh.local`. This file is excluded from Git by `.gitignore`. Read only the value needed for an authorized operation; never print either value or copy it into chat, logs, shell command arguments, or tracked files. OpenSSH does not automatically read `.env` files; a normal `ssh` session will still prompt for the password unless a compatible credential helper is configured. The API token is for Hostinger management API calls, not for the Next.js application's runtime environment.
+Ignored `.env.hostinger-ssh.local` may contain `HOSTINGER_SSH_PASSWORD` and `HOSTINGER_API_TOKEN`. Read only the needed credential; never print it or place it in command arguments, logs, source, uploads or chat. OpenSSH does not read that file automatically; use its password prompt or a previously authorized key.
 
-This local file is not available to GitHub Actions. The staging workflow needs `HOSTINGER_API_TOKEN` separately as a GitHub `preview` environment secret; it no longer uses `HOSTINGER_SSH_PASSWORD` or `HOSTINGER_SSH_KNOWN_HOSTS`. Do not upload `.env.hostinger-ssh.local` to Hostinger or include it in deployment archives.
+The API token is for operations, not application runtime. GitHub `preview` and `production` environments have their own secret configuration; CI uses upload/build APIs without SSH. Masked API values cannot be copied as working credentials.
 
-On first connection, verify the presented host key fingerprint against a trusted Hostinger record before accepting it. If an existing host key changes, stop and investigate; do not bypass host key checking. Let OpenSSH prompt for the password or use a key already authorized on the account. Never place a password, private key, or application secret in this skill, a shell command, logs, or tracked repository files.
-
-If shell access becomes available, inspect `pwd` and the relevant directories to identify which website or app is in scope before changing files. The hosting account now contains separate production and preview Next.js applications; both WordPress installations were removed after verified backups and acceptance on October 4. Keep operations confined to the website named in the request. The staging preview workflow uses Hostinger's upload and build APIs because its SSH transfer failed. An SSH shell and a `git pull` do not by themselves establish an automatic deployment pipeline. Exit with `exit` when finished.
+Before mutations, identify the account/path/domain and keep the operation within the authorized environment. Preserve outside-deployment media and private recovery backups. A shell `git pull` does not publish a managed application. Exit shell sessions when finished.

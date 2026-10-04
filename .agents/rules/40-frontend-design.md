@@ -8,6 +8,6 @@
 - Preserve semantic structure, keyboard access, visible focus, labeled inputs, accessible feedback, and reduced-motion behavior. Track the formal accessibility target as proposed until DEC-112 is accepted.
 - Handle loading, empty, error, unavailable, validation, pending, and success states appropriate to the feature. Do not fabricate school content or pretend a failed send succeeded.
 - Keep implementation/provider details out of visitor-facing flows unless needed for a meaningful action. Use truthful, plain-language outcomes.
-- Render published content safely and expose meaningful image alt text. Keep privileged CMS calls out of browser components.
+- Render published content safely and expose meaningful image alt text. Keep privileged content/database calls out of browser components.
 
 For new features without an established visual pattern, follow the existing design system and identify any unresolved design dependency. This rule does not block independent API, documentation, or test work.
