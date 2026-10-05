@@ -89,7 +89,8 @@ export function ArticleCategoryPicker({
         Select where this article will be published on the website.
       </p>
 
-      <div className="mt-3.5 grid gap-3 sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2">
+      {/* Equal rows: every card is as tall as the tallest, one column each. */}
+      <div className="mt-3.5 grid auto-rows-fr gap-3 sm:grid-cols-2">
         {ARTICLE_CATEGORY_OPTIONS.map((cat) => {
           const Icon = cat.icon;
           const isSelected = value === cat.id;
@@ -98,7 +99,7 @@ export function ArticleCategoryPicker({
               key={cat.id}
               type="button"
               onClick={() => onChange(cat.id)}
-              className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
+              className={`flex h-full w-full flex-col items-start rounded-xl border p-4 text-left transition-all ${
                 isSelected
                   ? "border-school-green bg-school-green-light/40 shadow-sm ring-2 ring-school-green/20"
                   : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"
