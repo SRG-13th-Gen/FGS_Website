@@ -10,6 +10,7 @@ import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
 import { schoolInfoContent } from "@/lib/content/sections/content";
 import {
   ARTICLE_CATEGORY_LABELS,
+  articleAreaNav,
   articleAreaOptions,
   formatArticleDate,
 } from "@/lib/content/display";
@@ -81,6 +82,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   }
 
   const { article } = result;
+  const area = articleAreaNav(article.category);
   const othersResult = await getPublishedArticles(
     articleAreaOptions(article.category),
   );
@@ -101,11 +103,11 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           {/* Breadcrumb / Back Link */}
           <div className="mb-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <Link
-              href="/#news"
+              href={area.href}
               className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-semibold text-neutral-600 transition-colors hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back to News &amp; Events</span>
+              <span>{area.backLabel}</span>
             </Link>
 
             <span className="inline-flex items-center gap-1.5 rounded-full bg-school-green-light px-3 py-1 text-xs font-bold tracking-wider text-school-green-dark uppercase">
@@ -196,13 +198,13 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             <section className="mt-16">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
-                  More News &amp; Updates
+                  {area.moreHeading}
                 </h2>
                 <Link
-                  href="/#news"
+                  href={area.href}
                   className="inline-flex min-h-11 items-center rounded-md text-xs font-semibold text-school-green-dark hover:underline focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm"
                 >
-                  View All News →
+                  {area.allLabel}
                 </Link>
               </div>
 

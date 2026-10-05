@@ -39,3 +39,27 @@ export function articleAreaOptions(category: ArticleCategorySlug) {
     ? { categories: [category] }
     : { excludeCategories: SEPARATE_AREA_CATEGORIES };
 }
+
+/** Where an article's back and "view all" links go: its own area. */
+export function articleAreaNav(category: ArticleCategorySlug) {
+  if (category === "pta")
+    return {
+      href: "/pta",
+      backLabel: "Back to PTA",
+      moreHeading: "More PTA Activities",
+      allLabel: "View All PTA Activities →",
+    };
+  if (category === "alumni")
+    return {
+      href: "/alumni",
+      backLabel: "Back to Alumni",
+      moreHeading: "More Alumni Activities",
+      allLabel: "View All Alumni Activities →",
+    };
+  return {
+    href: "/#news",
+    backLabel: "Back to News & Events",
+    moreHeading: "More News & Updates",
+    allLabel: "View All News →",
+  };
+}

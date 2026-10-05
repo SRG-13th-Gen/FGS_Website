@@ -4,7 +4,7 @@ vi.mock("@/lib/content/db", () => ({
   ...db,
   isoDate: (s: string | null) => (s ? s + "Z" : null),
 }));
-import { articleAreaOptions } from "@/lib/content/display";
+import { articleAreaNav, articleAreaOptions } from "@/lib/content/display";
 import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
 import { listArticlesForAdmin } from "@/lib/content/admin-articles";
 import { listMediaLibrary } from "@/lib/content/media-library";
@@ -67,6 +67,22 @@ describe("database query boundaries", () => {
     for (const category of ["announcements", "events", "clubs"] as const)
       expect(articleAreaOptions(category)).toEqual({
         excludeCategories: ["pta", "alumni"],
+      });
+  });
+
+  it("sends an article's back and view-all links to its own area", () => {
+    expect(articleAreaNav("pta")).toMatchObject({
+      href: "/pta",
+      backLabel: "Back to PTA",
+    });
+    expect(articleAreaNav("alumni")).toMatchObject({
+      href: "/alumni",
+      backLabel: "Back to Alumni",
+    });
+    for (const category of ["announcements", "events", "clubs"] as const)
+      expect(articleAreaNav(category)).toMatchObject({
+        href: "/#news",
+        backLabel: "Back to News & Events",
       });
   });
 
