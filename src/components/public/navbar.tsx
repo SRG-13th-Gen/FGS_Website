@@ -2,26 +2,34 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import type { SchoolInfoView } from "@/lib/content/sections/school-info";
 
-/** Navigation items — each `href` targets a section id on the landing page. */
+import { isHomepage, sectionHref, sectionId } from "./nav-links";
+
+/** Navigation items — each `href` targets a section of the landing page. */
 const NAV_ITEMS = [
-  { label: "Home", href: "#home" },
-  { label: "About Us", href: "#about" },
-  { label: "Admission", href: "#admission" },
-  { label: "News & Events", href: "#news" },
-  { label: "Clubs", href: "#clubs" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact Us", href: "#contact" },
+  { label: "Home", href: sectionHref("home") },
+  { label: "About Us", href: sectionHref("about") },
+  { label: "Admission", href: sectionHref("admission") },
+  { label: "News & Events", href: sectionHref("news") },
+  { label: "Clubs", href: sectionHref("clubs") },
+  { label: "Gallery", href: sectionHref("gallery") },
+  { label: "Contact Us", href: sectionHref("contact") },
 ] as const;
 
 export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pastHero, setPastHero] = useState(false);
-  const [activeSection, setActiveSection] = useState("#home");
+  const pathname = usePathname();
+  const onHome = isHomepage(pathname);
+  const [scrolledSection, setActiveSection] = useState(sectionHref("home"));
+  // The scroll-based highlight only means something on the homepage.
+  const activeSection = onHome ? scrolledSection : null;
 
   /* Add shadow and track when scrolled past the hero section. */
   useEffect(() => {
@@ -36,12 +44,13 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
 
   /* Track which section is currently in view via IntersectionObserver. */
   useEffect(() => {
-    const ids = NAV_ITEMS.map((item) => item.href.slice(1));
+    if (!onHome) return;
+    const ids = NAV_ITEMS.map((item) => sectionId(item.href));
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveSection(`#${entry.target.id}`);
+            setActiveSection(sectionHref(entry.target.id));
           }
         }
       },
@@ -53,23 +62,25 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, []);
+  }, [onHome]);
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      setMobileOpen(false);
+      // Off the homepage the link navigates normally to /#section.
+      if (!onHome) return;
       e.preventDefault();
-      const el = document.getElementById(href.slice(1));
+      const el = document.getElementById(sectionId(href));
       if (el) {
         const reduceMotion = window.matchMedia(
           "(prefers-reduced-motion: reduce)",
         ).matches;
         el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
-        window.history.replaceState(null, "", href);
+        window.history.replaceState(null, "", `#${sectionId(href)}`);
         setActiveSection(href);
       }
-      setMobileOpen(false);
     },
-    [],
+    [onHome],
   );
 
   /* Escape closes the mobile menu. */
@@ -97,9 +108,9 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
       </a>
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo / School name */}
-        <a
-          href="#home"
-          onClick={(e) => handleNavClick(e, "#home")}
+        <Link
+          href={sectionHref("home")}
+          onClick={(e) => handleNavClick(e, sectionHref("home"))}
           className="flex min-h-11 items-center gap-2.5 rounded-md text-lg font-normal tracking-tight focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <Image
@@ -112,7 +123,10 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
           />
           <div
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ${
-              pastHero || (activeSection !== "#home" && scrolled)
+              pastHero ||
+              (activeSection !== null &&
+                activeSection !== sectionHref("home") &&
+                scrolled)
                 ? "max-w-[260px] translate-x-0 opacity-100"
                 : "max-w-0 -translate-x-2 opacity-0"
             }`}
@@ -120,13 +134,13 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             <span className="hidden sm:inline">{schoolInfo.schoolName}</span>
             <span className="sm:hidden">{schoolInfo.shortName}</span>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop nav links */}
         <ul className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
-              <a
+              <Link
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
                 aria-current={
@@ -145,7 +159,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
                     activeSection === item.href ? "w-4/5" : "w-0"
                   }`}
                 />
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -180,7 +194,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         <ul className="space-y-1 px-4 pt-2 pb-4">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
-              <a
+              <Link
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
                 aria-current={
@@ -193,7 +207,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
                 }`}
               >
                 {item.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
