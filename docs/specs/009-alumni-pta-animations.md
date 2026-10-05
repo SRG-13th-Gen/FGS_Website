@@ -1,14 +1,14 @@
 # SPEC-009: Alumni, PTA and motion
 
-| Field                 | Value                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Feature ID            | SPEC-009                                                                                                     |
-| Approval status       | Proposed (plan approved by the owner on 2026-10-05; client confirmation and design dependencies are pending) |
-| Implementation status | Unimplemented                                                                                                |
-| Responsible owner     | Engineering team (design dependencies: Aya, frontend designer)                                               |
-| Requirement IDs       | FR-016 to FR-020 (proposed; to be added to [FRS_NFRS](../FRS_NFRS.md) with the implementation change)        |
-| Decision IDs          | DEC-121 (proposed; amends DEC-115 and the one-page scope note under FR-003/004); DEC-010 and DEC-112 apply   |
-| Acceptance evidence   | Pending; later record approver, date and evidence link                                                       |
+| Field                 | Value                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Feature ID            | SPEC-009                                                                                                        |
+| Approval status       | Proposed (plan approved by the owner on 2026-10-05; client confirmation and design dependencies are pending)    |
+| Implementation status | Implemented (local verification passed; pending owner browser acceptance and the client/designer confirmations) |
+| Responsible owner     | Engineering team (design dependencies: Aya, frontend designer)                                                  |
+| Requirement IDs       | FR-016 to FR-020 (added to [FRS_NFRS](../FRS_NFRS.md), status Proposed with DEC-121)                            |
+| Decision IDs          | DEC-121 (proposed; amends DEC-115 and the one-page scope note under FR-003/004); DEC-010 and DEC-112 apply      |
+| Acceptance evidence   | Local verification recorded below (2026-10-05); owner browser acceptance and hosted acceptance pending          |
 
 ## Owner/client instructions
 
@@ -113,12 +113,12 @@ The current navbar assumes every item is a homepage anchor: it calls `preventDef
 
 ## Dependencies and decisions
 
-| ID / item        | Status   | Note                                                                                                                                                                                                                                                                    |
-| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DEC-121          | Proposed | Extends the product from one public page and seven fixed editors to include `/alumni`, `/pta` and an eighth fixed editor. Amends DEC-115 and FR-002/003/004 wording. Owner instruction recorded above is the basis; mark Accepted when the open questions are answered. |
-| DEC-010          | Accepted | Visual system preserved; no new branding.                                                                                                                                                                                                                               |
-| DEC-112          | Proposed | Formal accessibility target still pending; the rules above are engineering requirements, not an audit.                                                                                                                                                                  |
-| Open design deps | Open     | See Q5–Q8 for Aya.                                                                                                                                                                                                                                                      |
+| ID / item        | Status   | Note                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DEC-121          | Proposed | Extends the product from one public page and seven fixed editors to include `/alumni`, `/pta` and an eighth fixed editor. Amends DEC-115 and FR-002/003/004 wording. Owner instruction recorded above is the basis. Implemented in code, still Proposed: mark Accepted when the owner confirms and the client/designer questions below are answered. Recorded in DECISIONS and FRS_NFRS. |
+| DEC-010          | Accepted | Visual system preserved; no new branding.                                                                                                                                                                                                                                                                                                                                                |
+| DEC-112          | Proposed | Formal accessibility target still pending; the rules above are engineering requirements, not an audit.                                                                                                                                                                                                                                                                                   |
+| Open design deps | Open     | See Q5–Q8 for Aya.                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Owner decisions and open questions
 
@@ -173,19 +173,42 @@ Other repository-affecting points:
 
 ## Verification and evidence
 
-| Requirement / criterion | Test ID and type        | Test path or manual procedure                                                                                       | Result and evidence |
-| ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| AC-01 / FR-016          | T-024 unit              | Planned: extend `tests/unit/content-validation.test.ts`                                                             | Not run             |
-| AC-02 / FR-017          | T-025 unit              | Planned: extend `tests/unit/sections-schemas.test.ts`, `sections-reorder.test.ts`                                   | Not run             |
-| AC-03, AC-05 / FR-018   | T-026 integration       | Planned: extend `tests/integration/content-queries.test.ts`; DB check in `tests/database/content.test.ts`           | Not run             |
-| AC-04 / FR-018          | T-027 e2e               | Planned: `tests/e2e/alumni-pta.spec.ts` (no-database build, unavailable state; empty state needs a content fixture) | Not run             |
-| AC-06 / FR-015          | T-028 unit/e2e          | Planned: sitemap unit test; canonical assertions in the e2e spec                                                    | Not run             |
-| AC-07, AC-08            | T-029 authenticated e2e | Planned: extend `admin-sidebar.spec.ts`; skips without `E2E_ADMIN_STORAGE_STATE`                                    | Not run             |
-| AC-09, AC-10 / FR-019   | T-030 e2e               | Planned: `tests/e2e/navbar.spec.ts`, desktop and 375 px mobile, four desktop widths                                 | Not run             |
-| AC-11 / FR-020          | T-031 e2e               | Planned: reduced-motion emulation and JavaScript-disabled context                                                   | Not run             |
+| Requirement / criterion | Test ID and type        | Test path or manual procedure                                                                                                                                       | Result (2026-10-05)                                                                             |
+| ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| AC-01 / FR-016          | T-024 unit              | `tests/unit/content-validation.test.ts` (five categories, labels, unknown rejected)                                                                                 | Passed                                                                                          |
+| AC-02 / FR-017          | T-025 unit              | `tests/unit/alumni-section.test.ts` (schema bounds, empty list, alt rule, defaults, migration SQL equals defaults); `tests/unit/saved-uploads.test.ts`              | Passed                                                                                          |
+| AC-03, AC-05 / FR-018   | T-026 integration       | `tests/integration/content-queries.test.ts` (read options, area links), `alumni-read.test.ts`; real database in `tests/database/content.test.ts`                    | Passed                                                                                          |
+| AC-04 / FR-018          | T-027 e2e               | `tests/e2e/alumni-pta.spec.ts` against a build with no content database (unavailable state); empty state needs a seeded database                                    | Passed (unavailable state); empty state covered by `alumni-read.test.ts`, browser check pending |
+| AC-06 / FR-015          | T-028 unit/e2e          | `tests/unit/sitemap.test.ts`; canonical and title assertions in `alumni-pta.spec.ts`                                                                                | Passed                                                                                          |
+| AC-07, AC-08            | T-029 authenticated e2e | `tests/e2e/admin-sidebar.spec.ts`; unit `tests/unit/admin-nav.test.ts`, `tests/integration/section-uploads.test.ts`; owner checked the editor and sidebar signed in | Unit/integration passed; **authenticated e2e skipped** (no `E2E_ADMIN_STORAGE_STATE`)           |
+| AC-09, AC-10 / FR-019   | T-030 e2e               | `tests/e2e/navbar.spec.ts` (four desktop widths, 375 px mobile, links, active state, menu); `tests/unit/nav-links.test.ts`                                          | Passed                                                                                          |
+| AC-11 / FR-020          | T-031 e2e               | `tests/e2e/motion.spec.ts` (reduced motion, JavaScript disabled, below-fold only, no layout shift, deep link); `tests/unit/reveal.test.ts`                          | Passed                                                                                          |
 
-Default Playwright runs assume unavailable content storage, so `/alumni` and `/pta` smoke tests there assert the unavailable state; empty-state coverage needs a seeded isolated database and is recorded as skipped when the fixture is absent. Record actual commands and results here when work is performed.
+Default Playwright runs assume unavailable content storage, so `/alumni` and `/pta` smoke tests there assert the unavailable state; empty-state coverage needs a seeded isolated database and is recorded as skipped when the fixture is absent.
+
+### Commands and results
+
+| Command                                                                                                                                                                                                | Result                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm format:check`, production `pnpm build` (all through `pnpm verify`)                                                                                   | Passed; 22 test files, 210 tests                                              |
+| Database suites against a disposable `fgs_content_fgstest` database in local Docker (`node --env-file=.env.database-test.local node_modules/vitest/vitest.mjs run --config vitest.database.config.ts`) | Passed; 24 files, 221 tests including the unit tests (11 in `tests/database`) |
+| `DB_PORT=9 pnpm test:e2e` (project Playwright config, production build, no reachable content database)                                                                                                 | 43 passed, 5 skipped                                                          |
+
+Skipped: the five authenticated checks (`admin-sidebar`, `media-picker`, `content-workflows`) need a private Google session fixture and an isolated content database that are not generated by default. A skipped check is not a pass. The owner checked the admin editors, lists and sidebar signed in on the local site. Staging/production databases and Hostinger were not used. Hosted acceptance is not part of this record.
 
 ## Completion record
 
-Pending. Record implementation/PR references, remaining accepted limitations and the verification date. Advance status only as defined in [SPEC_WORKFLOW](../SPEC_WORKFLOW.md).
+**Implementation (branch `feature/alumni-pta`, local; not pushed or merged at the time of writing):** data layer (migration 003, categories, `site-alumni`, read options), admin (alumni editor, five-option picker, activity routes, sidebar, dashboard card), public `/alumni` and `/pta`, navbar and footer links, scroll motion, article back links. Separate fixes: the duplicate-upload fix for every image editor and the `/news/[slug]` link defect. Pull request reference: pending.
+
+**Verification:** local, 2026-10-05, as recorded above. Owner browser checks of the admin and public pages passed for phases 1 to 3; phases 3 to 5 are re-checked together in one browser pass before acceptance.
+
+**Remaining before acceptance (approval stays Proposed):**
+
+- Client: confirm the homepage feed excludes PTA and Alumni (Q1), the All News label (Q9), and the owner confirms DEC-121.
+- Designer (Aya): pill colours and icons (Q5), alumni card (Q6), motion values (Q7), page header treatment (Q8), Announcements blue versus green (Q11), and the navbar order and `xl` breakpoint as a design dependency (Q2).
+- Engineering, before release: check staging and production `legacy_urls` for `/alumni` or `/pta` (Q10); run migration 003 on staging and production through the managed pipeline.
+- Authenticated e2e coverage needs the private session fixture (skipped here).
+
+**Accepted limitations:** the admin sidebar highlights by path only, so `?category=` pages highlight "Add New" and edit pages "All News"; the admin-editable PTA header is deferred (Q3); the formal accessibility audit remains DEC-112; rollback of migration 003 is manual and the previous release would show `pta`/`alumni` articles in the homepage feed without a category label.
+
+Advance status only as defined in [SPEC_WORKFLOW](../SPEC_WORKFLOW.md).

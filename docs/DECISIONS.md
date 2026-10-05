@@ -43,12 +43,15 @@ The [conceptual draft](conceptual/IMPLEMENTATION_PLAN.md) and Git history retain
 
 ## Open, proposed and deferred
 
-| ID      | Status                         | Remaining decision                                                                                                                  |
-| ------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| DEC-106 | Proposed; delivery deferred    | Inquiry provider, recipient, sender verification, abuse controls, duplicate handling and privacy                                    |
-| DEC-107 | Resolved technical feasibility | Hostinger Node 24, Google sign-in, persistent storage, isolation and recovery verified at launch; operations targets remain DEC-110 |
-| DEC-110 | Open                           | Assign backup/incident/monitoring ownership; agree retention, data location and recovery targets                                    |
-| DEC-112 | Proposed                       | Formal WCAG 2.2 AA and numeric reliability/performance targets require approval and measurement                                     |
-| DEC-114 | Deferred                       | Public search, analytics, arbitrary page-layout editing and content types beyond accepted needs                                     |
+| ID      | Status                         | Remaining decision                                                                                                                                                                                                                                       |
+| ------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DEC-106 | Proposed; delivery deferred    | Inquiry provider, recipient, sender verification, abuse controls, duplicate handling and privacy                                                                                                                                                         |
+| DEC-107 | Resolved technical feasibility | Hostinger Node 24, Google sign-in, persistent storage, isolation and recovery verified at launch; operations targets remain DEC-110                                                                                                                      |
+| DEC-110 | Open                           | Assign backup/incident/monitoring ownership; agree retention, data location and recovery targets                                                                                                                                                         |
+| DEC-112 | Proposed                       | Formal WCAG 2.2 AA and numeric reliability/performance targets require approval and measurement                                                                                                                                                          |
+| DEC-114 | Deferred                       | Public search, analytics, arbitrary page-layout editing and content types beyond accepted needs                                                                                                                                                          |
+| DEC-121 | Proposed                       | Amends DEC-115: the product has `/alumni` and `/pta` pages and eight fixed section editors (Alumni added). Basis: October 5 client instructions and owner plan approval; accept when the owner confirms ([SPEC-009](specs/009-alumni-pta-animations.md)) |
+
+DEC-121 is implemented in code but remains **Proposed**: it amends DEC-115 (seven fixed section editors) and the one-page scope under FR-002/003/004. DEC-115 stays the recorded decision until DEC-121 is accepted. Its open confirmations are listed in SPEC-009 (client: feed exclusion, All News label, legacy URLs; designer: pill colours, achievement card, motion values, page header treatment, Announcements colour).
 
 Inquiry delivery, additional roles and visitor accounts are not implemented. Do not invent retention periods, provider guarantees or SLAs. Update requirements, contracts and evidence together when resolving a decision.

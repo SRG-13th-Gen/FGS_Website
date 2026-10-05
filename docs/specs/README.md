@@ -10,7 +10,7 @@
 | SPEC-006                                   | Initial repository scaffold                            | Historical record retired from active docs; retained in Git history; ID reserved |
 | [SPEC-007](007-site-content-management.md) | Seven fixed section editors                            | Implemented with revision checks                                                 |
 | [SPEC-008](008-wordpress-removal.md)       | Application content ownership and production migration | Completed October 4; migration/acceptance evidence retained                      |
-| [SPEC-009](009-alumni-pta-animations.md)   | Alumni and PTA pages, admin areas and motion           | Proposed; unimplemented                                                          |
+| [SPEC-009](009-alumni-pta-animations.md)   | Alumni and PTA pages, admin areas and motion           | Proposed; implemented, pending browser acceptance and confirmations              |
 
 Use [requirements](../FRS_NFRS.md), [decisions](../DECISIONS.md), [contracts](../DATA_API_CONTRACTS.md) and [testing](../TESTING.md) for shared constraints. Create new feature specs from the [template](_TEMPLATE.md) using the [workflow](../SPEC_WORKFLOW.md). Do not reuse retired IDs.
 
