@@ -10,7 +10,6 @@ import {
   Newspaper,
   FilePlus,
   Award,
-  HeartHandshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,7 +31,7 @@ const EXTRA_PAGE_TITLES: ReadonlyArray<{
 }> = [
   {
     matches: (p) => /^\/admin\/articles\/[^/]+\/edit$/.test(p),
-    title: "Edit News & Events",
+    title: "Edit Post",
   },
 ];
 
@@ -46,8 +45,10 @@ export function getAdminPageTitle(pathname: string): string {
 
 /**
  * The single sidebar item that owns this path: the item with the longest
- * matching href. A plain prefix match would highlight both "All News"
- * (/admin/articles) and "Add New" (/admin/articles/new).
+ * matching href. A plain prefix match would highlight both "All Posts"
+ * (/admin/articles) and "Add New" (/admin/articles/new), while editing a
+ * post (/admin/articles/12/edit) correctly stays under "All Posts". The
+ * query string never matters, so a filtered All Posts is still All Posts.
  */
 export function getActiveAdminNavHref(pathname: string): string | null {
   let active: string | null = null;
@@ -87,38 +88,18 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         href: "/admin/sections/school-info",
         icon: Settings,
       },
-    ],
-  },
-  {
-    label: "News & Events",
-    items: [
-      { label: "All News", href: "/admin/articles", icon: Newspaper },
-      { label: "Add New", href: "/admin/articles/new", icon: FilePlus },
-    ],
-  },
-  {
-    label: "Alumni",
-    items: [
       {
         label: "Alumni Achievements",
         href: "/admin/sections/alumni",
         icon: Award,
       },
-      {
-        label: "Alumni Activities",
-        href: "/admin/alumni/activities",
-        icon: GraduationCap,
-      },
     ],
   },
   {
-    label: "PTA",
+    label: "Posts",
     items: [
-      {
-        label: "PTA Activities",
-        href: "/admin/pta/activities",
-        icon: HeartHandshake,
-      },
+      { label: "All Posts", href: "/admin/articles", icon: Newspaper },
+      { label: "Add New", href: "/admin/articles/new", icon: FilePlus },
     ],
   },
 ];

@@ -48,7 +48,7 @@ Uploads publish complete files through a same-directory atomic rename. Identical
 | Legacy catch-all              | Exact mapped 301; unknown path 404; database outage 503                                                                                              |
 | `/sitemap.xml`, `/robots.txt` | Production indexing controlled by `SITE_INDEXABLE`; lists `/`, `/alumni`, `/pta` and every published article; admin/API excluded from crawl guidance |
 
-Admin routes (all behind `requireAdmin()`): `/admin/sections/alumni` (editor), `/admin/alumni/activities` and `/admin/pta/activities` (the shared article list locked to one category) and `/admin/articles/new?category=<slug>`, which preselects only an allowlisted category. Article URLs are unchanged: every article is `/news/[slug]`.
+Admin routes (all behind `requireAdmin()`): `/admin/sections/alumni` (editor), `/admin/articles` (All Posts, with an optional `?category=<slug>` filter, `q` search and `page`) and `/admin/articles/new?category=<slug>`, which preselects only an allowlisted category. `/admin/alumni/activities` and `/admin/pta/activities` redirect (307) to `/admin/articles?category=alumni` and `?category=pta`. Article URLs are unchanged: every article is `/news/[slug]`.
 
 Media paths reject traversal/symlink escape. Safe images are inline; other imported files download as attachments. A matching ETag returns 304. Crawl directives are not authorization.
 

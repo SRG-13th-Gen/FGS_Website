@@ -5,25 +5,47 @@ import {
   getActiveAdminNavHref,
   getAdminPageTitle,
 } from "@/components/admin/admin-nav";
+import nextConfig from "../../next.config";
 
 const itemHrefs = ADMIN_NAV_GROUPS.flatMap((g) => g.items.map((i) => i.href));
 
 describe("admin navigation groups", () => {
-  it("adds Alumni and PTA groups with the agreed items", () => {
-    const group = (label: string) =>
-      ADMIN_NAV_GROUPS.find((g) => g.label === label)?.items.map((i) => [
-        i.label,
-        i.href,
-      ]);
-    expect(group("Alumni")).toEqual([
-      ["Alumni Achievements", "/admin/sections/alumni"],
-      ["Alumni Activities", "/admin/alumni/activities"],
+  it("has the three simplified groups in order", () => {
+    expect(ADMIN_NAV_GROUPS.map((g) => g.label)).toEqual([
+      "Overview",
+      "Website Sections",
+      "Posts",
     ]);
-    expect(group("PTA")).toEqual([["PTA Activities", "/admin/pta/activities"]]);
-    expect(group("News & Events")).toEqual([
-      ["All News", "/admin/articles"],
+  });
+
+  it("lists Alumni Achievements with the other website sections", () => {
+    const sections = ADMIN_NAV_GROUPS.find(
+      (g) => g.label === "Website Sections",
+    );
+    expect(sections?.items.map((i) => [i.label, i.href])).toEqual([
+      ["Hero", "/admin/sections/hero"],
+      ["About", "/admin/sections/about"],
+      ["Admission", "/admin/sections/admission"],
+      ["Clubs", "/admin/sections/clubs"],
+      ["Gallery", "/admin/sections/gallery"],
+      ["Contact", "/admin/sections/contact"],
+      ["School Info", "/admin/sections/school-info"],
+      ["Alumni Achievements", "/admin/sections/alumni"],
+    ]);
+  });
+
+  it("renames News & Events to Posts and All News to All Posts", () => {
+    const posts = ADMIN_NAV_GROUPS.find((g) => g.label === "Posts");
+    expect(posts?.items.map((i) => [i.label, i.href])).toEqual([
+      ["All Posts", "/admin/articles"],
       ["Add New", "/admin/articles/new"],
     ]);
+  });
+
+  it("has no separate Alumni or PTA groups or activity links", () => {
+    expect(ADMIN_NAV_GROUPS.map((g) => g.label)).not.toContain("Alumni");
+    expect(ADMIN_NAV_GROUPS.map((g) => g.label)).not.toContain("PTA");
+    expect(itemHrefs.some((href) => href.includes("/activities"))).toBe(false);
   });
 
   it("has unique hrefs and labels", () => {
@@ -38,15 +60,23 @@ describe("getActiveAdminNavHref", () => {
     expect(getActiveAdminNavHref(href)).toBe(href);
   });
 
-  it("does not highlight All News on the Add New page", () => {
+  it("does not highlight All Posts on the Add New page", () => {
     expect(getActiveAdminNavHref("/admin/articles/new")).toBe(
       "/admin/articles/new",
     );
   });
 
-  it("keeps All News active while editing an article", () => {
+  it("keeps All Posts active on every edit page", () => {
     expect(getActiveAdminNavHref("/admin/articles/12/edit")).toBe(
       "/admin/articles",
+    );
+  });
+
+  it("ignores the query string, so a filtered All Posts is still All Posts", () => {
+    // usePathname() never includes the query; a stray one must not matter.
+    expect(getActiveAdminNavHref("/admin/articles")).toBe("/admin/articles");
+    expect(getActiveAdminNavHref("/admin/articles/new")).toBe(
+      "/admin/articles/new",
     );
   });
 
@@ -65,13 +95,30 @@ describe("getAdminPageTitle", () => {
   it.each([
     ["/admin", "Dashboard"],
     ["/admin/sections/alumni", "Alumni Achievements"],
-    ["/admin/alumni/activities", "Alumni Activities"],
-    ["/admin/pta/activities", "PTA Activities"],
-    ["/admin/articles", "All News"],
+    ["/admin/sections/school-info", "School Info"],
+    ["/admin/articles", "All Posts"],
     ["/admin/articles/new", "Add New"],
-    ["/admin/articles/7/edit", "Edit News & Events"],
+    ["/admin/articles/7/edit", "Edit Post"],
     ["/admin/somewhere-else", "Admin"],
   ])("%s -> %s", (pathname, title) => {
     expect(getAdminPageTitle(pathname)).toBe(title);
+  });
+});
+
+describe("retired activity routes", () => {
+  it("redirect to the filtered All Posts list", async () => {
+    const redirects = await nextConfig.redirects?.();
+    expect(redirects).toEqual([
+      {
+        source: "/admin/alumni/activities",
+        destination: "/admin/articles?category=alumni",
+        permanent: false,
+      },
+      {
+        source: "/admin/pta/activities",
+        destination: "/admin/articles?category=pta",
+        permanent: false,
+      },
+    ]);
   });
 });

@@ -24,7 +24,7 @@ test("desktop: sidebar navigates to every section without a full reload error", 
   await page.getByRole("link", { name: "School Info" }).click();
   await page.waitForURL(/\/admin\/sections\/school-info$/);
 
-  await page.getByRole("link", { name: "All News" }).click();
+  await page.getByRole("link", { name: "All Posts" }).click();
   await page.waitForURL(/\/admin\/articles$/);
 });
 
@@ -42,16 +42,18 @@ test("mobile: sidebar is off-canvas, opens via the trigger, and a link navigates
   await page.waitForURL(/\/admin\/sections\/about$/);
 });
 
-test("desktop: Alumni and PTA areas each highlight exactly one sidebar item", async ({
+test("desktop: exactly one sidebar item is active on every admin page", async ({
   page,
 }) => {
   await signInOrSkip(page);
   const cases = [
+    ["/admin", "Dashboard"],
     ["/admin/sections/alumni", "Alumni Achievements"],
-    ["/admin/alumni/activities", "Alumni Activities"],
-    ["/admin/pta/activities", "PTA Activities"],
-    ["/admin/articles", "All News"],
+    ["/admin/articles", "All Posts"],
+    ["/admin/articles?category=pta", "All Posts"],
+    ["/admin/articles?category=alumni", "All Posts"],
     ["/admin/articles/new", "Add New"],
+    ["/admin/articles/new?category=alumni", "Add New"],
   ] as const;
   for (const [path, label] of cases) {
     await page.goto(path);
@@ -60,8 +62,57 @@ test("desktop: Alumni and PTA areas each highlight exactly one sidebar item", as
     );
     await expect(active).toHaveCount(1);
     await expect(active).toHaveText(label);
-    await expect(
-      page.getByRole("heading", { name: label }).first(),
-    ).toBeVisible();
   }
+});
+
+test("desktop: the sidebar has Posts and no separate Alumni or PTA groups", async ({
+  page,
+}) => {
+  await signInOrSkip(page);
+  await expect(page.getByRole("link", { name: "All Posts" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Alumni Achievements" }),
+  ).toBeVisible();
+  await expect(page.getByText("PTA Activities")).toHaveCount(0);
+  await expect(page.getByText("Alumni Activities")).toHaveCount(0);
+});
+
+test("desktop: the old activity routes redirect to the filtered list", async ({
+  page,
+}) => {
+  await signInOrSkip(page);
+  await page.goto("/admin/alumni/activities");
+  await page.waitForURL(/\/admin\/articles\?category=alumni$/);
+  await page.goto("/admin/pta/activities");
+  await page.waitForURL(/\/admin\/articles\?category=pta$/);
+});
+
+test("desktop: category filter keeps its choice in the URL and Add New preselects it", async ({
+  page,
+}) => {
+  await signInOrSkip(page);
+  await page.goto("/admin/articles");
+  const filter = page.getByRole("navigation", {
+    name: "Filter posts by category",
+  });
+  await expect(filter.getByRole("link")).toHaveText([
+    "All",
+    "Announcements",
+    "Events",
+    "Clubs",
+    "PTA",
+    "Alumni",
+  ]);
+  await filter.getByRole("link", { name: "PTA" }).click();
+  await page.waitForURL(/\/admin\/articles\?category=pta$/);
+  await expect(filter.getByRole("link", { name: "PTA" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  // The page's own button, not the sidebar item of the same name.
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "Add New", exact: true })
+    .click();
+  await page.waitForURL(/\/admin\/articles\/new\?category=pta$/);
 });
