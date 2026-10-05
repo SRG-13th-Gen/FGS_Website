@@ -15,7 +15,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'staging' && 'preview' || 'production' }}
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       HOSTINGER_ACCOUNT_USERNAME: ${{ vars.HOSTINGER_ACCOUNT_USERNAME }}
       HOSTINGER_DEPLOY_DOMAIN: ${{ vars.HOSTINGER_DEPLOY_DOMAIN }}
@@ -52,6 +52,33 @@ jobs:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
         run: |
           set -euo pipefail
+          # Retry only failures before the request can reach Hostinger. Replaying a
+          # timed-out PATCH after transfer starts can corrupt the TUS offset.
+          upload_request() {
+            local phase="$1" result exit_code http_status pretransfer attempt
+            shift
+            for attempt in 1 2 3 4; do
+              if result=$(curl --silent --show-error --connect-timeout 30 \
+                --write-out '%{http_code} %{time_pretransfer}' "$@"); then
+                printf '%s' "${result%% *}"
+                return 0
+              else
+                exit_code=$?
+              fi
+              read -r http_status pretransfer <<< "$result"
+              case "$exit_code" in
+                5|6|7|28)
+                  if [[ "$http_status" == 000 && "$pretransfer" =~ ^0([.]0+)?$ && "$attempt" -lt 4 ]]; then
+                    echo "$phase connection failed (curl $exit_code); retrying attempt $((attempt + 1))/4." >&2
+                    sleep "$((attempt * 5))"
+                    continue
+                  fi
+                  ;;
+              esac
+              echo "$phase failed (curl $exit_code, HTTP $http_status). No build was started; inspect the upload before rerunning if transfer began." >&2
+              return "$exit_code"
+            done
+          }
           jq -n --arg username "$HOSTINGER_ACCOUNT_USERNAME" --arg domain "$HOSTINGER_DEPLOY_DOMAIN" \
             '{username: $username, domain: $domain}' > "$RUNNER_TEMP/upload-url-request.json"
           curl --fail --silent --show-error --connect-timeout 15 --max-time 60 \
@@ -67,15 +94,15 @@ jobs:
           upload_target="${upload_url%/}/${ARCHIVE_NAME}?override=true"
           archive_path="$RUNNER_TEMP/$ARCHIVE_NAME"
           archive_size=$(stat -c %s "$archive_path")
-          create_status=$(curl --silent --show-error --connect-timeout 15 --max-time 60 \
-            --output "$RUNNER_TEMP/upload-create-response" --write-out '%{http_code}' \
+          create_status=$(upload_request 'Upload creation' --max-time 60 \
+            --output "$RUNNER_TEMP/upload-create-response" \
             --request POST --header "X-Auth: $auth_key" --header "X-Auth-Rest: $rest_auth_key" \
             --header 'Tus-Resumable: 1.0.0' --header "Upload-Length: $archive_size" \
             --header 'Upload-Offset: 0' "$upload_target")
           [[ "$create_status" == 201 ]] || { echo "Upload creation failed (HTTP $create_status)." >&2; exit 1; }
-          upload_status=$(curl --silent --show-error --connect-timeout 15 --max-time 300 \
+          upload_status=$(upload_request 'Archive upload' --max-time 300 \
             --dump-header "$RUNNER_TEMP/upload-headers" \
-            --output "$RUNNER_TEMP/upload-patch-response" --write-out '%{http_code}' \
+            --output "$RUNNER_TEMP/upload-patch-response" \
             --request PATCH --header "X-Auth: $auth_key" --header "X-Auth-Rest: $rest_auth_key" \
             --header 'Tus-Resumable: 1.0.0' \
             --header 'Content-Type: application/offset+octet-stream' --header 'Upload-Offset: 0' \

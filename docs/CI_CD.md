@@ -33,6 +33,8 @@ Both environments have secret `HOSTINGER_API_TOKEN`, variable `HOSTINGER_ACCOUNT
 
 The workflow validates branch/account/domain, archives the pushed SHA, uploads through Hostinger's file API, checks archive readability, then starts and polls a managed Node 24 build. Successful publication is followed by HTTPS checks for `/`, `/admin/login` and `/sitemap.xml`. These checks do not verify authenticated workflows or response commit identity.
 
+Archive creation and transfer allow four connection attempts, each with a 30-second connection timeout and waits of 5, 10 and 15 seconds between attempts. Only proxy/DNS/connect errors or timeouts with no HTTP response and zero curl pretransfer time are retried. Once transfer starts, failures stop the job for inspection rather than replaying an uncertain TUS request. The job allows 25 minutes, including the existing 15-minute build polling window.
+
 One concurrency group serializes each destination; `main` and `master` share production. Running deployments are not canceled. GitHub may coalesce older pending runs when pushes arrive quickly.
 
 ## Schema migrations
@@ -46,5 +48,7 @@ MySQL DDL commits implicitly. Migration failure blocks the build; a later build 
 ## Evidence and failures
 
 Staging's [October 4 deployment succeeded](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/37193631397), including migration/build and public checks. Production's automated branch path is configured but has not been exercised; it still serves the accepted launch release.
+
+The [October 5 staging run](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/37276980341/job/111656053561) stopped during upload creation: curl exited 28 after a 15-second connection timeout to `srv1758-files.hstgr.io:443`. No managed build or publication was started. Connection retries were added October 6; hosted verification of that change remains pending.
 
 Failed builds retain the previous published app. A smoke-check failure after publication does not roll back. If upload/build-start results are uncertain, inspect Hostinger Deployments before retrying. Rebuild a known compatible commit to roll back application code, preserving live content/media. Uploaded ZIPs are not backups. See [recovery](DEPLOYMENT.md).
