@@ -6,7 +6,8 @@ import path from "node:path";
 import { getPool, rows, mutate, transaction } from "@/lib/content/db";
 import { publishArticle } from "@/lib/content/publish";
 import { updateArticle, trashArticle } from "@/lib/content/edit-article";
-import { getArticleBySlug } from "@/lib/content/reads";
+import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
+import { SEPARATE_AREA_CATEGORIES } from "@/lib/content/display";
 import {
   getArticleForEdit,
   listArticlesForAdmin,
@@ -112,6 +113,57 @@ describe("real MySQL content operations", () => {
     const [row] = await rows("SELECT id, slug FROM articles");
     await mutate("UPDATE articles SET status = 'draft' WHERE id = ?", [row.id]);
     expect(await getArticleBySlug(row.slug)).toEqual({ status: "not-found" });
+  });
+  it("stores pta and alumni articles and keeps each area separate", async () => {
+    for (const [title, category] of [
+      ["School news", "announcements"],
+      ["PTA day", "pta"],
+      ["Alumni reunion", "alumni"],
+      ["Trashed alumni", "alumni"],
+    ] as const)
+      expect(await publishArticle(input({ title, category }))).toMatchObject({
+        status: "success",
+      });
+    const [trashed] = await rows(
+      "SELECT id FROM articles WHERE title = 'Trashed alumni'",
+    );
+    await trashArticle(trashed.id);
+
+    const titles = async (
+      options?: Parameters<typeof getPublishedArticles>[0],
+    ) => {
+      const result = await getPublishedArticles(options);
+      if (result.status !== "ok") throw new Error("unavailable");
+      return result.articles.map((a) => a.title).sort();
+    };
+    // Default: every published category, never trash.
+    expect(await titles()).toEqual([
+      "Alumni reunion",
+      "PTA day",
+      "School news",
+    ]);
+    // Homepage feed: school news only.
+    expect(
+      await titles({ excludeCategories: SEPARATE_AREA_CATEGORIES }),
+    ).toEqual(["School news"]);
+    // Area pages.
+    expect(await titles({ categories: ["pta"] })).toEqual(["PTA day"]);
+    expect(await titles({ categories: ["alumni"] })).toEqual([
+      "Alumni reunion",
+    ]);
+    // Admin lists filter by category too.
+    const admin = await listArticlesForAdmin({
+      search: "",
+      category: "alumni",
+      page: 1,
+    });
+    expect(admin).toMatchObject({ status: "ok", total: 1 });
+    // The ENUM rejects unknown values.
+    await expect(
+      mutate("UPDATE articles SET category = 'sports' WHERE id = ?", [
+        trashed.id,
+      ]),
+    ).rejects.toThrow();
   });
   it("supports image-only articles and reuses immutable media", async () => {
     const file = new File([png], "school.png", { type: "image/png" });
