@@ -4,7 +4,11 @@ import { imageRefSchema, type ResolvedImage } from "./types";
 
 /** Optional photo; alt text is required whenever a photo is set. */
 const achievementImageSchema = imageRefSchema.extend({
-  alt: z.string().trim().min(1).max(200),
+  alt: z
+    .string()
+    .trim()
+    .min(1, "Alt text is required when a photo is set.")
+    .max(200),
 });
 
 const achievementSchema = z.object({
@@ -41,5 +45,10 @@ export const ALUMNI_DEFAULTS: AlumniContent = {
   sectionLabel: "Alumni",
   heading: "Alumni Achievements",
   intro: "Celebrating the accomplishments of Flor de Grace School alumni.",
+  achievements: [],
+};
+
+export const ALUMNI_FALLBACK: AlumniView = {
+  ...ALUMNI_DEFAULTS,
   achievements: [],
 };

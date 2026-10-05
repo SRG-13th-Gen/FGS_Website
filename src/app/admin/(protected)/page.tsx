@@ -13,11 +13,13 @@ import {
   ExternalLink,
   ArrowRight,
   Pencil,
+  Award,
 } from "lucide-react";
 
 import {
   aboutContent,
   admissionContent,
+  alumniContent,
   clubsContent,
   contactContent,
   galleryContent,
@@ -67,6 +69,12 @@ const SECTION_CARDS = [
     href: "/admin/sections/contact",
     icon: Mail,
     adapter: contactContent,
+  },
+  {
+    label: "Alumni",
+    href: "/admin/sections/alumni",
+    icon: Award,
+    adapter: alumniContent,
   },
   {
     label: "School Info",

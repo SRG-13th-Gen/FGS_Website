@@ -333,6 +333,7 @@ export function RepeatableList<T>({
   error,
   minItems = 0,
   maxItems,
+  emptyText,
 }: {
   label: string;
   helperText?: string;
@@ -348,6 +349,8 @@ export function RepeatableList<T>({
   error?: string;
   minItems?: number;
   maxItems?: number;
+  /** Shown instead of the list while it has no items. */
+  emptyText?: string;
 }) {
   const update = (index: number, patch: Partial<T>) => {
     onChange(
@@ -380,6 +383,11 @@ export function RepeatableList<T>({
       {helperText && <p className={helperTextClass}>{helperText}</p>}
 
       <div className="mt-3 space-y-4">
+        {items.length === 0 && emptyText && (
+          <p className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/50 p-4 text-center text-sm text-neutral-500">
+            {emptyText}
+          </p>
+        )}
         {items.map((item, index) => (
           <div
             key={index}

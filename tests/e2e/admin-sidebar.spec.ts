@@ -41,3 +41,27 @@ test("mobile: sidebar is off-canvas, opens via the trigger, and a link navigates
   await page.getByRole("link", { name: "About" }).click();
   await page.waitForURL(/\/admin\/sections\/about$/);
 });
+
+test("desktop: Alumni and PTA areas each highlight exactly one sidebar item", async ({
+  page,
+}) => {
+  await signInOrSkip(page);
+  const cases = [
+    ["/admin/sections/alumni", "Alumni Achievements"],
+    ["/admin/alumni/activities", "Alumni Activities"],
+    ["/admin/pta/activities", "PTA Activities"],
+    ["/admin/articles", "All News"],
+    ["/admin/articles/new", "Add New"],
+  ] as const;
+  for (const [path, label] of cases) {
+    await page.goto(path);
+    const active = page.locator(
+      '[data-sidebar="menu-button"][data-active="true"]',
+    );
+    await expect(active).toHaveCount(1);
+    await expect(active).toHaveText(label);
+    await expect(
+      page.getByRole("heading", { name: label }).first(),
+    ).toBeVisible();
+  }
+});

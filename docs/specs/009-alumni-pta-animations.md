@@ -148,7 +148,18 @@ Working rules: one phase at a time; each phase runs `pnpm lint`, `pnpm typecheck
 
 ## Implementation approach
 
-Phased as proposed in the planning message; each phase leaves `pnpm verify` green. Other repository-affecting points:
+Delivered in six phases, one at a time. After each phase the owner reviews in the browser before the next starts, and each phase runs `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm format:check` (phase 6 runs `pnpm verify`). Each phase is one focused Conventional Commit.
+
+| Phase | Scope                                                                                                                                                                 | Status      |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| 1     | Data layer: migration 003, categories, `site-alumni` schema/registry/importer skip, explicit read options.                                                            | Done        |
+| 2     | Admin: alumni editor, five-option category picker, `/admin/alumni/activities` and `/admin/pta/activities`, sidebar groups, dashboard card, single active nav item.    | In progress |
+| 3     | Public `/alumni` and `/pta` pages, shared news card, sitemap entries and canonicals.                                                                                  | Planned     |
+| 4     | Navbar (new order, `xl` breakpoint, route/anchor items) and footer links. The `/news/[slug]` link defect is fixed in its own `fix` commit, separate from the feature. | Planned     |
+| 5     | Motion: `Reveal` component and hover polish on public pages.                                                                                                          | Planned     |
+| 6     | Docs completion and final verification: contracts, FRS/NFRS, DEC-121, testing map, then a disposable `*_fgstest` database in local Docker for `pnpm test:database`.   | Planned     |
+
+Other repository-affecting points:
 
 - `scripts/import-content.ts` iterates `SECTION_REGISTRY` and records any slug without a WordPress snapshot page as a broken reference. The new slug has no WordPress origin, so add an importable/legacy marker to the registry (or skip it explicitly) so offline imports and `tests/database/migration.test.ts` do not report a failure.
 - Update [DATA_API_CONTRACTS](../DATA_API_CONTRACTS.md) (eight slugs, five categories, new routes), [FRONTEND](../FRONTEND.md), [FRS_NFRS](../FRS_NFRS.md) (FR-016 to FR-020 and the one-page note), [DECISIONS](../DECISIONS.md) (DEC-121), [TESTING](../TESTING.md) (coverage map) and the spec index. Historical "seven editors" statements in SPEC-007/008 evidence stay as history.

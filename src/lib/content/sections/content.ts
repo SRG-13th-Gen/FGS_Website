@@ -21,6 +21,13 @@ import {
   type AdmissionContent,
   type AdmissionView,
 } from "./admission";
+import {
+  alumniSchema,
+  ALUMNI_DEFAULTS,
+  ALUMNI_FALLBACK,
+  type AlumniContent,
+  type AlumniView,
+} from "./alumni";
 import { clubsSchema, CLUBS_DEFAULTS } from "./clubs";
 import { contactSchema, CONTACT_DEFAULTS } from "./contact";
 import {
@@ -237,5 +244,43 @@ export const galleryContent = {
       };
     }
     return saveSectionRaw("site-gallery", parsed.data, expectedRevision);
+  },
+};
+
+export const alumniContent = {
+  slug: "site-alumni" as const,
+  schema: alumniSchema,
+  defaults: ALUMNI_DEFAULTS,
+  async get(): Promise<AlumniView> {
+    const page = await fetchSectionPage("site-alumni");
+    if (!page) return ALUMNI_FALLBACK;
+    const parsed = alumniSchema.safeParse(page.data);
+    if (!parsed.success) return ALUMNI_FALLBACK;
+    const achievements = await Promise.all(
+      parsed.data.achievements.map(async ({ image, ...rest }) => {
+        // A missing media record renders the card without a photo.
+        const resolved = image
+          ? await resolveImageRef(image, { mediaId: 0, url: "", alt: "" })
+          : null;
+        return { ...rest, image: resolved?.url ? resolved : null };
+      }),
+    );
+    return { ...parsed.data, achievements };
+  },
+  async getLastModified(): Promise<string | null> {
+    return (await fetchSectionPage("site-alumni"))?.modifiedAt ?? null;
+  },
+  async save(
+    data: AlumniContent,
+    expectedRevision: number,
+  ): Promise<SectionSaveResult> {
+    const parsed = alumniSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        status: "validation_error",
+        fieldErrors: zodIssuesToFieldErrors(parsed.error),
+      };
+    }
+    return saveSectionRaw("site-alumni", parsed.data, expectedRevision);
   },
 };

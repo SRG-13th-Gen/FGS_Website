@@ -24,19 +24,47 @@ import type {
 } from "@/lib/content/types";
 import { publishArticleAction } from "./publish-actions";
 
-export type ArticleCategory = ArticleCategorySlug;
-
 const initialState: PublishArticleResult | null = null;
+
+const DEFAULT_CATEGORY: ArticleCategorySlug = "announcements";
+
+const NEWS_COPY = {
+  title: "Add News & Events",
+  subtitle:
+    "Publish school stories, club updates, official announcements, PTA activities, and alumni updates.",
+};
+
+/** Page heading and subtitle, by the area the page was opened from. */
+const PAGE_COPY: Record<
+  ArticleCategorySlug,
+  { title: string; subtitle: string }
+> = {
+  announcements: NEWS_COPY,
+  events: NEWS_COPY,
+  clubs: NEWS_COPY,
+  pta: {
+    title: "Add PTA Activity",
+    subtitle: "Publish PTA activities and events.",
+  },
+  alumni: {
+    title: "Add Alumni Activity",
+    subtitle: "Publish alumni updates and activities.",
+  },
+};
 
 export default function NewArticleForm({
   mutationKey: initialMutationKey,
+  initialCategory = DEFAULT_CATEGORY,
 }: {
   mutationKey: string;
+  initialCategory?: ArticleCategorySlug;
 }) {
+  const copy = PAGE_COPY[initialCategory];
   const [mutationKey, setMutationKey] = useState(initialMutationKey);
   // Form state
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ArticleCategory>("announcements");
+  const [category, setCategory] =
+    useState<ArticleCategorySlug>(initialCategory);
   const [body, setBody] = useState("");
   const [pictures, setPictures] = useState<ArticlePicture[]>([]);
 
@@ -58,7 +86,7 @@ export default function NewArticleForm({
       setMutationKey(crypto.randomUUID());
       setTitle("");
       setBody("");
-      setCategory("announcements");
+      setCategory(initialCategory);
       pictures.forEach((pic) => URL.revokeObjectURL(pic.previewUrl));
       setPictures([]);
     } else if (state && state.uploadedImages.length > 0) {
@@ -82,11 +110,9 @@ export default function NewArticleForm({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            Add News &amp; Events
+            {copy.title}
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Publish school stories, club updates, and official announcements.
-          </p>
+          <p className="mt-1 text-sm text-neutral-500">{copy.subtitle}</p>
         </div>
 
         {/* View Toggle Tabs */}
@@ -313,7 +339,8 @@ export default function NewArticleForm({
                 </li>
                 <li>
                   • <strong>Categories:</strong> Pick the appropriate category
-                  so visitors can easily filter news on the landing page.
+                  so visitors can find it. PTA and Alumni posts appear on their
+                  own /pta and /alumni pages instead of the landing page feed.
                 </li>
               </ul>
             </div>
