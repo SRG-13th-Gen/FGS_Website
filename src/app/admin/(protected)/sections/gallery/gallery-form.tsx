@@ -11,6 +11,7 @@ import {
   TextareaField,
   type ImageFieldValue,
 } from "@/components/admin/fields";
+import { applySavedUploads } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type { GalleryView } from "@/lib/content/sections/gallery";
@@ -84,13 +85,16 @@ export function GalleryForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedUploads(photos, state.uploadedMedia);
+      setRevision(state.revision);
+      setPhotos(saved);
       setBaseline({
         sectionLabel,
         heading,
         intro,
-        photos: photos.map((p) => ({
+        photos: saved.map((p) => ({
           image: { mediaId: p.mediaId, url: p.previewUrl, alt: p.alt },
           caption: p.caption,
         })),

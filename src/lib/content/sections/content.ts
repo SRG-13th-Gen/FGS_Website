@@ -7,6 +7,7 @@ import {
   type AboutContent,
   type AboutView,
 } from "./about";
+import { rows } from "../db";
 import {
   fetchSectionPage,
   resolveImageRef,
@@ -21,6 +22,14 @@ import {
   type AdmissionContent,
   type AdmissionView,
 } from "./admission";
+import {
+  alumniSchema,
+  ALUMNI_DEFAULTS,
+  ALUMNI_FALLBACK,
+  type AlumniContent,
+  type AlumniResult,
+  type AlumniView,
+} from "./alumni";
 import { clubsSchema, CLUBS_DEFAULTS } from "./clubs";
 import { contactSchema, CONTACT_DEFAULTS } from "./contact";
 import {
@@ -237,5 +246,69 @@ export const galleryContent = {
       };
     }
     return saveSectionRaw("site-gallery", parsed.data, expectedRevision);
+  },
+};
+
+async function resolveAlumni(data: AlumniContent): Promise<AlumniView> {
+  const achievements = await Promise.all(
+    data.achievements.map(async ({ image, ...rest }) => {
+      // A missing media record renders the card without a photo.
+      const resolved = image
+        ? await resolveImageRef(image, { mediaId: 0, url: "", alt: "" })
+        : null;
+      return { ...rest, image: resolved?.url ? resolved : null };
+    }),
+  );
+  return { ...data, achievements };
+}
+
+export const alumniContent = {
+  slug: "site-alumni" as const,
+  schema: alumniSchema,
+  defaults: ALUMNI_DEFAULTS,
+  async get(): Promise<AlumniView> {
+    const page = await fetchSectionPage("site-alumni");
+    if (!page) return ALUMNI_FALLBACK;
+    const parsed = alumniSchema.safeParse(page.data);
+    return parsed.success ? resolveAlumni(parsed.data) : ALUMNI_FALLBACK;
+  },
+  /**
+   * Public read that tells a database outage apart from missing content, so
+   * the Alumni page never presents an outage as an empty list. A missing or
+   * invalid stored row falls back to the defaults.
+   */
+  async getResult(): Promise<AlumniResult> {
+    try {
+      const [row] = await rows("SELECT data FROM sections WHERE slug = ?", [
+        "site-alumni",
+      ]);
+      const data =
+        typeof row?.data === "string" ? JSON.parse(row.data) : row?.data;
+      const parsed = alumniSchema.safeParse(data);
+      return {
+        status: "ok",
+        alumni: parsed.success
+          ? await resolveAlumni(parsed.data)
+          : ALUMNI_FALLBACK,
+      };
+    } catch {
+      return { status: "unavailable" };
+    }
+  },
+  async getLastModified(): Promise<string | null> {
+    return (await fetchSectionPage("site-alumni"))?.modifiedAt ?? null;
+  },
+  async save(
+    data: AlumniContent,
+    expectedRevision: number,
+  ): Promise<SectionSaveResult> {
+    const parsed = alumniSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        status: "validation_error",
+        fieldErrors: zodIssuesToFieldErrors(parsed.error),
+      };
+    }
+    return saveSectionRaw("site-alumni", parsed.data, expectedRevision);
   },
 };

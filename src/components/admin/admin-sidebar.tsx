@@ -17,15 +17,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { ADMIN_NAV_GROUPS } from "./admin-nav";
-
-function isActive(pathname: string, href: string): boolean {
-  if (href === "/admin") return pathname === "/admin";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+import { ADMIN_NAV_GROUPS, getActiveAdminNavHref } from "./admin-nav";
 
 export function AdminSidebar() {
-  const pathname = usePathname();
+  const activeHref = getActiveAdminNavHref(usePathname());
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -58,7 +53,7 @@ export function AdminSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const active = isActive(pathname, item.href);
+                  const active = item.href === activeHref;
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton

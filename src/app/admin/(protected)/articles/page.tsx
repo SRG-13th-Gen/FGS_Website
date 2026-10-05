@@ -13,10 +13,6 @@ import {
   formatArticleDateFull,
 } from "@/lib/content/display";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -35,9 +31,21 @@ import {
 
 import { TrashArticleButton } from "./trash-article-button";
 
+const BASE_PATH = "/admin/articles";
+
 function isArticleCategory(value: string): value is ArticleCategorySlug {
   return (ARTICLE_CATEGORIES as readonly string[]).includes(value);
 }
+
+/** Shown when a filter has no posts at all (no search text). */
+const EMPTY_MESSAGE: Record<ArticleCategorySlug | "all", string> = {
+  all: "Publish your first post to see it here.",
+  announcements: "No announcements have been published yet.",
+  events: "No events have been published yet.",
+  clubs: "No club posts have been published yet.",
+  pta: "No PTA activities have been published yet.",
+  alumni: "No alumni activities have been published yet.",
+};
 
 function buildHref(
   base: { q: string; category: string; page: number },
@@ -49,10 +57,10 @@ function buildHref(
   if (next.category !== "all") params.set("category", next.category);
   if (next.page > 1) params.set("page", String(next.page));
   const qs = params.toString();
-  return qs ? `/admin/articles?${qs}` : "/admin/articles";
+  return qs ? `${BASE_PATH}?${qs}` : BASE_PATH;
 }
 
-export default async function AdminAllArticlesPage({
+export default async function AdminAllPostsPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; category?: string; page?: string }>;
@@ -60,7 +68,7 @@ export default async function AdminAllArticlesPage({
   await requireAdmin();
   const params = await searchParams;
   const q = (params.q ?? "").trim();
-  const category =
+  const category: ArticleCategorySlug | "all" =
     params.category && isArticleCategory(params.category)
       ? params.category
       : "all";
@@ -70,20 +78,32 @@ export default async function AdminAllArticlesPage({
   const result = await listArticlesForAdmin({ search: q, category, page });
 
   const current = { q, category, page };
+  // "Add New" from a filtered view preselects that category.
+  const newHref =
+    category === "all"
+      ? "/admin/articles/new"
+      : `/admin/articles/new?category=${category}`;
+  const filters: Array<{ slug: ArticleCategorySlug | "all"; label: string }> = [
+    { slug: "all", label: "All" },
+    ...ARTICLE_CATEGORIES.map((slug) => ({
+      slug,
+      label: ARTICLE_CATEGORY_LABELS[slug],
+    })),
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            All News
+            All Posts
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Search, filter, edit, or trash published news and events.
+            Search, filter, edit, or trash published posts.
           </p>
         </div>
         <Link
-          href="/admin/articles/new"
+          href={newHref}
           className="inline-flex items-center gap-2 rounded-xl bg-school-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-school-green-dark"
         >
           <FilePlus className="h-4 w-4" />
@@ -91,28 +111,48 @@ export default async function AdminAllArticlesPage({
         </Link>
       </div>
 
+      {/* Category filter: plain links, so the choice lives in the URL. */}
+      <nav aria-label="Filter posts by category">
+        <ul className="flex flex-wrap gap-1 rounded-xl border border-neutral-200 bg-white p-1 shadow-sm sm:inline-flex">
+          {filters.map(({ slug, label }) => {
+            const selected = slug === category;
+            return (
+              <li key={slug}>
+                <Link
+                  href={buildHref(current, { category: slug, page: 1 })}
+                  aria-current={selected ? "page" : undefined}
+                  className={`inline-flex min-h-9 items-center rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-1 focus-visible:outline-none ${
+                    selected
+                      ? "bg-school-green text-white shadow-sm"
+                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
       <form
         method="get"
         className="flex flex-col gap-3 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center"
       >
+        {category !== "all" && (
+          <input type="hidden" name="category" value={category} />
+        )}
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             name="q"
             defaultValue={q}
+            aria-label="Search posts by title"
             placeholder="Search by title..."
             className="w-full rounded-lg border border-neutral-200 bg-neutral-50/50 py-2 pr-3 pl-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-school-green focus:bg-white focus:ring-2 focus:ring-school-green/20 focus:outline-none"
           />
         </div>
-        <NativeSelect name="category" defaultValue={category}>
-          <NativeSelectOption value="all">All categories</NativeSelectOption>
-          {ARTICLE_CATEGORIES.map((slug) => (
-            <NativeSelectOption key={slug} value={slug}>
-              {ARTICLE_CATEGORY_LABELS[slug]}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
         <button
           type="submit"
           className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
@@ -124,18 +164,20 @@ export default async function AdminAllArticlesPage({
       {result.status === "unavailable" ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-10 text-center">
           <p className="text-sm text-neutral-500">
-            News could not be loaded. Please try again shortly.
+            Posts could not be loaded. Please try again shortly.
           </p>
         </div>
       ) : result.items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-10 text-center">
           <p className="text-sm font-semibold text-neutral-900">
-            No news found.
+            No posts found.
           </p>
           <p className="mt-1 text-sm text-neutral-500">
-            {q || category !== "all"
-              ? "Try a different search or category."
-              : "Publish your first news post to see it here."}
+            {q
+              ? category === "all"
+                ? "Try a different search."
+                : `Nothing in ${ARTICLE_CATEGORY_LABELS[category]} matches that search.`
+              : EMPTY_MESSAGE[category]}
           </p>
         </div>
       ) : (

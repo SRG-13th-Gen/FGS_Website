@@ -10,7 +10,7 @@
 | `pnpm test:database` | Real MySQL/importer tests; guarded disposable database required                                          |
 | `pnpm docker:config` | Compose configuration; generated local database passwords required                                       |
 
-PR CI runs `verify`, not browser or real-database tests. Public browser smoke tests assume unavailable content storage and non-indexable local configuration. Passing them does not establish hosted OAuth or data acceptance.
+PR CI runs `verify`, not browser or real-database tests. Public browser smoke tests assume unavailable content storage and non-indexable local configuration. When the local database is running, point the app at an unreachable port for the browser run so those assumptions hold, for example `DB_PORT=9 pnpm test:e2e` (process variables win over `.env.local`). Some navbar checks skip on a 404 article page for the same reason. Passing them does not establish hosted OAuth or data acceptance.
 
 ## Database integration
 
@@ -20,6 +20,8 @@ Use an isolated database ending in `_fgstest`. Set `DB_*` and `FGS_TEST_DATABASE
 node --env-file=.env.database-test.local node_modules/vitest/vitest.mjs run --config vitest.database.config.ts
 ```
 
+To create the disposable database in the local Docker MariaDB only, run as the database root user (`docker exec <container> mariadb -uroot -p"$MARIADB_ROOT_PASSWORD"`): `CREATE DATABASE fgs_content_fgstest` (utf8mb4) and `GRANT ALL PRIVILEGES ON fgs_content_fgstest.* TO` the application user. Then copy `.env.local` to the ignored `.env.database-test.local`, set `DB_NAME=fgs_content_fgstest` and `FGS_TEST_DATABASE=fgs_content_fgstest`, and apply migrations with `FGS_ENV_FILE=.env.database-test.local pnpm db:migrate` before the command above. `pnpm test:database` reads only process variables, so use the `node --env-file` form (or export the file) when running it.
+
 Both database suites delete disposable content rows. They cover transactions, revision conflicts, published-only reads, idempotent publication, soft trash, search/pagination, media reuse, upload bounds and repeat imports preserving edits. Files use temporary test storage. Never target staging/production data for routine tests.
 
 ## Authenticated browser fixtures
@@ -28,21 +30,30 @@ Both database suites delete disposable content rows. They cover transactions, re
 
 ## Coverage map
 
-| Behavior / requirement                                  | Current test sources                                                                                                                    |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Google allowlist and sessions; FR-005/006               | `tests/unit/admin-auth.test.ts`, `admin-session.test.ts`; `tests/integration/content-actions.test.ts`                                   |
-| SQL reads/actions and publication; FR-001/002/007       | `tests/integration/content-queries.test.ts`, `content-actions.test.ts`; `tests/database/content.test.ts`                                |
-| Upload/HTML/path safety; FR-008, NFR-001/002            | `tests/unit/content-validation.test.ts`, `content-svg.test.ts`, `content-rendering.test.ts`; `tests/integration/content-routes.test.ts` |
-| Section validation/revisions; FR-002/009                | `tests/unit/sections-schemas.test.ts`, `sections-reorder.test.ts`; database/action suites                                               |
-| Import/restore and source conversion                    | `tests/database/migration.test.ts`; rendering fixtures; disposable hosted recovery exercises                                            |
-| SEO, outage states and anonymous access; FR-003/004/015 | Robots unit tests; `tests/e2e/admin-login.spec.ts`, `news-resilience.spec.ts`, `scaffold.spec.ts`                                       |
-| Admin browser workflows                                 | `tests/e2e/content-workflows.spec.ts`, `admin-sidebar.spec.ts`, `media-picker.spec.ts`                                                  |
+| Behavior / requirement                                                        | Current test sources                                                                                                                                                             |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google allowlist and sessions; FR-005/006                                     | `tests/unit/admin-auth.test.ts`, `admin-session.test.ts`; `tests/integration/content-actions.test.ts`                                                                            |
+| SQL reads/actions and publication; FR-001/002/007                             | `tests/integration/content-queries.test.ts`, `content-actions.test.ts`; `tests/database/content.test.ts`                                                                         |
+| Upload/HTML/path safety; FR-008, NFR-001/002                                  | `tests/unit/content-validation.test.ts`, `content-svg.test.ts`, `content-rendering.test.ts`; `tests/integration/content-routes.test.ts`                                          |
+| Section validation/revisions; FR-002/009                                      | `tests/unit/sections-schemas.test.ts`, `sections-reorder.test.ts`; database/action suites                                                                                        |
+| Import/restore and source conversion                                          | `tests/database/migration.test.ts`; rendering fixtures; disposable hosted recovery exercises                                                                                     |
+| SEO, outage states and anonymous access; FR-003/004/015                       | Robots unit tests; `tests/e2e/admin-login.spec.ts`, `news-resilience.spec.ts`, `scaffold.spec.ts`                                                                                |
+| Admin browser workflows                                                       | `tests/e2e/content-workflows.spec.ts`, `admin-sidebar.spec.ts`, `media-picker.spec.ts`                                                                                           |
+| PTA/Alumni categories, `site-alumni` schema, migration 003; FR-016/017        | `tests/unit/content-validation.test.ts`, `alumni-section.test.ts` (migration SQL equals defaults); `tests/database/content.test.ts`                                              |
+| Read options, feed separation, sitemap, outage vs empty; FR-016/018           | `tests/integration/content-queries.test.ts`, `alumni-read.test.ts`; `tests/unit/sitemap.test.ts`; `tests/database/content.test.ts`                                               |
+| Admin nav, single active item, no duplicate uploads; FR-017                   | `tests/unit/admin-nav.test.ts`, `saved-uploads.test.ts`; `tests/integration/section-uploads.test.ts`; `tests/e2e/admin-sidebar.spec.ts` (authenticated, skips without a fixture) |
+| Public pages and canonicals; FR-018                                           | `tests/e2e/alumni-pta.spec.ts`                                                                                                                                                   |
+| Navbar links, active state, fit at 768/1024/1280/1440 px, mobile menu; FR-019 | `tests/unit/nav-links.test.ts`; `tests/e2e/navbar.spec.ts`                                                                                                                       |
+| Light-only theme in OS dark mode (DEC-122)                                    | `tests/unit/theme-provider.test.ts` (jsdom); `tests/e2e/color-scheme.spec.ts` (dark emulation: no `.dark` class, light surfaces, same computed colours as light)                 |
+| Reveal and reduced motion, JavaScript disabled, no layout shift; FR-020       | `tests/unit/reveal.test.ts` (jsdom environment per file); `tests/e2e/motion.spec.ts`                                                                                             |
 
 Legacy T-001–T-023 references remain traceability IDs in requirements/history; only the coverage listed above is asserted. Formal accessibility/performance audits, inquiry tests and a general durable audit log are not completed acceptance evidence.
 
 ## Recorded evidence
 
 October 4 release verification passed 110 tests across 13 files and the production build. Public browser rerun: 7 passed, 4 authenticated checks skipped. Earlier migration verification passed 120 combined unit/integration/MySQL/importer tests and four authenticated isolated browser checks.
+
+October 5 SPEC-009 verification (local, not hosted): `pnpm verify` passed (ESLint, TypeScript, 23 files and 215 unit/integration tests, Prettier, production build). The database suites passed against a disposable `fgs_content_fgstest` database in local Docker (25 files and 226 tests including the unit tests; the two files under `tests/database` are 11 tests). `DB_PORT=9 pnpm test:e2e` passed 51 tests with 8 authenticated checks skipped for lack of a private Google session fixture. Browser acceptance by the owner is separate and pending.
 
 Hosted launch evidence separately covers Google sign-in, seven editors, image-only publication/edit/trash, media selection/upload, all five articles, redirects, assets, responsive presentation, indexing/canonicals, isolation, restart/redeploy persistence and disposable recovery. See [SPEC-008](specs/008-wordpress-removal.md). Staging's revised migration/build pipeline [passed](https://github.com/SRG-13th-Gen/FGS_Website/actions/runs/37193631397).
 

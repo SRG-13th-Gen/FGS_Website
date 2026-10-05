@@ -10,6 +10,15 @@
   /* Provisional system fonts; the frontend designer owns the final typography. */
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /*
+   * Opaque page and section surfaces. Each equals the old translucent
+   * neutral/muted background composited over the white page, so the light
+   * design is unchanged but no longer depends on what is behind it.
+   */
+  --color-surface-soft: oklch(0.9925 0 0); /* was bg-neutral-50/50 */
+  --color-surface-muted: oklch(0.991 0 0); /* was bg-muted/30 */
+  --color-surface-admin: oklch(0.9895 0 0); /* was bg-neutral-50/70 */
   --font-heading: var(--font-sans);
 
   /* School brand tokens — designer-owned, derived from FGS logo palette. */
@@ -143,6 +152,8 @@
   }
   html {
     @apply font-sans;
+    /* One light design: native controls and scrollbars stay light. */
+    color-scheme: light;
     scroll-behavior: smooth;
     /* Account for fixed navbar height during anchor scrolling */
     scroll-padding-top: 5rem;
@@ -159,5 +170,39 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/*
+ * Motion: the single place for entrance timing (SPEC-009, interim values
+ * pending the designer). Used by <Reveal> and by .motion-enter.
+ */
+:root {
+  --motion-duration: 500ms;
+  --motion-distance: 16px;
+  --motion-stagger: 80ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* CSS-only entrance on load, for content that is already in view. */
+@keyframes motion-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.motion-enter {
+  animation: motion-enter var(--motion-duration) var(--motion-ease) backwards;
+  animation-delay: calc(var(--motion-stagger) * var(--motion-step, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter {
+    animation: none;
   }
 }

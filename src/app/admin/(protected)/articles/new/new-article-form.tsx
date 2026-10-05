@@ -18,22 +18,28 @@ import {
   ArticlePictureFormFields,
   type ArticlePicture,
 } from "@/components/admin/article-fields";
-import type { PublishArticleResult } from "@/lib/content/types";
+import type {
+  ArticleCategorySlug,
+  PublishArticleResult,
+} from "@/lib/content/types";
 import { publishArticleAction } from "./publish-actions";
-
-export type ArticleCategory = "announcements" | "events" | "clubs";
 
 const initialState: PublishArticleResult | null = null;
 
+const DEFAULT_CATEGORY: ArticleCategorySlug = "announcements";
+
 export default function NewArticleForm({
   mutationKey: initialMutationKey,
+  initialCategory = DEFAULT_CATEGORY,
 }: {
   mutationKey: string;
+  initialCategory?: ArticleCategorySlug;
 }) {
   const [mutationKey, setMutationKey] = useState(initialMutationKey);
   // Form state
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ArticleCategory>("announcements");
+  const [category, setCategory] =
+    useState<ArticleCategorySlug>(initialCategory);
   const [body, setBody] = useState("");
   const [pictures, setPictures] = useState<ArticlePicture[]>([]);
 
@@ -55,7 +61,7 @@ export default function NewArticleForm({
       setMutationKey(crypto.randomUUID());
       setTitle("");
       setBody("");
-      setCategory("announcements");
+      setCategory(initialCategory);
       pictures.forEach((pic) => URL.revokeObjectURL(pic.previewUrl));
       setPictures([]);
     } else if (state && state.uploadedImages.length > 0) {
@@ -82,7 +88,8 @@ export default function NewArticleForm({
             Add News &amp; Events
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Publish school stories, club updates, and official announcements.
+            Publish school stories, club updates, official announcements, PTA
+            activities, and alumni updates.
           </p>
         </div>
 
@@ -310,7 +317,8 @@ export default function NewArticleForm({
                 </li>
                 <li>
                   • <strong>Categories:</strong> Pick the appropriate category
-                  so visitors can easily filter news on the landing page.
+                  so visitors can find it. PTA and Alumni posts appear on their
+                  own /pta and /alumni pages instead of the landing page feed.
                 </li>
               </ul>
             </div>
