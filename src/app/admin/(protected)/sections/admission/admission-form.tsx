@@ -13,6 +13,7 @@ import {
   TextareaField,
   type ImageFieldValue,
 } from "@/components/admin/fields";
+import { applySavedImage } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type {
@@ -86,16 +87,19 @@ export function AdmissionForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedImage(backgroundImage, state.uploadedMedia);
+      setRevision(state.revision);
+      setBackgroundImage(saved);
       setBaseline({
         sectionLabel,
         heading,
         intro,
         backgroundImage: {
-          mediaId: backgroundImage.mediaId,
-          url: backgroundImage.previewUrl,
-          alt: backgroundImage.alt,
+          mediaId: saved.mediaId,
+          url: saved.previewUrl,
+          alt: saved.alt,
         },
         programs,
         requirementCategories,

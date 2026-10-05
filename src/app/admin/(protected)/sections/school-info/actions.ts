@@ -53,12 +53,14 @@ export async function saveSchoolInfoAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  let uploadedMedia: Record<number, number> | undefined;
   if (file instanceof File && file.size > 0) {
     const uploaded = await uploadSectionImage(file, alt);
     if ("error" in uploaded) {
       return { status: "error", message: uploaded.error };
     }
     input.logo.mediaId = uploaded.mediaId;
+    uploadedMedia = { 0: uploaded.mediaId };
   }
 
   const result = await schoolInfoContent.save(
@@ -74,5 +76,5 @@ export async function saveSchoolInfoAction(
   } catch {
     cacheWarning = true;
   }
-  return { ...result, cacheWarning };
+  return { ...result, cacheWarning, uploadedMedia };
 }

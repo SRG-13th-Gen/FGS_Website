@@ -42,12 +42,14 @@ export async function saveHeroAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  let uploadedMedia: Record<number, number> | undefined;
   if (file instanceof File && file.size > 0) {
     const uploaded = await uploadSectionImage(file, alt);
     if ("error" in uploaded) {
       return { status: "error", message: uploaded.error };
     }
     input.backgroundImage.mediaId = uploaded.mediaId;
+    uploadedMedia = { 0: uploaded.mediaId };
   }
 
   const result = await heroContent.save(
@@ -62,5 +64,5 @@ export async function saveHeroAction(
   } catch {
     cacheWarning = true;
   }
-  return { ...result, cacheWarning };
+  return { ...result, cacheWarning, uploadedMedia };
 }

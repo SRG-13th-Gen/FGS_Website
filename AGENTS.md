@@ -31,7 +31,7 @@ The documentation index defines authority, document ownership, and task-specific
 
 ## Present repository state
 
-The Next.js public and admin interfaces now use server-only services in `src/lib/content`. Seven section editors, article create/edit/trash and media selection/upload remain. Google verified-email allowlisting and eight-hour sessions remain. SQL migrations and offline migration/recovery tools are implemented; fresh WordPress backups and an export are retained outside Git. Hosted acceptance passed and production launched on October 4; evidence is recorded in SPEC-008. Inquiry submission is deferred. Use `pnpm verify`, `pnpm test:database`, and `pnpm test:e2e`; see [TESTING](docs/TESTING.md) and [DEPLOYMENT](docs/DEPLOYMENT.md).
+The Next.js public and admin interfaces now use server-only services in `src/lib/content`. Eight section editors (including Alumni Achievements), article create/edit/trash in a consolidated admin Posts area with a category filter, and media selection/upload remain. PTA and Alumni post categories have their own public `/pta` and `/alumni` pages and stay out of the homepage news feed, and public pages use the `Reveal` scroll-motion component ([SPEC-009](docs/specs/009-alumni-pta-animations.md)). Google verified-email allowlisting and eight-hour sessions remain. SQL migrations and offline migration/recovery tools are implemented; fresh WordPress backups and an export are retained outside Git. Hosted acceptance passed and production launched on October 4; evidence is recorded in SPEC-008. Inquiry submission is deferred. Use `pnpm verify`, `pnpm test:database`, and `pnpm test:e2e`; see [TESTING](docs/TESTING.md) and [DEPLOYMENT](docs/DEPLOYMENT.md).
 
 shadcn components in `src/components/ui` are primitives. Custom public components and the school visual system are documented in [FRONTEND.md](docs/FRONTEND.md) and [DESIGN.md](docs/DESIGN.md).
 
@@ -45,8 +45,8 @@ For authorized Hostinger shell or management API access, use the repository-loca
 
 # This is NOT the Next.js you know
 
-This version has breaking changes â€” APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-This block is written and re-added by `next dev` â€” verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->

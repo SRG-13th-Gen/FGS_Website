@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowRight, ChevronUp } from "lucide-react";
 
+import { Reveal } from "@/components/public/reveal";
 import type { GalleryView } from "@/lib/content/sections/gallery";
 
 function chunkIntoFives<T>(items: T[]): T[][] {
@@ -23,7 +24,7 @@ export function GallerySection({ content }: { content: GalleryView }) {
     <section id="gallery" className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header with 'View More' on the upper right */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
               {content.sectionLabel}
@@ -52,7 +53,7 @@ export function GallerySection({ content }: { content: GalleryView }) {
               )}
             </button>
           )}
-        </div>
+        </Reveal>
 
         {content.photos.length === 0 ? (
           <div className="mt-12 rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-14 text-center">
@@ -65,18 +66,18 @@ export function GallerySection({ content }: { content: GalleryView }) {
             {visibleChunks.map((chunk, chunkIndex) => {
               const [big, ...rest] = chunk;
               return (
-                <div
+                <Reveal
                   key={chunkIndex}
                   className="grid grid-cols-2 gap-4 md:grid-cols-4"
                 >
                   {big && (
-                    <div className="relative col-span-2 row-span-2 aspect-square overflow-hidden rounded-2xl border border-neutral-200/60 shadow-sm transition-all hover:shadow-md">
+                    <div className="group relative col-span-2 row-span-2 aspect-square overflow-hidden rounded-2xl border border-neutral-200/60 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
                       <Image
                         src={big.image.url}
                         alt={big.image.alt}
                         fill
                         sizes="(max-width: 767px) 100vw, 50vw"
-                        className="object-cover"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {big.caption && (
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
@@ -91,14 +92,14 @@ export function GallerySection({ content }: { content: GalleryView }) {
                   {rest.map((photo, photoIndex) => (
                     <div
                       key={photoIndex}
-                      className="relative aspect-square overflow-hidden rounded-2xl border border-neutral-200/60 shadow-sm transition-all hover:scale-[1.02]"
+                      className="group relative aspect-square overflow-hidden rounded-2xl border border-neutral-200/60 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                     >
                       <Image
                         src={photo.image.url}
                         alt={photo.image.alt}
                         fill
                         sizes="(max-width: 767px) 50vw, 25vw"
-                        className="object-cover"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {photo.caption && (
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
@@ -109,7 +110,7 @@ export function GallerySection({ content }: { content: GalleryView }) {
                       )}
                     </div>
                   ))}
-                </div>
+                </Reveal>
               );
             })}
           </div>

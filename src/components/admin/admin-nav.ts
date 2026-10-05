@@ -9,6 +9,7 @@ import {
   Settings,
   Newspaper,
   FilePlus,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,15 +24,45 @@ export interface AdminNavGroup {
   items: AdminNavItem[];
 }
 
+/** Titles for pages that are not sidebar items. */
+const EXTRA_PAGE_TITLES: ReadonlyArray<{
+  matches: (pathname: string) => boolean;
+  title: string;
+}> = [
+  {
+    matches: (p) => /^\/admin\/articles\/[^/]+\/edit$/.test(p),
+    title: "Edit Post",
+  },
+];
+
 export function getAdminPageTitle(pathname: string): string {
   for (const group of ADMIN_NAV_GROUPS) {
     const match = group.items.find((item) => item.href === pathname);
     if (match) return match.label;
   }
-  if (pathname.startsWith("/admin/articles/") && pathname.endsWith("/edit")) {
-    return "Edit News & Events";
+  return EXTRA_PAGE_TITLES.find((e) => e.matches(pathname))?.title ?? "Admin";
+}
+
+/**
+ * The single sidebar item that owns this path: the item with the longest
+ * matching href. A plain prefix match would highlight both "All Posts"
+ * (/admin/articles) and "Add New" (/admin/articles/new), while editing a
+ * post (/admin/articles/12/edit) correctly stays under "All Posts". The
+ * query string never matters, so a filtered All Posts is still All Posts.
+ */
+export function getActiveAdminNavHref(pathname: string): string | null {
+  let active: string | null = null;
+  for (const group of ADMIN_NAV_GROUPS) {
+    for (const { href } of group.items) {
+      const matches =
+        href === "/admin"
+          ? pathname === href
+          : pathname === href || pathname.startsWith(href + "/");
+      if (matches && (active === null || href.length > active.length))
+        active = href;
+    }
   }
-  return "Admin";
+  return active;
 }
 
 export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
@@ -57,12 +88,17 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         href: "/admin/sections/school-info",
         icon: Settings,
       },
+      {
+        label: "Alumni Achievements",
+        href: "/admin/sections/alumni",
+        icon: Award,
+      },
     ],
   },
   {
-    label: "News & Events",
+    label: "Posts",
     items: [
-      { label: "All News", href: "/admin/articles", icon: Newspaper },
+      { label: "All Posts", href: "/admin/articles", icon: Newspaper },
       { label: "Add New", href: "/admin/articles/new", icon: FilePlus },
     ],
   },

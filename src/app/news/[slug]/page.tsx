@@ -10,6 +10,8 @@ import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
 import { schoolInfoContent } from "@/lib/content/sections/content";
 import {
   ARTICLE_CATEGORY_LABELS,
+  articleAreaNav,
+  articleAreaOptions,
   formatArticleDate,
 } from "@/lib/content/display";
 import { Navbar } from "@/components/public/navbar";
@@ -59,7 +61,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         <Navbar schoolInfo={schoolInfo} />
         <main
           id="main-content"
-          className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28"
+          className="min-h-screen bg-surface-soft pt-24 pb-20 sm:pt-28 sm:pb-28"
         >
           <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
             <p className="rounded-2xl border border-neutral-200 bg-white p-10 text-sm font-medium text-neutral-600 shadow-sm">
@@ -80,7 +82,10 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   }
 
   const { article } = result;
-  const othersResult = await getPublishedArticles();
+  const area = articleAreaNav(article.category);
+  const othersResult = await getPublishedArticles(
+    articleAreaOptions(article.category),
+  );
   const otherArticles =
     othersResult.status === "ok"
       ? othersResult.articles.filter((a) => a.slug !== article.slug).slice(0, 4)
@@ -92,17 +97,17 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
       <main
         id="main-content"
-        className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28"
+        className="min-h-screen bg-surface-soft pt-24 pb-20 sm:pt-28 sm:pb-28"
       >
         <article className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb / Back Link */}
           <div className="mb-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <Link
-              href="/#news"
+              href={area.href}
               className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-semibold text-neutral-600 transition-colors hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back to News &amp; Events</span>
+              <span>{area.backLabel}</span>
             </Link>
 
             <span className="inline-flex items-center gap-1.5 rounded-full bg-school-green-light px-3 py-1 text-xs font-bold tracking-wider text-school-green-dark uppercase">
@@ -193,13 +198,13 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             <section className="mt-16">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
-                  More News &amp; Updates
+                  {area.moreHeading}
                 </h2>
                 <Link
-                  href="/#news"
+                  href={area.href}
                   className="inline-flex min-h-11 items-center rounded-md text-xs font-semibold text-school-green-dark hover:underline focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm"
                 >
-                  View All News →
+                  {area.allLabel}
                 </Link>
               </div>
 

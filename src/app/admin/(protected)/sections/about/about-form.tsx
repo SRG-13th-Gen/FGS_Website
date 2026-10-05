@@ -11,6 +11,7 @@ import {
   TextareaField,
   type ImageFieldValue,
 } from "@/components/admin/fields";
+import { applySavedImage } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type { AboutView } from "@/lib/content/sections/about";
@@ -80,8 +81,11 @@ export function AboutForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedImage(bannerImage, state.uploadedMedia);
+      setRevision(state.revision);
+      setBannerImage(saved);
       setBaseline({
         sectionLabel,
         heading,
@@ -93,9 +97,9 @@ export function AboutForm({
           heading: bannerHeading,
           body: bannerBody,
           image: {
-            mediaId: bannerImage.mediaId,
-            url: bannerImage.previewUrl,
-            alt: bannerImage.alt,
+            mediaId: saved.mediaId,
+            url: saved.previewUrl,
+            alt: saved.alt,
           },
         },
       });

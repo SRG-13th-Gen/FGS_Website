@@ -10,42 +10,66 @@ import {
   Megaphone,
   Calendar,
   Sparkles,
+  GraduationCap,
+  HeartHandshake,
   RefreshCw,
 } from "lucide-react";
 
 import { MediaPickerDialog } from "@/components/admin/media-picker";
-import type { ArticleCategorySlug } from "@/lib/content/types";
+import {
+  ARTICLE_CATEGORIES,
+  type ArticleCategorySlug,
+} from "@/lib/content/types";
 
-export const ARTICLE_CATEGORY_OPTIONS: Array<{
+interface ArticleCategoryOption {
   id: ArticleCategorySlug;
   name: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
-}> = [
-  {
-    id: "announcements",
+}
+
+// Keyed by slug so a new category cannot be added without an option here.
+// PTA and Alumni reuse the school green pill until the designer decides.
+const CATEGORY_OPTION_DETAILS: Record<
+  ArticleCategorySlug,
+  Omit<ArticleCategoryOption, "id">
+> = {
+  announcements: {
     name: "Announcements",
     description:
       "Official school advisories, enrollment updates, schedule alerts",
     icon: Megaphone,
     color: "border-blue-500/30 bg-blue-50 text-blue-700",
   },
-  {
-    id: "events",
+  events: {
     name: "Events",
     description: "Celebrations, ceremonies, gatherings, and milestones",
     icon: Calendar,
     color: "border-school-green/30 bg-school-green-light text-school-green",
   },
-  {
-    id: "clubs",
+  clubs: {
     name: "Clubs",
     description: "Student clubs, workshops, activities, and exhibits",
     icon: Sparkles,
     color: "border-amber-500/30 bg-amber-50 text-amber-700",
   },
-];
+  pta: {
+    name: "PTA",
+    description: "Parent-Teacher Association activities and events",
+    icon: HeartHandshake,
+    color: "border-school-green/30 bg-school-green-light text-school-green",
+  },
+  alumni: {
+    name: "Alumni",
+    description: "Alumni activities, updates, and gatherings",
+    icon: GraduationCap,
+    color: "border-school-green/30 bg-school-green-light text-school-green",
+  },
+};
+
+export const ARTICLE_CATEGORY_OPTIONS: ArticleCategoryOption[] =
+  ARTICLE_CATEGORIES.map((id) => ({ id, ...CATEGORY_OPTION_DETAILS[id] }));
 
 export function ArticleCategoryPicker({
   value,
@@ -65,7 +89,8 @@ export function ArticleCategoryPicker({
         Select where this article will be published on the website.
       </p>
 
-      <div className="mt-3.5 grid gap-3 sm:grid-cols-3">
+      {/* Equal rows: every card is as tall as the tallest, one column each. */}
+      <div className="mt-3.5 grid auto-rows-fr gap-3 sm:grid-cols-2">
         {ARTICLE_CATEGORY_OPTIONS.map((cat) => {
           const Icon = cat.icon;
           const isSelected = value === cat.id;
@@ -74,7 +99,7 @@ export function ArticleCategoryPicker({
               key={cat.id}
               type="button"
               onClick={() => onChange(cat.id)}
-              className={`flex flex-col items-start rounded-xl border p-4 text-left transition-all ${
+              className={`flex h-full w-full flex-col items-start rounded-xl border p-4 text-left transition-all ${
                 isSelected
                   ? "border-school-green bg-school-green-light/40 shadow-sm ring-2 ring-school-green/20"
                   : "border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50"

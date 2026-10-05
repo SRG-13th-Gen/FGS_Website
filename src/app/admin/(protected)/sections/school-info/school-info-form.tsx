@@ -11,6 +11,7 @@ import {
   TextareaField,
   type ImageFieldValue,
 } from "@/components/admin/fields";
+import { applySavedImage } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type { SchoolInfoView } from "@/lib/content/sections/school-info";
@@ -73,12 +74,15 @@ export function SchoolInfoForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedImage(logo, state.uploadedMedia);
+      setRevision(state.revision);
+      setLogo(saved);
       setBaseline({
         schoolName,
         shortName,
-        logo: { mediaId: logo.mediaId, url: logo.previewUrl, alt: logo.alt },
+        logo: { mediaId: saved.mediaId, url: saved.previewUrl, alt: saved.alt },
         address,
         phone,
         email,

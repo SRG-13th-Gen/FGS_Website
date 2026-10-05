@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { SchoolInfoView } from "@/lib/content/sections/school-info";
@@ -34,36 +35,36 @@ export function Footer({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             </h3>
             <ul className="text-sm text-background/70">
               <li>
-                <a
-                  href="#about"
+                <Link
+                  href="/#about"
                   className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#admission"
+                <Link
+                  href="/#admission"
                   className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   Admission
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#news"
+                <Link
+                  href="/#news"
                   className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   News &amp; Events
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#clubs"
+                <Link
+                  href="/#clubs"
                   className="inline-block py-3 transition-colors hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   Clubs
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

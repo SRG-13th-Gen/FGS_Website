@@ -2,6 +2,7 @@ import type { z } from "zod";
 
 import { ABOUT_DEFAULTS, aboutSchema } from "./about";
 import { ADMISSION_DEFAULTS, admissionSchema } from "./admission";
+import { ALUMNI_DEFAULTS, alumniSchema } from "./alumni";
 import { CLUBS_DEFAULTS, clubsSchema } from "./clubs";
 import { CONTACT_DEFAULTS, contactSchema } from "./contact";
 import { GALLERY_DEFAULTS, gallerySchema } from "./gallery";
@@ -18,6 +19,8 @@ export interface SectionRegistryEntry {
   publicAnchor: string;
   schema: z.ZodType;
   defaults: unknown;
+  /** False when the section has no WordPress origin; offline imports skip it. */
+  legacyImport?: false;
 }
 
 /** Single source of truth for every section: slug, schema, and seed defaults. */
@@ -69,6 +72,16 @@ export const SECTION_REGISTRY: readonly SectionRegistryEntry[] = [
     publicAnchor: "/#contact",
     schema: contactSchema,
     defaults: CONTACT_DEFAULTS,
+  },
+  {
+    slug: "site-alumni",
+    label: "Alumni",
+    pageTitle: "Site Section: Alumni",
+    publicAnchor: "/alumni",
+    schema: alumniSchema,
+    defaults: ALUMNI_DEFAULTS,
+    // Created by migration 003; no WordPress page exists to import.
+    legacyImport: false,
   },
   {
     slug: "site-school-info",

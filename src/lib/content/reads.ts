@@ -3,7 +3,12 @@ import { rows, isoDate } from "./db";
 import { mediaUrl } from "./media";
 import { buildArticleContent } from "./blocks";
 import { sanitizeArticleHtml } from "./sanitize";
-import type { Article, ArticleDetailResult, ArticleListResult } from "./types";
+import type {
+  Article,
+  ArticleCategorySlug,
+  ArticleDetailResult,
+  ArticleListResult,
+} from "./types";
 import type { RowDataPacket } from "mysql2/promise";
 export async function articleImages(id: number) {
   return rows(
@@ -31,10 +36,37 @@ async function toArticle(row: RowDataPacket): Promise<Article> {
     coverImage: images[0] ?? null,
   };
 }
-export async function getPublishedArticles(): Promise<ArticleListResult> {
+export interface PublishedArticleOptions {
+  /** Keep only these categories. Omitted: every category. */
+  categories?: readonly ArticleCategorySlug[];
+  /** Drop these categories. Omitted: none are dropped. */
+  excludeCategories?: readonly ArticleCategorySlug[];
+}
+function categoryClause(
+  operator: "IN" | "NOT IN",
+  list: readonly ArticleCategorySlug[] | undefined,
+) {
+  const values = [...new Set(list ?? [])];
+  return values.length
+    ? {
+        sql: ` AND category ${operator} (${values.map(() => "?").join(",")})`,
+        values,
+      }
+    : { sql: "", values: [] as string[] };
+}
+/** Every published article by default; areas are selected explicitly. */
+export async function getPublishedArticles(
+  options: PublishedArticleOptions = {},
+): Promise<ArticleListResult> {
   try {
+    const include = categoryClause("IN", options.categories);
+    const exclude = categoryClause("NOT IN", options.excludeCategories);
     const items = await rows(
-      "SELECT * FROM articles WHERE status = 'publish' ORDER BY published_at DESC, id DESC",
+      "SELECT * FROM articles WHERE status = 'publish'" +
+        include.sql +
+        exclude.sql +
+        " ORDER BY published_at DESC, id DESC",
+      [...include.values, ...exclude.values],
     );
     return { status: "ok", articles: await Promise.all(items.map(toArticle)) };
   } catch {

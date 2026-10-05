@@ -10,6 +10,7 @@ import {
   TextareaField,
   type ImageFieldValue,
 } from "@/components/admin/fields";
+import { applySavedImage } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type { HeroView } from "@/lib/content/sections/hero";
@@ -70,15 +71,18 @@ export function HeroForm({
   const [handledState, setHandledState] = useState(state);
   if (state !== handledState) {
     setHandledState(state);
-    if (state?.status === "success") setRevision(state.revision);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedImage(image, state.uploadedMedia);
+      setRevision(state.revision);
+      setImage(saved);
       setBaseline({
         heading,
         tagline,
         backgroundImage: {
-          mediaId: image.mediaId,
-          url: image.previewUrl,
-          alt: image.alt,
+          mediaId: saved.mediaId,
+          url: saved.previewUrl,
+          alt: saved.alt,
         },
       });
     }

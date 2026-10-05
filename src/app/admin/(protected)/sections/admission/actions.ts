@@ -60,12 +60,14 @@ export async function saveAdmissionAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  let uploadedMedia: Record<number, number> | undefined;
   if (file instanceof File && file.size > 0) {
     const uploaded = await uploadSectionImage(file, bgAlt);
     if ("error" in uploaded) {
       return { status: "error", message: uploaded.error };
     }
     input.backgroundImage.mediaId = uploaded.mediaId;
+    uploadedMedia = { 0: uploaded.mediaId };
   }
 
   const result = await admissionContent.save(
@@ -80,5 +82,5 @@ export async function saveAdmissionAction(
   } catch {
     cacheWarning = true;
   }
-  return { ...result, cacheWarning };
+  return { ...result, cacheWarning, uploadedMedia };
 }

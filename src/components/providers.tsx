@@ -8,7 +8,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    // The site has one light design (DEC-122). forcedTheme keeps the .dark
+    // class off even when the visitor's OS or an old stored theme says dark.
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      forcedTheme="light"
+      enableSystem={false}
+    >
       <TooltipProvider>
         {children}
         <Toaster />

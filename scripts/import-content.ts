@@ -174,6 +174,7 @@ try {
     return input;
   }
   for (const entry of SECTION_REGISTRY) {
+    if (entry.legacyImport === false) continue;
     const page = snapshot.pages.find((p) => p.slug === entry.slug);
     if (!page) {
       report.brokenReferences.push(entry.slug);

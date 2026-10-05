@@ -15,7 +15,7 @@ export function AdminShell({
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <SidebarInset className="bg-neutral-50/70">
+      <SidebarInset className="bg-surface-admin">
         <AdminTopbar email={email} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}
