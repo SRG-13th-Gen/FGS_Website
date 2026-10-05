@@ -5,6 +5,7 @@ import { ArrowRight, ChevronUp } from "lucide-react";
 
 import type { ArticleListResult } from "@/lib/content/types";
 import { ArticleCard } from "@/components/public/article-card";
+import { Reveal } from "@/components/public/reveal";
 
 export function NewsSection({ result }: { result: ArticleListResult }) {
   const [expanded, setExpanded] = useState(false);
@@ -15,7 +16,7 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
     <section id="news" className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header with 'View More' at upper right */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
               News &amp; Announcements
@@ -46,7 +47,7 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
               )}
             </button>
           )}
-        </div>
+        </Reveal>
 
         {result.status === "unavailable" ? (
           <div className="mt-12 rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-14 text-center">
@@ -63,8 +64,10 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
         ) : (
           /* Articles Grid */
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleArticles.map((post) => (
-              <ArticleCard key={post.slug} article={post} />
+            {visibleArticles.map((post, index) => (
+              <Reveal key={post.slug} step={index % 3} className="h-full">
+                <ArticleCard article={post} />
+              </Reveal>
             ))}
           </div>
         )}

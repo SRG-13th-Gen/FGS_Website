@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
 import { ArticleCard } from "@/components/public/article-card";
+import { Reveal } from "@/components/public/reveal";
 import { AlumniAchievements } from "@/components/public/alumni-achievements";
 import { AreaNotice, AreaPageHeader } from "@/components/public/area-page";
 import { getPublishedArticles } from "@/lib/content/reads";
@@ -68,13 +69,15 @@ export default async function AlumniPage() {
           className="bg-neutral-50/50 py-20 lg:py-28"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2
-              id="alumni-activities"
-              className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl"
-            >
-              Alumni Activities
-            </h2>
-            <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
+            <Reveal>
+              <h2
+                id="alumni-activities"
+                className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl"
+              >
+                Alumni Activities
+              </h2>
+              <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
+            </Reveal>
 
             <div className="mt-12">
               {articlesResult.status === "unavailable" ? (
@@ -88,8 +91,14 @@ export default async function AlumniPage() {
                 </AreaNotice>
               ) : (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {articles.map((article) => (
-                    <ArticleCard key={article.slug} article={article} />
+                  {articles.map((article, index) => (
+                    <Reveal
+                      key={article.slug}
+                      step={index % 3}
+                      className="h-full"
+                    >
+                      <ArticleCard article={article} />
+                    </Reveal>
                   ))}
                 </div>
               )}

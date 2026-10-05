@@ -161,3 +161,37 @@
     }
   }
 }
+
+/*
+ * Motion: the single place for entrance timing (SPEC-009, interim values
+ * pending the designer). Used by <Reveal> and by .motion-enter.
+ */
+:root {
+  --motion-duration: 500ms;
+  --motion-distance: 16px;
+  --motion-stagger: 80ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* CSS-only entrance on load, for content that is already in view. */
+@keyframes motion-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.motion-enter {
+  animation: motion-enter var(--motion-duration) var(--motion-ease) backwards;
+  animation-delay: calc(var(--motion-stagger) * var(--motion-step, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter {
+    animation: none;
+  }
+}

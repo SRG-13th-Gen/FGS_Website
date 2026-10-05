@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
 import { ArticleCard } from "@/components/public/article-card";
+import { Reveal } from "@/components/public/reveal";
 import { AreaNotice, AreaPageHeader } from "@/components/public/area-page";
 import { getPublishedArticles } from "@/lib/content/reads";
 import { schoolInfoContent } from "@/lib/content/sections/content";
@@ -49,8 +50,14 @@ export default async function PtaPage() {
                 </AreaNotice>
               ) : (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {articles.map((article) => (
-                    <ArticleCard key={article.slug} article={article} />
+                  {articles.map((article, index) => (
+                    <Reveal
+                      key={article.slug}
+                      step={index % 3}
+                      className="h-full"
+                    >
+                      <ArticleCard article={article} />
+                    </Reveal>
                   ))}
                 </div>
               )}

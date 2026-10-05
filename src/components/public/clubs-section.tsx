@@ -8,6 +8,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { Reveal } from "@/components/public/reveal";
 import { SECTION_ICON_OPTIONS } from "@/lib/content/sections/icons";
 import type { ClubsContent } from "@/lib/content/sections/clubs";
 
@@ -65,7 +66,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
     <section id="clubs" className="bg-muted/30 py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header with Carousel Navigation */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
               {content.sectionLabel}
@@ -100,10 +101,10 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
-        </div>
+        </Reveal>
 
         {/* Carousel Component */}
-        <div className="mt-12">
+        <Reveal className="mt-12">
           <Carousel
             setApi={setApi}
             opts={{
@@ -180,7 +181,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               ))}
             </div>
           )}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
