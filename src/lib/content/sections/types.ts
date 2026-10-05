@@ -30,6 +30,12 @@ export interface SectionSaveOk {
   status: "success";
   cacheWarning: boolean;
   revision: number;
+  /**
+   * Slot index -> stored media id, for images uploaded by this save. Lets the
+   * form hold the saved reference instead of the original file, so a later
+   * save never uploads the same file again.
+   */
+  uploadedMedia?: Record<number, number>;
 }
 export interface SectionSaveValidationError {
   status: "validation_error";

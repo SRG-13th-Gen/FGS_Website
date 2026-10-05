@@ -75,6 +75,7 @@ export async function saveGalleryAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  const uploadedMedia: Record<number, number> = {};
   for (let i = 0; i < input.photos.length; i++) {
     const file = formData.get(`photoFile-${i}`);
     if (file instanceof File && file.size > 0) {
@@ -85,14 +86,16 @@ export async function saveGalleryAction(
       if ("error" in uploaded)
         return { status: "error", message: uploaded.error };
       input.photos[i].image.mediaId = uploaded.mediaId;
+      uploadedMedia[i] = uploaded.mediaId;
     }
   }
   const result = await galleryContent.save(input, revision);
   if (result.status !== "success") return result;
+  const saved = { ...result, uploadedMedia };
   try {
     revalidatePath("/");
-    return result;
+    return saved;
   } catch {
-    return { ...result, cacheWarning: true };
+    return { ...saved, cacheWarning: true };
   }
 }

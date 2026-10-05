@@ -13,6 +13,7 @@ import {
   type ImageFieldValue,
 } from "@/components/admin/fields";
 import { MediaPickerDialog } from "@/components/admin/media-picker";
+import { applySavedUploads } from "@/components/admin/saved-uploads";
 import { SaveBar } from "@/components/admin/save-bar";
 import { useUnsavedChangesWarning } from "@/components/admin/use-unsaved-changes-warning";
 import type { AlumniView } from "@/lib/content/sections/alumni";
@@ -133,12 +134,15 @@ export function AlumniForm({
   if (state !== handledState) {
     setHandledState(state);
     if (state?.status === "success") {
+      // Hold the stored media reference instead of the original file.
+      const saved = applySavedUploads(achievements, state.uploadedMedia);
       setRevision(state.revision);
+      setAchievements(saved);
       setBaseline({
         sectionLabel,
         heading,
         intro,
-        achievements: achievements.map(toBaselineItem),
+        achievements: saved.map(toBaselineItem),
       });
     }
   }

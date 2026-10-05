@@ -88,6 +88,7 @@ export async function saveAlumniAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  const uploadedMedia: Record<number, number> = {};
   for (let i = 0; i < input.achievements.length; i++) {
     const file = formData.get(`achievementFile-${i}`);
     if (file instanceof File && file.size > 0) {
@@ -96,14 +97,16 @@ export async function saveAlumniAction(
       if ("error" in uploaded)
         return { status: "error", message: uploaded.error };
       input.achievements[i].image = { mediaId: uploaded.mediaId, alt };
+      uploadedMedia[i] = uploaded.mediaId;
     }
   }
   const result = await alumniContent.save(input, revision);
   if (result.status !== "success") return result;
+  const saved = { ...result, uploadedMedia };
   try {
     revalidatePath("/alumni");
-    return result;
+    return saved;
   } catch {
-    return { ...result, cacheWarning: true };
+    return { ...saved, cacheWarning: true };
   }
 }
