@@ -1,7 +1,13 @@
 // App-owned DTOs. Deliberately distinct from database column names
 // (see docs/DATA_API_CONTRACTS.md) so the adapter boundary stays explicit.
 
-export const ARTICLE_CATEGORIES = ["announcements", "events", "clubs"] as const;
+export const ARTICLE_CATEGORIES = [
+  "announcements",
+  "events",
+  "clubs",
+  "pta",
+  "alumni",
+] as const;
 export type ArticleCategorySlug = (typeof ARTICLE_CATEGORIES)[number];
 
 export interface ArticleImage {

@@ -18,10 +18,13 @@ import {
   ArticlePictureFormFields,
   type ArticlePicture,
 } from "@/components/admin/article-fields";
-import type { PublishArticleResult } from "@/lib/content/types";
+import type {
+  ArticleCategorySlug,
+  PublishArticleResult,
+} from "@/lib/content/types";
 import { publishArticleAction } from "./publish-actions";
 
-export type ArticleCategory = "announcements" | "events" | "clubs";
+export type ArticleCategory = ArticleCategorySlug;
 
 const initialState: PublishArticleResult | null = null;
 

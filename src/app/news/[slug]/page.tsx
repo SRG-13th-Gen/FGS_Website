@@ -10,6 +10,7 @@ import { getArticleBySlug, getPublishedArticles } from "@/lib/content/reads";
 import { schoolInfoContent } from "@/lib/content/sections/content";
 import {
   ARTICLE_CATEGORY_LABELS,
+  articleAreaOptions,
   formatArticleDate,
 } from "@/lib/content/display";
 import { Navbar } from "@/components/public/navbar";
@@ -80,7 +81,9 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   }
 
   const { article } = result;
-  const othersResult = await getPublishedArticles();
+  const othersResult = await getPublishedArticles(
+    articleAreaOptions(article.category),
+  );
   const otherArticles =
     othersResult.status === "ok"
       ? othersResult.articles.filter((a) => a.slug !== article.slug).slice(0, 4)

@@ -22,6 +22,7 @@ export const SECTION_SLUGS = [
   "site-contact",
   "site-clubs",
   "site-gallery",
+  "site-alumni",
 ] as const;
 export type SectionSlug = (typeof SECTION_SLUGS)[number];
 

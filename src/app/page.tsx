@@ -9,6 +9,7 @@ import { NewsSection } from "@/components/public/news-section";
 import { ClubsSection } from "@/components/public/clubs-section";
 import { GallerySection } from "@/components/public/gallery-section";
 import { getPublishedArticles } from "@/lib/content/reads";
+import { SEPARATE_AREA_CATEGORIES } from "@/lib/content/display";
 import {
   aboutContent,
   admissionContent,
@@ -31,7 +32,7 @@ export default async function Home() {
     clubs,
     gallery,
   ] = await Promise.all([
-    getPublishedArticles(),
+    getPublishedArticles({ excludeCategories: SEPARATE_AREA_CATEGORIES }),
     heroContent.get(),
     schoolInfoContent.get(),
     aboutContent.get(),

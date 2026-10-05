@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { ARTICLE_CATEGORY_LABELS } from "@/lib/content/display";
+import { ARTICLE_CATEGORIES } from "@/lib/content/types";
+
 import {
   MAX_IMAGE_BYTES,
   validateArticleFields,
@@ -61,6 +64,27 @@ describe("validateArticleFields", () => {
       body: "Body",
     });
     expect(fieldErrors.title).toBeTruthy();
+  });
+
+  it("accepts every category, including pta and alumni, and labels them", () => {
+    expect(ARTICLE_CATEGORIES).toEqual([
+      "announcements",
+      "events",
+      "clubs",
+      "pta",
+      "alumni",
+    ]);
+    for (const category of ARTICLE_CATEGORIES) {
+      const { fieldErrors } = validateArticleFields({
+        title: "Foundation Day",
+        category,
+        body: "Body",
+      });
+      expect(fieldErrors).toEqual({});
+      expect(ARTICLE_CATEGORY_LABELS[category]).toBeTruthy();
+    }
+    expect(ARTICLE_CATEGORY_LABELS.pta).toBe("PTA");
+    expect(ARTICLE_CATEGORY_LABELS.alumni).toBe("Alumni");
   });
 
   it("rejects a category outside the allowlist", () => {
