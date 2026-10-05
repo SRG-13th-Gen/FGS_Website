@@ -76,6 +76,8 @@ Defaults contain no people: `sectionLabel: "Alumni"`, `heading: "Alumni Achievem
 - The category picker grid is `sm:grid-cols-3`; five options need `sm:grid-cols-2 lg:grid-cols-3` or similar. Icon/colors for PTA and Alumni are a design dependency.
 - The admin dashboard section cards list the seven editors; add an Alumni card.
 - Admin forms get no animation.
+- **Known limitation (owner, 2026-10-05):** the sidebar highlights from the URL path only. `/admin/articles/new?category=alumni|pta` highlights "Add New" (the page heading shows the area), and editing an article highlights "All News" whatever its category. Left as is for now.
+- **Fix recorded (2026-10-05):** after a successful save the alumni and gallery editors hold the stored media reference instead of the original file (`SectionSaveOk.uploadedMedia`), so a second save never uploads the same file again. The hero, About, Admission and School Info editors upload through the same pattern and are not changed by this specification.
 
 ## Public behavior
 
@@ -84,6 +86,7 @@ Defaults contain no people: `sectionLabel: "Alumni"`, `heading: "Alumni Achievem
 - Both pages are dynamic (`export const dynamic = "force-dynamic"`, as every other page), set explicit `metadata` with their own title, description and `alternates.canonical`. The root layout canonical is `/`, and child metadata inherits it unless overridden, so omitting the override would canonicalize both pages to the homepage.
 - The `/pta` header (static, neutral text) and the `/alumni` article list heading are fixed in code. The `/alumni` page heading and intro come from `site-alumni`. **Deferred option (Q3):** admin-editable PTA header text, for example a `site-pta` section.
 - The homepage feed excludes `pta` and `alumni` through an explicit option on the read (`getPublishedArticles({ excludeCategories })`), with parameterized SQL. The default of `getPublishedArticles()` is unchanged (Q1). The sitemap, admin dashboard and article-detail “more” list use deliberate choices instead of inheriting the default: the sitemap includes every published article; the “more” list is restricted to the same area as the current article.
+- Implemented in phase 3: `alumniContent.getResult()` separates a database outage ("unavailable") from a missing or invalid row (defaults), so `/alumni` never presents an outage as an empty list. Both pages render the "unavailable" notice when their reads fail.
 - The shared card is currently inline in `news-section.tsx` and the “more” list in `news/[slug]/page.tsx`. Extract one presentational card used by the homepage, `/alumni` and `/pta` instead of copying markup.
 
 ### Navbar
@@ -131,6 +134,7 @@ Answers recorded from the owner on 2026-10-05. The decision column is the implem
 | Q8  | Design dependency: `/alumni`, `/pta` page header treatment (hero strip vs. section header on white).                                        | Interim: section header pattern on white.                                                                                                                                                                                                           | Open design dependency (Aya)       |
 | Q9  | Should the admin "All News" label/group be renamed, since it now holds PTA and Alumni articles too?                                         | Unanswered; default stands: unchanged, area groups give filtered views.                                                                                                                                                                             | Open (client)                      |
 | Q10 | Do any WordPress-era `legacy_urls` rows use `/alumni` or `/pta`? (Not checkable from the repository.)                                       | Unanswered; check staging/production before release.                                                                                                                                                                                                | Open (engineering, before release) |
+| Q11 | Design dependency: the admin category picker colours Announcements blue, while DESIGN.md lists Announcements green. This predates SPEC-009. | Left untouched (owner, 2026-10-05). Aya to decide which is intended.                                                                                                                                                                                | Open design dependency (Aya)       |
 
 ### Plan approval (owner, 2026-10-05)
 
@@ -150,14 +154,14 @@ Working rules: one phase at a time; each phase runs `pnpm lint`, `pnpm typecheck
 
 Delivered in six phases, one at a time. After each phase the owner reviews in the browser before the next starts, and each phase runs `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm format:check` (phase 6 runs `pnpm verify`). Each phase is one focused Conventional Commit.
 
-| Phase | Scope                                                                                                                                                                 | Status      |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 1     | Data layer: migration 003, categories, `site-alumni` schema/registry/importer skip, explicit read options.                                                            | Done        |
-| 2     | Admin: alumni editor, five-option category picker, `/admin/alumni/activities` and `/admin/pta/activities`, sidebar groups, dashboard card, single active nav item.    | In progress |
-| 3     | Public `/alumni` and `/pta` pages, shared news card, sitemap entries and canonicals.                                                                                  | Planned     |
-| 4     | Navbar (new order, `xl` breakpoint, route/anchor items) and footer links. The `/news/[slug]` link defect is fixed in its own `fix` commit, separate from the feature. | Planned     |
-| 5     | Motion: `Reveal` component and hover polish on public pages.                                                                                                          | Planned     |
-| 6     | Docs completion and final verification: contracts, FRS/NFRS, DEC-121, testing map, then a disposable `*_fgstest` database in local Docker for `pnpm test:database`.   | Planned     |
+| Phase | Scope                                                                                                                                                                 | Status  |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| 1     | Data layer: migration 003, categories, `site-alumni` schema/registry/importer skip, explicit read options.                                                            | Done    |
+| 2     | Admin: alumni editor, five-option category picker, `/admin/alumni/activities` and `/admin/pta/activities`, sidebar groups, dashboard card, single active nav item.    | Done    |
+| 3     | Public `/alumni` and `/pta` pages, shared news card, sitemap entries and canonicals.                                                                                  | Done    |
+| 4     | Navbar (new order, `xl` breakpoint, route/anchor items) and footer links. The `/news/[slug]` link defect is fixed in its own `fix` commit, separate from the feature. | Planned |
+| 5     | Motion: `Reveal` component and hover polish on public pages.                                                                                                          | Planned |
+| 6     | Docs completion and final verification: contracts, FRS/NFRS, DEC-121, testing map, then a disposable `*_fgstest` database in local Docker for `pnpm test:database`.   | Planned |
 
 Other repository-affecting points:
 

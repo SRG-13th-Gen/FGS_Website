@@ -52,3 +52,6 @@ export const ALUMNI_FALLBACK: AlumniView = {
   ...ALUMNI_DEFAULTS,
   achievements: [],
 };
+
+export type AlumniResult =
+  { status: "ok"; alumni: AlumniView } | { status: "unavailable" };

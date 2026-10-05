@@ -7,6 +7,7 @@ import {
   type AboutContent,
   type AboutView,
 } from "./about";
+import { rows } from "../db";
 import {
   fetchSectionPage,
   resolveImageRef,
@@ -26,6 +27,7 @@ import {
   ALUMNI_DEFAULTS,
   ALUMNI_FALLBACK,
   type AlumniContent,
+  type AlumniResult,
   type AlumniView,
 } from "./alumni";
 import { clubsSchema, CLUBS_DEFAULTS } from "./clubs";
@@ -247,6 +249,19 @@ export const galleryContent = {
   },
 };
 
+async function resolveAlumni(data: AlumniContent): Promise<AlumniView> {
+  const achievements = await Promise.all(
+    data.achievements.map(async ({ image, ...rest }) => {
+      // A missing media record renders the card without a photo.
+      const resolved = image
+        ? await resolveImageRef(image, { mediaId: 0, url: "", alt: "" })
+        : null;
+      return { ...rest, image: resolved?.url ? resolved : null };
+    }),
+  );
+  return { ...data, achievements };
+}
+
 export const alumniContent = {
   slug: "site-alumni" as const,
   schema: alumniSchema,
@@ -255,17 +270,30 @@ export const alumniContent = {
     const page = await fetchSectionPage("site-alumni");
     if (!page) return ALUMNI_FALLBACK;
     const parsed = alumniSchema.safeParse(page.data);
-    if (!parsed.success) return ALUMNI_FALLBACK;
-    const achievements = await Promise.all(
-      parsed.data.achievements.map(async ({ image, ...rest }) => {
-        // A missing media record renders the card without a photo.
-        const resolved = image
-          ? await resolveImageRef(image, { mediaId: 0, url: "", alt: "" })
-          : null;
-        return { ...rest, image: resolved?.url ? resolved : null };
-      }),
-    );
-    return { ...parsed.data, achievements };
+    return parsed.success ? resolveAlumni(parsed.data) : ALUMNI_FALLBACK;
+  },
+  /**
+   * Public read that tells a database outage apart from missing content, so
+   * the Alumni page never presents an outage as an empty list. A missing or
+   * invalid stored row falls back to the defaults.
+   */
+  async getResult(): Promise<AlumniResult> {
+    try {
+      const [row] = await rows("SELECT data FROM sections WHERE slug = ?", [
+        "site-alumni",
+      ]);
+      const data =
+        typeof row?.data === "string" ? JSON.parse(row.data) : row?.data;
+      const parsed = alumniSchema.safeParse(data);
+      return {
+        status: "ok",
+        alumni: parsed.success
+          ? await resolveAlumni(parsed.data)
+          : ALUMNI_FALLBACK,
+      };
+    } catch {
+      return { status: "unavailable" };
+    }
   },
   async getLastModified(): Promise<string | null> {
     return (await fetchSectionPage("site-alumni"))?.modifiedAt ?? null;
