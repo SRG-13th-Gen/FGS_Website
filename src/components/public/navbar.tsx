@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,18 +8,15 @@ import { Menu, X } from "lucide-react";
 
 import type { SchoolInfoView } from "@/lib/content/sections/school-info";
 
-import { isHomepage, sectionHref, sectionId } from "./nav-links";
-
-/** Navigation items — each `href` targets a section of the landing page. */
-const NAV_ITEMS = [
-  { label: "Home", href: sectionHref("home") },
-  { label: "About Us", href: sectionHref("about") },
-  { label: "Admission", href: sectionHref("admission") },
-  { label: "News & Events", href: sectionHref("news") },
-  { label: "Clubs", href: sectionHref("clubs") },
-  { label: "Gallery", href: sectionHref("gallery") },
-  { label: "Contact Us", href: sectionHref("contact") },
-] as const;
+import {
+  NAV_ITEMS,
+  getAriaCurrent,
+  getCurrentNavHref,
+  isHomepage,
+  sectionHref,
+  sectionId,
+  type NavItem,
+} from "./nav-links";
 
 export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,9 +24,16 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   const [pastHero, setPastHero] = useState(false);
   const pathname = usePathname();
   const onHome = isHomepage(pathname);
-  const [scrolledSection, setActiveSection] = useState(sectionHref("home"));
-  // The scroll-based highlight only means something on the homepage.
-  const activeSection = onHome ? scrolledSection : null;
+  const [sectionInView, setSectionInView] = useState(sectionHref("home"));
+  const currentHref = getCurrentNavHref(pathname, sectionInView);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close the mobile menu once navigation lands on another page.
+  const [menuPathname, setMenuPathname] = useState(pathname);
+  if (menuPathname !== pathname) {
+    setMenuPathname(pathname);
+    setMobileOpen(false);
+  }
 
   /* Add shadow and track when scrolled past the hero section. */
   useEffect(() => {
@@ -45,12 +49,14 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   /* Track which section is currently in view via IntersectionObserver. */
   useEffect(() => {
     if (!onHome) return;
-    const ids = NAV_ITEMS.map((item) => sectionId(item.href));
+    const ids = NAV_ITEMS.filter((item) => item.kind === "anchor").map((item) =>
+      sectionId(item.href),
+    );
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveSection(sectionHref(entry.target.id));
+            setSectionInView(sectionHref(entry.target.id));
           }
         }
       },
@@ -65,10 +71,11 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   }, [onHome]);
 
   const handleNavClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    (e: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
       setMobileOpen(false);
-      // Off the homepage the link navigates normally to /#section.
-      if (!onHome) return;
+      // Route links, and section links off the homepage, navigate normally.
+      if (item.kind === "route" || !onHome) return;
+      const href = item.href;
       e.preventDefault();
       const el = document.getElementById(sectionId(href));
       if (el) {
@@ -77,7 +84,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         ).matches;
         el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
         window.history.replaceState(null, "", `#${sectionId(href)}`);
-        setActiveSection(href);
+        setSectionInView(href);
       }
     },
     [onHome],
@@ -87,7 +94,10 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
   useEffect(() => {
     if (!mobileOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        menuButtonRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -110,7 +120,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         {/* Logo / School name */}
         <Link
           href={sectionHref("home")}
-          onClick={(e) => handleNavClick(e, sectionHref("home"))}
+          onClick={(e) => handleNavClick(e, NAV_ITEMS[0])}
           className="flex min-h-11 items-center gap-2.5 rounded-md text-lg font-normal tracking-tight focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <Image
@@ -123,10 +133,10 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
           />
           <div
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ${
+              // No hero to compete with off the homepage.
+              !onHome ||
               pastHero ||
-              (activeSection !== null &&
-                activeSection !== sectionHref("home") &&
-                scrolled)
+              (currentHref !== sectionHref("home") && scrolled)
                 ? "max-w-[260px] translate-x-0 opacity-100"
                 : "max-w-0 -translate-x-2 opacity-0"
             }`}
@@ -137,17 +147,15 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         </Link>
 
         {/* Desktop nav links */}
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-0.5 xl:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                aria-current={
-                  activeSection === item.href ? "location" : undefined
-                }
+                onClick={(e) => handleNavClick(e, item)}
+                aria-current={getAriaCurrent(item, currentHref)}
                 className={`relative inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
-                  activeSection === item.href
+                  currentHref === item.href
                     ? "text-school-green-dark"
                     : "text-neutral-700"
                 }`}
@@ -156,7 +164,7 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
                 {/* Active indicator underline */}
                 <span
                   className={`absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 rounded-full bg-school-green transition-all duration-300 ${
-                    activeSection === item.href ? "w-4/5" : "w-0"
+                    currentHref === item.href ? "w-4/5" : "w-0"
                   }`}
                 />
               </Link>
@@ -167,8 +175,9 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
         {/* Mobile hamburger */}
         <button
           type="button"
+          ref={menuButtonRef}
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-neutral-700 transition-colors hover:bg-school-green-light hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-neutral-700 transition-colors hover:bg-school-green-light hover:text-school-green-dark focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none xl:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
@@ -185,9 +194,9 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
       <div
         id="mobile-menu"
         inert={!mobileOpen}
-        className={`overflow-hidden border-b border-border/50 bg-white transition-all duration-300 ease-in-out md:hidden ${
+        className={`overflow-hidden border-b border-border/50 bg-white transition-all duration-300 ease-in-out xl:hidden ${
           mobileOpen
-            ? "max-h-[28rem] opacity-100"
+            ? "max-h-[calc(100svh-4rem)] overflow-y-auto opacity-100"
             : "invisible max-h-0 border-transparent opacity-0"
         }`}
       >
@@ -196,12 +205,10 @@ export function Navbar({ schoolInfo }: { schoolInfo: SchoolInfoView }) {
             <li key={item.href}>
               <Link
                 href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                aria-current={
-                  activeSection === item.href ? "location" : undefined
-                }
+                onClick={(e) => handleNavClick(e, item)}
+                aria-current={getAriaCurrent(item, currentHref)}
                 className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none ${
-                  activeSection === item.href
+                  currentHref === item.href
                     ? "bg-school-green-light text-school-green-dark"
                     : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                 }`}

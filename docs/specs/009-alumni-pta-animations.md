@@ -97,7 +97,8 @@ The current navbar assumes every item is a homepage anchor: it calls `preventDef
 - Active state: on `/alumni` and `/pta` use `usePathname()`; on `/` keep the IntersectionObserver for anchors. The observer must not run, and `activeSection` must not drive the school-name reveal, off the homepage.
 - Fit: nine items do not fit the current `md` (768 px) breakpoint even before the school name appears (`max-w-[260px]`). Decision (Q2): show the inline list from `xl` (1280 px), use the hamburger below it, and tighten item padding at `xl`; measure at 768/1024/1280/1440 with no overlap or awkward wrapping. Alternative: shorten labels (needs the designer). `max-h-[28rem]` on the mobile menu must grow for nine items.
 - Order (owner decision 2026-10-05, Q2): Home, About Us, Admission, News & Events, PTA, Alumni, Clubs, Gallery, Contact Us.
-- Footer quick links change to `/#…` so they work from every route.
+- Footer quick links change to `/#…` so they work from every route. Implemented in a separate fix commit. The footer lists only a subset of sections (About, Admission, News & Events, Clubs), not the full navigation, so PTA and Alumni are not added to it.
+- Implemented (phase 4): items are `{ label, href, kind }` in `src/components/public/nav-links.ts`. The inline list shows from `xl` and the mobile menu grows to `calc(100svh - 4rem)`, scrolling on very short screens. Active state: the homepage keeps the scroll-based section highlight (`aria-current="location"`), `/pta` and `/alumni` mark their tab (`aria-current="page"`), and an article page marks nothing because no tab links to it. Off the homepage the school name is always shown. Measured at 375, 768, 1024, 1279, 1280 and 1440 px: no overlap or wrapping, with about 270 px spare between the school name and the links at 1280 px, so item padding was not tightened.
 
 ## Animation and accessibility rules
 
@@ -159,7 +160,7 @@ Delivered in six phases, one at a time. After each phase the owner reviews in th
 | 1     | Data layer: migration 003, categories, `site-alumni` schema/registry/importer skip, explicit read options.                                                            | Done    |
 | 2     | Admin: alumni editor, five-option category picker, `/admin/alumni/activities` and `/admin/pta/activities`, sidebar groups, dashboard card, single active nav item.    | Done    |
 | 3     | Public `/alumni` and `/pta` pages, shared news card, sitemap entries and canonicals.                                                                                  | Done    |
-| 4     | Navbar (new order, `xl` breakpoint, route/anchor items) and footer links. The `/news/[slug]` link defect is fixed in its own `fix` commit, separate from the feature. | Planned |
+| 4     | Navbar (new order, `xl` breakpoint, route/anchor items) and footer links. The `/news/[slug]` link defect is fixed in its own `fix` commit, separate from the feature. | Done    |
 | 5     | Motion: `Reveal` component and hover polish on public pages.                                                                                                          | Planned |
 | 6     | Docs completion and final verification: contracts, FRS/NFRS, DEC-121, testing map, then a disposable `*_fgstest` database in local Docker for `pnpm test:database`.   | Planned |
 
