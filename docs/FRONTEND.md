@@ -10,6 +10,10 @@ Imported images use local `/media/...` URLs through Next.js Image. Bundled fallb
 
 Google login and allowlisting are implemented; hosted sign-in passed October 4. Contact information is displayed, while inquiry submission remains deferred. See [TESTING](TESTING.md) and [SPEC-008](specs/008-wordpress-removal.md) for verification.
 
+## Light-only theme (DEC-122)
+
+The site has one light design and no dark design or toggle. `Providers` (`src/components/providers.tsx`) forces the `next-themes` theme to light (`forcedTheme="light"`, `enableSystem={false}`), so the `.dark` class is never added even when the visitor's OS is in dark mode or an old stored theme says dark. `globals.css` sets `color-scheme: light` so native controls and scrollbars stay light, and the Sonner toaster is fixed to light. Page and section backgrounds must be opaque: use `bg-surface-soft`, `bg-surface-muted` and `bg-surface-admin` (the previous translucent neutral and muted backgrounds composited over white) instead of a translucent colour that shows what is behind it. The shadcn `.dark` token block remains in `globals.css` but is not used. Covered by `tests/unit/theme-provider.test.ts` and `tests/e2e/color-scheme.spec.ts`.
+
 ## Alumni, PTA and motion (SPEC-009)
 
 **Pages.** `/alumni` shows the `site-alumni` header and achievements grid, then "Alumni Activities" (published `alumni` articles). `/pta` shows a static header and published `pta` articles. Both use the shared `ArticleCard` (`src/components/public/article-card.tsx`, also used by the homepage news), the section-header pattern from DESIGN and the existing neutral/green tokens, and show truthful empty and unavailable notices (`area-page.tsx`). Each sets its own title and canonical.

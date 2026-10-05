@@ -10,6 +10,15 @@
   /* Provisional system fonts; the frontend designer owns the final typography. */
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /*
+   * Opaque page and section surfaces. Each equals the old translucent
+   * neutral/muted background composited over the white page, so the light
+   * design is unchanged but no longer depends on what is behind it.
+   */
+  --color-surface-soft: oklch(0.9925 0 0); /* was bg-neutral-50/50 */
+  --color-surface-muted: oklch(0.991 0 0); /* was bg-muted/30 */
+  --color-surface-admin: oklch(0.9895 0 0); /* was bg-neutral-50/70 */
   --font-heading: var(--font-sans);
 
   /* School brand tokens — designer-owned, derived from FGS logo palette. */
@@ -143,6 +152,8 @@
   }
   html {
     @apply font-sans;
+    /* One light design: native controls and scrollbars stay light. */
+    color-scheme: light;
     scroll-behavior: smooth;
     /* Account for fixed navbar height during anchor scrolling */
     scroll-padding-top: 5rem;

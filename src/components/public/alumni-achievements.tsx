@@ -13,7 +13,7 @@ export function AlumniAchievements({
     <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {achievements.map((item, index) => (
         <Reveal as="li" key={index} step={index % 3} className="h-full">
-          <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-md">
+          <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-school-green/40 hover:shadow-md">
             {item.image && (
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
                 <Image

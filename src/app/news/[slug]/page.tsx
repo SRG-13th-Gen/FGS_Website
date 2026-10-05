@@ -61,7 +61,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         <Navbar schoolInfo={schoolInfo} />
         <main
           id="main-content"
-          className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28"
+          className="min-h-screen bg-surface-soft pt-24 pb-20 sm:pt-28 sm:pb-28"
         >
           <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
             <p className="rounded-2xl border border-neutral-200 bg-white p-10 text-sm font-medium text-neutral-600 shadow-sm">
@@ -97,7 +97,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
       <main
         id="main-content"
-        className="min-h-screen bg-neutral-50/50 pt-24 pb-20 sm:pt-28 sm:pb-28"
+        className="min-h-screen bg-surface-soft pt-24 pb-20 sm:pt-28 sm:pb-28"
       >
         <article className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb / Back Link */}

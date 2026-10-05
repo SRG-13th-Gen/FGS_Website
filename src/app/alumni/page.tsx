@@ -66,7 +66,7 @@ export default async function AlumniPage() {
 
         <section
           aria-labelledby="alumni-activities"
-          className="bg-neutral-50/50 py-20 lg:py-28"
+          className="bg-surface-soft py-20 lg:py-28"
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal>

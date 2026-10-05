@@ -19,6 +19,8 @@ Approval and implementation are separate. Current choices come from owner instru
 | DEC-119 | Pushes to staging deploy preview; main/master deploy production                                                                                          | October 4 instruction; staging automation verified, production promotion pending |
 | DEC-120 | Require the named quality check on both branches; run schema migrations before managed publication                                                       | October 4 instruction; branch settings and staging deployment verified           |
 
+| DEC-122 | The public site and admin are light-only: the theme is forced to light and `color-scheme: light` is set, so a visitor's OS dark mode never changes them; no dark design or theme toggle exists | October 5, 2026 review feedback from John (unreadable article pages in OS dark mode); applied on the owner's instruction; [FRONTEND](FRONTEND.md), SPEC-009 evidence |
+
 DEC-118 replaces an incorrectly duplicated DEC-115 heading in earlier migration documentation. The original DEC-115 remains the section-editor decision. No historical identifier is reused.
 
 ## Superseded decisions
