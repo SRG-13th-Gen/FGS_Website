@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { applySavedUploads } from "@/components/admin/saved-uploads";
+import {
+  applySavedImage,
+  applySavedUploads,
+} from "@/components/admin/saved-uploads";
 
 const file = new File([new Uint8Array([1])], "photo.jpg");
 const slot = (mediaId: number, pendingFile: File | null) => ({
@@ -36,5 +39,19 @@ describe("applySavedUploads", () => {
       1: 2,
     });
     expect(result.every((item) => item.pendingFile === null)).toBe(true);
+  });
+});
+
+describe("applySavedImage", () => {
+  it("swaps the single pending image for its stored media id", () => {
+    expect(applySavedImage(slot(0, file), { 0: 5 })).toMatchObject({
+      mediaId: 5,
+      pendingFile: null,
+    });
+  });
+
+  it("keeps an image that was not uploaded", () => {
+    const image = slot(8, null);
+    expect(applySavedImage(image, undefined)).toBe(image);
   });
 });

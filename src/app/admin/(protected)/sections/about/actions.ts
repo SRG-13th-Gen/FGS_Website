@@ -59,12 +59,14 @@ export async function saveAboutAction(
       status: "validation_error",
       fieldErrors: zodIssuesToFieldErrors(parsed.error),
     };
+  let uploadedMedia: Record<number, number> | undefined;
   if (file instanceof File && file.size > 0) {
     const uploaded = await uploadSectionImage(file, bannerAlt);
     if ("error" in uploaded) {
       return { status: "error", message: uploaded.error };
     }
     input.featureBanner.image.mediaId = uploaded.mediaId;
+    uploadedMedia = { 0: uploaded.mediaId };
   }
 
   const result = await aboutContent.save(
@@ -79,5 +81,5 @@ export async function saveAboutAction(
   } catch {
     cacheWarning = true;
   }
-  return { ...result, cacheWarning };
+  return { ...result, cacheWarning, uploadedMedia };
 }

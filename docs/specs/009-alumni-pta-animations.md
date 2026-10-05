@@ -77,7 +77,7 @@ Defaults contain no people: `sectionLabel: "Alumni"`, `heading: "Alumni Achievem
 - The admin dashboard section cards list the seven editors; add an Alumni card.
 - Admin forms get no animation.
 - **Known limitation (owner, 2026-10-05):** the sidebar highlights from the URL path only. `/admin/articles/new?category=alumni|pta` highlights "Add New" (the page heading shows the area), and editing an article highlights "All News" whatever its category. Left as is for now.
-- **Fix recorded (2026-10-05):** after a successful save the alumni and gallery editors hold the stored media reference instead of the original file (`SectionSaveOk.uploadedMedia`), so a second save never uploads the same file again. The hero, About, Admission and School Info editors upload through the same pattern and are not changed by this specification.
+- **Fix recorded (2026-10-05):** after a successful save every admin section editor that uploads images (Hero, About, Admission, Gallery, Alumni and School Info) holds the stored media reference instead of the original file (`SectionSaveOk.uploadedMedia`), so a second save never uploads the same file again. Covered by `tests/integration/section-uploads.test.ts` and `tests/unit/saved-uploads.test.ts`.
 
 ## Public behavior
 

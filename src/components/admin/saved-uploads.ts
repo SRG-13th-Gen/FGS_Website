@@ -17,3 +17,11 @@ export function applySavedUploads<T extends ImageFieldValue>(
       : item;
   });
 }
+
+/** The single-image editors (hero, About, Admission, School Info) use slot 0. */
+export function applySavedImage<T extends ImageFieldValue>(
+  image: T,
+  uploadedMedia: Record<number, number> | undefined,
+): T {
+  return applySavedUploads([image], uploadedMedia)[0];
+}
