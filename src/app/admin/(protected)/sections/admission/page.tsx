@@ -10,11 +10,11 @@ export default async function AdminAdmissionSectionPage() {
   const initial = await admissionContent.get();
 
   return (
-    <div className="space-y-1">
+    <div className="flex flex-1 flex-col space-y-4">
       <p className="text-sm text-neutral-500">
         Fields appear in the same order as on the homepage Admission section.
       </p>
-      <div className="pt-5">
+      <div className="flex flex-1 flex-col">
         <AdmissionForm initial={initial} revision={revision} />
       </div>
     </div>

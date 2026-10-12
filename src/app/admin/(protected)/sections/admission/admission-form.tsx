@@ -137,7 +137,7 @@ export function AdmissionForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
@@ -171,162 +171,170 @@ export function AdmissionForm({
         value={JSON.stringify(enrollmentSteps)}
       />
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-neutral-800">Section heading</h2>
-        <div className="mt-4 space-y-4">
-          <TextField
-            id="section-label"
-            name="sectionLabel"
-            label="Section label"
-            value={sectionLabel}
-            onChange={(e) => setSectionLabel(e.target.value)}
-            error={fieldErrors.sectionLabel}
-          />
-          <TextField
-            id="heading"
-            name="heading"
-            label="Heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            error={fieldErrors.heading}
-          />
-          <TextareaField
-            id="intro"
-            name="intro"
-            label="Intro text"
-            rows={2}
-            value={intro}
-            onChange={(e) => setIntro(e.target.value)}
-            error={fieldErrors.intro}
-          />
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 xl:gap-8">
+        {/* Column 1: Section Heading, Background Photo, Programs */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-neutral-800">Section Heading</h2>
+            <div className="mt-4 space-y-4">
+              <TextField
+                id="section-label"
+                name="sectionLabel"
+                label="Section Label"
+                value={sectionLabel}
+                onChange={(e) => setSectionLabel(e.target.value)}
+                error={fieldErrors.sectionLabel}
+              />
+              <TextField
+                id="heading"
+                name="heading"
+                label="Heading"
+                value={heading}
+                onChange={(e) => setHeading(e.target.value)}
+                error={fieldErrors.heading}
+              />
+              <TextareaField
+                id="intro"
+                name="intro"
+                label="Intro Text"
+                rows={2}
+                value={intro}
+                onChange={(e) => setIntro(e.target.value)}
+                error={fieldErrors.intro}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <ImageField
+              label="Section Background Photo"
+              helperText="Full-bleed decorative photo behind the whole section."
+              recommendedSize="1600×900 or larger, landscape"
+              value={backgroundImage}
+              onChange={setBackgroundImage}
+              error={
+                fieldErrors["backgroundImage.mediaId"] ||
+                fieldErrors["backgroundImage.alt"]
+              }
+            />
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <RepeatableList
+              label="Programs"
+              itemLabel="Program"
+              items={programs}
+              onChange={setPrograms}
+              minItems={1}
+              maxItems={6}
+              createItem={(): AdmissionProgram => ({
+                name: "",
+                levelLabel: "",
+                description: "",
+                icon: "blocks",
+              })}
+              error={fieldErrors.programs}
+              renderItem={(item, update, index) => (
+                <div className="space-y-3">
+                  <TextField
+                    id={`program-name-${index}`}
+                    label="Name"
+                    value={item.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                  />
+                  <TextField
+                    id={`program-level-${index}`}
+                    label="Level Label"
+                    value={item.levelLabel}
+                    onChange={(e) => update({ levelLabel: e.target.value })}
+                  />
+                  <TextareaField
+                    id={`program-desc-${index}`}
+                    label="Description"
+                    rows={2}
+                    value={item.description}
+                    onChange={(e) => update({ description: e.target.value })}
+                  />
+                  <IconPickerField
+                    label="Icon"
+                    value={item.icon}
+                    onChange={(icon) => update({ icon })}
+                  />
+                </div>
+              )}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <ImageField
-          label="Section background photo"
-          helperText="Full-bleed decorative photo behind the whole section."
-          recommendedSize="1600×900 or larger, landscape"
-          value={backgroundImage}
-          onChange={setBackgroundImage}
-          error={
-            fieldErrors["backgroundImage.mediaId"] ||
-            fieldErrors["backgroundImage.alt"]
-          }
-        />
-      </div>
+        {/* Column 2: Requirement Categories & Enrollment Steps */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <RepeatableList
+              label="Requirement Categories"
+              helperText="One card per student type (e.g. Old, New, Transferee)."
+              itemLabel="Category"
+              items={requirementCategories}
+              onChange={setRequirementCategories}
+              minItems={1}
+              maxItems={6}
+              createItem={() => ({ badgeLabel: "", title: "", items: [""] })}
+              error={fieldErrors.requirementCategories}
+              renderItem={(item, update, index) => (
+                <div className="space-y-3">
+                  <TextField
+                    id={`req-badge-${index}`}
+                    label="Badge Label"
+                    value={item.badgeLabel}
+                    onChange={(e) => update({ badgeLabel: e.target.value })}
+                  />
+                  <TextField
+                    id={`req-title-${index}`}
+                    label="Title"
+                    value={item.title}
+                    onChange={(e) => update({ title: e.target.value })}
+                  />
+                  <StringListField
+                    label="Requirements"
+                    itemLabel="Requirement"
+                    values={item.items}
+                    onChange={(items) => update({ items })}
+                  />
+                </div>
+              )}
+            />
+          </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Programs"
-          itemLabel="Program"
-          items={programs}
-          onChange={setPrograms}
-          minItems={1}
-          maxItems={6}
-          createItem={(): AdmissionProgram => ({
-            name: "",
-            levelLabel: "",
-            description: "",
-            icon: "blocks",
-          })}
-          error={fieldErrors.programs}
-          renderItem={(item, update, index) => (
-            <div className="space-y-3">
-              <TextField
-                id={`program-name-${index}`}
-                label="Name"
-                value={item.name}
-                onChange={(e) => update({ name: e.target.value })}
-              />
-              <TextField
-                id={`program-level-${index}`}
-                label="Level label"
-                value={item.levelLabel}
-                onChange={(e) => update({ levelLabel: e.target.value })}
-              />
-              <TextareaField
-                id={`program-desc-${index}`}
-                label="Description"
-                rows={2}
-                value={item.description}
-                onChange={(e) => update({ description: e.target.value })}
-              />
-              <IconPickerField
-                label="Icon"
-                value={item.icon}
-                onChange={(icon) => update({ icon })}
-              />
-            </div>
-          )}
-        />
-      </div>
-
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Requirement categories"
-          helperText="One card per student type (e.g. Old, New, Transferee)."
-          itemLabel="Category"
-          items={requirementCategories}
-          onChange={setRequirementCategories}
-          minItems={1}
-          maxItems={6}
-          createItem={() => ({ badgeLabel: "", title: "", items: [""] })}
-          error={fieldErrors.requirementCategories}
-          renderItem={(item, update, index) => (
-            <div className="space-y-3">
-              <TextField
-                id={`req-badge-${index}`}
-                label="Badge label"
-                value={item.badgeLabel}
-                onChange={(e) => update({ badgeLabel: e.target.value })}
-              />
-              <TextField
-                id={`req-title-${index}`}
-                label="Title"
-                value={item.title}
-                onChange={(e) => update({ title: e.target.value })}
-              />
-              <StringListField
-                label="Requirements"
-                itemLabel="Requirement"
-                values={item.items}
-                onChange={(items) => update({ items })}
-              />
-            </div>
-          )}
-        />
-      </div>
-
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Enrollment steps"
-          helperText="Numbered automatically (01, 02, 03…) by order."
-          itemLabel="Step"
-          items={enrollmentSteps}
-          onChange={setEnrollmentSteps}
-          minItems={1}
-          maxItems={8}
-          createItem={() => ({ title: "", description: "" })}
-          error={fieldErrors.enrollmentSteps}
-          renderItem={(item, update, index) => (
-            <div className="space-y-3">
-              <TextField
-                id={`step-title-${index}`}
-                label="Title"
-                value={item.title}
-                onChange={(e) => update({ title: e.target.value })}
-              />
-              <TextareaField
-                id={`step-desc-${index}`}
-                label="Description"
-                rows={2}
-                value={item.description}
-                onChange={(e) => update({ description: e.target.value })}
-              />
-            </div>
-          )}
-        />
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <RepeatableList
+              label="Enrollment Steps"
+              helperText="Numbered automatically (01, 02, 03…) by order."
+              itemLabel="Step"
+              items={enrollmentSteps}
+              onChange={setEnrollmentSteps}
+              minItems={1}
+              maxItems={8}
+              createItem={() => ({ title: "", description: "" })}
+              error={fieldErrors.enrollmentSteps}
+              renderItem={(item, update, index) => (
+                <div className="space-y-3">
+                  <TextField
+                    id={`step-title-${index}`}
+                    label="Title"
+                    value={item.title}
+                    onChange={(e) => update({ title: e.target.value })}
+                  />
+                  <TextareaField
+                    id={`step-desc-${index}`}
+                    label="Description"
+                    rows={2}
+                    value={item.description}
+                    onChange={(e) => update({ description: e.target.value })}
+                  />
+                </div>
+              )}
+            />
+          </div>
+        </div>
       </div>
 
       <SaveBar

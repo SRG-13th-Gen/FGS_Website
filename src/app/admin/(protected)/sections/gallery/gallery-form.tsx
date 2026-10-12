@@ -122,7 +122,7 @@ export function GalleryForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
@@ -146,80 +146,85 @@ export function GalleryForm({
           ),
       )}
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <div className="space-y-4">
-          <TextField
-            id="section-label"
-            name="sectionLabel"
-            label="Section label"
-            value={sectionLabel}
-            onChange={(e) => setSectionLabel(e.target.value)}
-            error={fieldErrors.sectionLabel}
-          />
-          <TextField
-            id="heading"
-            name="heading"
-            label="Heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            error={fieldErrors.heading}
-          />
-          <TextareaField
-            id="intro"
-            name="intro"
-            label="Intro text"
-            rows={2}
-            value={intro}
-            onChange={(e) => setIntro(e.target.value)}
-            error={fieldErrors.intro}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3 xl:gap-8">
+        {/* Column 1: Section Heading (1/3 width) */}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-1">
+          <h2 className="text-sm font-bold text-neutral-800">Section Heading</h2>
+          <div className="mt-4 space-y-4">
+            <TextField
+              id="section-label"
+              name="sectionLabel"
+              label="Section Label"
+              value={sectionLabel}
+              onChange={(e) => setSectionLabel(e.target.value)}
+              error={fieldErrors.sectionLabel}
+            />
+            <TextField
+              id="heading"
+              name="heading"
+              label="Heading"
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              error={fieldErrors.heading}
+            />
+            <TextareaField
+              id="intro"
+              name="intro"
+              label="Intro Text"
+              rows={3}
+              value={intro}
+              onChange={(e) => setIntro(e.target.value)}
+              error={fieldErrors.intro}
+            />
+          </div>
+        </div>
+
+        {/* Column 2: Photos List (2/3 width) */}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-2">
+          <RepeatableList
+            label="Photos"
+            helperText="Shown 5 at a time (1 large + 4 small), with further sets revealed via View More on the homepage."
+            itemLabel="Photo"
+            items={photos}
+            onChange={setPhotos}
+            maxItems={30}
+            createItem={(): GalleryPhotoForm => ({
+              mediaId: 0,
+              previewUrl: "",
+              alt: "",
+              pendingFile: null,
+              caption: "",
+            })}
+            error={fieldErrors.photos}
+            renderItem={(item, update, index) => (
+              <div className="space-y-3">
+                <ImageField
+                  label="Photo"
+                  recommendedSize="Square or landscape, at least 800px wide"
+                  value={{
+                    mediaId: item.mediaId,
+                    previewUrl: item.previewUrl,
+                    alt: item.alt,
+                    pendingFile: item.pendingFile,
+                  }}
+                  onChange={(next) => update(next)}
+                  error={
+                    fieldErrors[`photos.${index}.image.mediaId`] ||
+                    fieldErrors[`photos.${index}.image.alt`]
+                  }
+                />
+                <TextField
+                  id={`photo-caption-${index}`}
+                  label="Caption"
+                  helperText="Optional. Shown as an overlay on the photo."
+                  value={item.caption}
+                  onChange={(e) => update({ caption: e.target.value })}
+                  error={fieldErrors[`photos.${index}.caption`]}
+                />
+              </div>
+            )}
           />
         </div>
-      </div>
-
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Photos"
-          helperText="Shown 5 at a time (1 large + 4 small), with further sets revealed via View More on the homepage."
-          itemLabel="Photo"
-          items={photos}
-          onChange={setPhotos}
-          maxItems={30}
-          createItem={(): GalleryPhotoForm => ({
-            mediaId: 0,
-            previewUrl: "",
-            alt: "",
-            pendingFile: null,
-            caption: "",
-          })}
-          error={fieldErrors.photos}
-          renderItem={(item, update, index) => (
-            <div className="space-y-3">
-              <ImageField
-                label="Photo"
-                recommendedSize="Square or landscape, at least 800px wide"
-                value={{
-                  mediaId: item.mediaId,
-                  previewUrl: item.previewUrl,
-                  alt: item.alt,
-                  pendingFile: item.pendingFile,
-                }}
-                onChange={(next) => update(next)}
-                error={
-                  fieldErrors[`photos.${index}.image.mediaId`] ||
-                  fieldErrors[`photos.${index}.image.alt`]
-                }
-              />
-              <TextField
-                id={`photo-caption-${index}`}
-                label="Caption"
-                helperText="Optional. Shown as an overlay on the photo."
-                value={item.caption}
-                onChange={(e) => update({ caption: e.target.value })}
-                error={fieldErrors[`photos.${index}.caption`]}
-              />
-            </div>
-          )}
-        />
       </div>
 
       <SaveBar

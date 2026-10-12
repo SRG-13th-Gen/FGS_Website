@@ -75,10 +75,12 @@ export function ArticleCategoryPicker({
   value,
   onChange,
   error,
+  gridClassName = "grid-cols-1 sm:grid-cols-3",
 }: {
   value: ArticleCategorySlug;
   onChange: (next: ArticleCategorySlug) => void;
   error?: string;
+  gridClassName?: string;
 }) {
   return (
     <div>
@@ -89,8 +91,8 @@ export function ArticleCategoryPicker({
         Select where this article will be published on the website.
       </p>
 
-      {/* Equal rows: every card is as tall as the tallest, one column each. */}
-      <div className="mt-3.5 grid auto-rows-fr gap-3 sm:grid-cols-2">
+      {/* Equal rows: every card is as tall as the tallest */}
+      <div className={`mt-3.5 grid auto-rows-fr gap-3 ${gridClassName}`}>
         {ARTICLE_CATEGORY_OPTIONS.map((cat) => {
           const Icon = cat.icon;
           const isSelected = value === cat.id;

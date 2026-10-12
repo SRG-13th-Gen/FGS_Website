@@ -167,7 +167,7 @@ export function AlumniForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
@@ -185,44 +185,46 @@ export function AlumniForm({
           ),
       )}
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <div className="space-y-4">
-          <TextField
-            id="section-label"
-            name="sectionLabel"
-            label="Section label"
-            value={sectionLabel}
-            onChange={(e) => setSectionLabel(e.target.value)}
-            error={fieldErrors.sectionLabel}
-          />
-          <TextField
-            id="heading"
-            name="heading"
-            label="Heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            error={fieldErrors.heading}
-          />
-          <TextareaField
-            id="intro"
-            name="intro"
-            label="Intro text"
-            rows={2}
-            value={intro}
-            onChange={(e) => setIntro(e.target.value)}
-            error={fieldErrors.intro}
-          />
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3 xl:gap-8">
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-1">
+          <h2 className="text-sm font-bold text-neutral-800">Section Heading</h2>
+          <div className="mt-4 space-y-4">
+            <TextField
+              id="section-label"
+              name="sectionLabel"
+              label="Section Label"
+              value={sectionLabel}
+              onChange={(e) => setSectionLabel(e.target.value)}
+              error={fieldErrors.sectionLabel}
+            />
+            <TextField
+              id="heading"
+              name="heading"
+              label="Heading"
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              error={fieldErrors.heading}
+            />
+            <TextareaField
+              id="intro"
+              name="intro"
+              label="Intro Text"
+              rows={2}
+              value={intro}
+              onChange={(e) => setIntro(e.target.value)}
+              error={fieldErrors.intro}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Alumni achievements"
-          helperText="Up to 24 achievements, shown in this order."
-          itemLabel="Achievement"
-          items={achievements}
-          onChange={setAchievements}
-          maxItems={MAX_ACHIEVEMENTS}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-2">
+          <RepeatableList
+            label="Alumni Achievements"
+            helperText="Up to 24 achievements, shown in this order."
+            itemLabel="Achievement"
+            items={achievements}
+            onChange={setAchievements}
+            maxItems={MAX_ACHIEVEMENTS}
           emptyText="No achievements yet. Add the first one to show it on the Alumni page."
           createItem={(): AchievementForm => ({
             name: "",
@@ -239,7 +241,7 @@ export function AlumniForm({
               <div className="space-y-3">
                 <TextField
                   id={`achievement-name-${index}`}
-                  label="Alumni name"
+                  label="Alumni Name"
                   value={item.name}
                   onChange={(e) => update({ name: e.target.value })}
                   error={errorFor("name")}
@@ -328,6 +330,7 @@ export function AlumniForm({
             );
           }}
         />
+        </div>
       </div>
 
       <SaveBar

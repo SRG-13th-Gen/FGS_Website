@@ -3,10 +3,18 @@
 import { useEffect, useId, useRef } from "react";
 import Image from "next/image";
 import { ArrowDown, ArrowUp, Plus, Trash2, UploadCloud } from "lucide-react";
+import { cn } from "cn";
 
 import { MediaPickerDialog } from "@/components/admin/media-picker";
 import { reorderArray } from "@/lib/content/sections/reorder";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  SECTION_ICON_LABELS,
   SECTION_ICON_NAMES,
   SECTION_ICON_OPTIONS,
   type SectionIconName,
@@ -103,6 +111,8 @@ export function ImageField({
   value,
   onChange,
   error,
+  previewClassName,
+  className,
 }: {
   label: string;
   helperText?: string;
@@ -110,16 +120,23 @@ export function ImageField({
   value: ImageFieldValue;
   onChange: (next: ImageFieldValue) => void;
   error?: string;
+  previewClassName?: string;
+  className?: string;
 }) {
   const inputId = useId();
 
   return (
-    <div>
+    <div className={className}>
       <span className={fieldLabelClass}>{label}</span>
       {helperText && <p className={helperTextClass}>{helperText}</p>}
 
       <div className="mt-2.5 flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 sm:w-48">
+        <div
+          className={cn(
+            "relative h-32 w-full shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 sm:w-48",
+            previewClassName,
+          )}
+        >
           {value.previewUrl ? (
             <Image
               src={value.previewUrl}
@@ -175,7 +192,7 @@ export function ImageField({
             htmlFor={inputId}
             className="block text-xs font-semibold text-neutral-700"
           >
-            Alt text
+            Alt Text
           </label>
           <input
             id={inputId}
@@ -290,33 +307,42 @@ export function IconPickerField({
   return (
     <div>
       <span className={fieldLabelClass}>{label}</span>
-      <div
-        className="mt-2 flex flex-wrap gap-2"
-        role="radiogroup"
-        aria-label={label}
-      >
-        {SECTION_ICON_NAMES.map((name) => {
-          const Icon = SECTION_ICON_OPTIONS[name];
-          const selected = value === name;
-          return (
-            <button
-              key={name}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              aria-label={name}
-              onClick={() => onChange(name)}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
-                selected
-                  ? "border-school-green bg-school-green-light text-school-green"
-                  : "border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-            </button>
-          );
-        })}
-      </div>
+      <TooltipProvider delayDuration={100}>
+        <div
+          className="mt-2 flex flex-wrap gap-2"
+          role="radiogroup"
+          aria-label={label}
+        >
+          {SECTION_ICON_NAMES.map((name) => {
+            const Icon = SECTION_ICON_OPTIONS[name];
+            const selected = value === name;
+            const iconTitle = SECTION_ICON_LABELS[name] ?? name;
+            return (
+              <Tooltip key={name}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    aria-label={iconTitle}
+                    onClick={() => onChange(name)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
+                      selected
+                        ? "border-school-green bg-school-green-light text-school-green"
+                        : "border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {iconTitle}
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </TooltipProvider>
       {error && <p className={errorTextClass}>{error}</p>}
     </div>
   );
@@ -334,6 +360,7 @@ export function RepeatableList<T>({
   minItems = 0,
   maxItems,
   emptyText,
+  gridClassName,
 }: {
   label: string;
   helperText?: string;
@@ -351,6 +378,7 @@ export function RepeatableList<T>({
   maxItems?: number;
   /** Shown instead of the list while it has no items. */
   emptyText?: string;
+  gridClassName?: string;
 }) {
   const update = (index: number, patch: Partial<T>) => {
     onChange(
@@ -382,7 +410,12 @@ export function RepeatableList<T>({
       </div>
       {helperText && <p className={helperTextClass}>{helperText}</p>}
 
-      <div className="mt-3 space-y-4">
+      <div
+        className={cn(
+          "mt-3",
+          gridClassName ? cn("grid", gridClassName) : "space-y-4",
+        )}
+      >
         {items.length === 0 && emptyText && (
           <p className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/50 p-4 text-center text-sm text-neutral-500">
             {emptyText}
