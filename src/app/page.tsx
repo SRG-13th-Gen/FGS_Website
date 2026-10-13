@@ -140,19 +140,28 @@ export default async function Home() {
               className="motion-enter text-4xl leading-tight font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
               style={{ "--motion-step": 0 } as React.CSSProperties}
             >
-              {hero.heading.split("\n").map((line, index, lines) => (
-                <span
-                  key={index}
-                  className={
-                    index === 0
-                      ? "block text-2xl font-bold tracking-wide text-white/95 drop-shadow-md sm:text-3xl md:text-4xl"
-                      : "text-3d-hero mt-1 block text-4xl font-black tracking-tight text-white drop-shadow-2xl sm:text-6xl md:text-7xl lg:text-8xl"
-                  }
-                >
-                  {line}
-                  {index < lines.length - 1 && <br />}
-                </span>
-              ))}
+              {hero.heading
+                .replace(
+                  /Flor de Grace School Inc\.?/i,
+                  "Flor de Grace\nSchool, Inc.",
+                )
+                .replace(
+                  /Flor de Grace\s+School,\s*Inc\.?/i,
+                  "Flor de Grace\nSchool, Inc.",
+                )
+                .split("\n")
+                .map((line, index) => (
+                  <span
+                    key={index}
+                    className={
+                      index === 0
+                        ? "block text-2xl font-bold tracking-wide text-white/95 drop-shadow-md sm:text-3xl md:text-4xl"
+                        : "text-3d-hero mt-1 block text-4xl font-black tracking-tight text-white drop-shadow-2xl sm:text-6xl sm:whitespace-nowrap md:text-7xl lg:text-8xl"
+                    }
+                  >
+                    {line}
+                  </span>
+                ))}
             </h1>
 
             {/* Cool Ornamental Divider between School Name and Tagline */}
@@ -286,7 +295,19 @@ export default async function Home() {
                 {about.sectionLabel}
               </span>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
-                {about.heading}
+                {about.heading
+                  .replace(/Building Futures,\s*/i, "Building Futures,\n")
+                  .split("\n")
+                  .map((line, index) => (
+                    <span
+                      key={index}
+                      className={
+                        index === 1 ? "block sm:whitespace-nowrap" : "block"
+                      }
+                    >
+                      {line}
+                    </span>
+                  ))}
               </h2>
               <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-school-green" />
             </Reveal>

@@ -35,7 +35,7 @@ export interface AboutView extends Omit<AboutContent, "featureBanner"> {
 
 export const ABOUT_DEFAULTS: AboutContent = {
   sectionLabel: "About Us",
-  heading: "Building Futures, One Student at a Time",
+  heading: "Building Futures,\nOne Student at a Time",
   storyParagraphs: [
     "For over two decades, since its establishment in 2001, Flor de Grace School Inc. has stood as a nurturing ground, diligently cultivating the seeds of potential within each student. Rooted in a profound mission to provide a quality education through a holistic approach that fosters academic excellence, character development, and lifelong learning, the school has become an integral part of our community, shaping not just minds, but also hearts and souls.",
     "Flor de Grace School’s vision is ambitious and inspiring: to become a model institution of learning that shapes well-rounded individuals—academically excellent, morally upright, and committed to lifelong growth and service to others. This is not merely a statement etched on a wall; it is a living ethos that permeates every classroom, every interaction, and every activity within the school’s vibrant walls.",
