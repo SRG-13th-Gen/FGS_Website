@@ -117,10 +117,12 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           </div>
 
           {/* Article Header Card */}
-          <header className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-10">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-neutral-500">
-              <Calendar className="h-3.5 w-3.5 text-school-green" />
-              <span>{formatArticleDate(article.publishedAt)}</span>
+          <header className="rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-sm sm:p-10 md:p-12">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-semibold text-neutral-500">
+              <span className="flex items-center gap-1.5 text-school-green-dark">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{formatArticleDate(article.publishedAt)}</span>
+              </span>
               <span>•</span>
               <span>Flor de Grace School Administration</span>
             </div>
@@ -130,14 +132,14 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             </h1>
 
             {article.excerpt && (
-              <p className="mt-4 text-base text-neutral-600 italic sm:text-lg">
+              <p className="mt-4 text-base leading-relaxed text-neutral-600 italic sm:text-lg">
                 {article.excerpt}
               </p>
             )}
 
             {/* Featured Cover Image */}
             {article.coverImage && (
-              <figure className="mt-8 overflow-hidden rounded-2xl border border-neutral-200/80 shadow-sm">
+              <figure className="mt-8 overflow-hidden rounded-3xl border border-neutral-200/80 shadow-md">
                 <div className="relative aspect-[16/9] w-full bg-neutral-100 sm:aspect-[21/9]">
                   <Image
                     src={article.coverImage.url}
@@ -149,7 +151,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   />
                 </div>
                 {article.coverImage.caption && (
-                  <figcaption className="border-t border-neutral-100 bg-neutral-50/80 px-4 py-3 text-center text-xs text-neutral-600 italic sm:text-sm">
+                  <figcaption className="border-t border-neutral-100 bg-neutral-50/90 px-4 py-3 text-center text-xs text-neutral-600 italic sm:text-sm">
                     {article.coverImage.caption}
                   </figcaption>
                 )}
@@ -163,7 +165,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             />
 
             {/* School Contact Footer Card inside Article */}
-            <div className="mt-12 rounded-2xl border border-school-green/20 bg-school-green-light/40 p-6 sm:p-8">
+            <div className="mt-12 rounded-3xl border border-school-green/30 bg-gradient-to-br from-school-green/10 via-school-green-light/30 to-school-yellow/10 p-6 sm:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-base font-bold text-neutral-900">
@@ -176,14 +178,14 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                 <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-school-green-dark">
                   <a
                     href={`tel:${schoolInfo.phone}`}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm transition-colors hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200/60 bg-white px-3.5 py-2 shadow-xs transition-colors hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
                     <Phone className="h-3.5 w-3.5 text-school-green" />
                     <span>{schoolInfo.phone}</span>
                   </a>
                   <a
                     href={`mailto:${schoolInfo.email}`}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-white px-3 py-2 shadow-sm transition-colors hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200/60 bg-white px-3.5 py-2 shadow-xs transition-colors hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
                     <Mail className="h-3.5 w-3.5 text-school-green" />
                     <span>Inquire via Email</span>

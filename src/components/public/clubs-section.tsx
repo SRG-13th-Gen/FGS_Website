@@ -14,28 +14,43 @@ import type { ClubsContent } from "@/lib/content/sections/clubs";
 
 const ACCENT_STYLES = [
   {
-    card: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-    icon: "text-emerald-600",
+    badge: "bg-emerald-50 text-emerald-800 border-emerald-300/80",
+    iconBg:
+      "from-emerald-500/15 to-emerald-600/5 text-emerald-700 border-emerald-200/90",
+    glow: "hover:border-emerald-500/50 hover:shadow-emerald-500/10",
+    indicator: "bg-emerald-500",
   },
   {
-    card: "bg-amber-50 text-amber-800 border-amber-200/60",
-    icon: "text-amber-600",
+    badge: "bg-amber-50 text-amber-800 border-amber-300/80",
+    iconBg:
+      "from-amber-500/15 to-amber-600/5 text-amber-800 border-amber-200/90",
+    glow: "hover:border-amber-500/50 hover:shadow-amber-500/10",
+    indicator: "bg-amber-500",
   },
   {
-    card: "bg-blue-50 text-blue-700 border-blue-200/60",
-    icon: "text-blue-600",
+    badge: "bg-blue-50 text-blue-800 border-blue-300/80",
+    iconBg: "from-blue-500/15 to-blue-600/5 text-blue-700 border-blue-200/90",
+    glow: "hover:border-blue-500/50 hover:shadow-blue-500/10",
+    indicator: "bg-blue-500",
   },
   {
-    card: "bg-purple-50 text-purple-700 border-purple-200/60",
-    icon: "text-purple-600",
+    badge: "bg-purple-50 text-purple-800 border-purple-300/80",
+    iconBg:
+      "from-purple-500/15 to-purple-600/5 text-purple-700 border-purple-200/90",
+    glow: "hover:border-purple-500/50 hover:shadow-purple-500/10",
+    indicator: "bg-purple-500",
   },
   {
-    card: "bg-rose-50 text-rose-700 border-rose-200/60",
-    icon: "text-rose-600",
+    badge: "bg-rose-50 text-rose-800 border-rose-300/80",
+    iconBg: "from-rose-500/15 to-rose-600/5 text-rose-700 border-rose-200/90",
+    glow: "hover:border-rose-500/50 hover:shadow-rose-500/10",
+    indicator: "bg-rose-500",
   },
   {
-    card: "bg-teal-50 text-teal-700 border-teal-200/60",
-    icon: "text-teal-600",
+    badge: "bg-teal-50 text-teal-800 border-teal-300/80",
+    iconBg: "from-teal-500/15 to-teal-600/5 text-teal-700 border-teal-200/90",
+    glow: "hover:border-teal-500/50 hover:shadow-teal-500/10",
+    indicator: "bg-teal-500",
   },
 ] as const;
 
@@ -68,14 +83,15 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
         {/* Section Header with Carousel Navigation */}
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
+            <span className="inline-flex items-center gap-2 rounded-full border border-school-green/20 bg-school-green/5 px-3.5 py-1 text-xs font-bold tracking-widest text-school-green-dark uppercase shadow-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-school-green" />
               {content.sectionLabel}
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
               {content.heading}
             </h2>
-            <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
-            <p className="mt-3 max-w-xl text-sm text-neutral-600 sm:text-base">
+            <div className="mt-3.5 h-1 w-20 rounded-full bg-gradient-to-r from-school-green to-school-green-light" />
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">
               {content.intro}
             </p>
           </div>
@@ -87,7 +103,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               onClick={() => api?.scrollPrev()}
               disabled={!api?.canScrollPrev()}
               aria-label="Previous club slide"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200/90 bg-white text-neutral-700 shadow-xs transition-all hover:scale-105 hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green hover:shadow-md focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -96,7 +112,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
               onClick={() => api?.scrollNext()}
               disabled={!api?.canScrollNext()}
               aria-label="Next club slide"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-40 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200/90 bg-white text-neutral-700 shadow-xs transition-all hover:scale-105 hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green hover:shadow-md focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:border-neutral-200 disabled:hover:bg-white disabled:hover:text-neutral-700"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -122,32 +138,39 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
                     key={club.name}
                     className="pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                   >
-                    <div className="group flex h-full flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-school-green/40 hover:shadow-md">
+                    <div
+                      className={`group flex h-full flex-col justify-between rounded-3xl border border-neutral-200/80 bg-white p-7 shadow-xs transition-all duration-300 hover:-translate-y-1.5 ${accent.glow} hover:shadow-xl`}
+                    >
                       <div>
                         {/* Top: Icon + Category */}
                         <div className="flex items-center justify-between">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50 shadow-inner transition-transform duration-300 group-hover:scale-110">
-                            <Icon className={`h-6 w-6 ${accent.icon}`} />
+                          <div
+                            className={`flex h-13 w-13 items-center justify-center rounded-2xl border bg-gradient-to-br ${accent.iconBg} shadow-inner transition-transform duration-300 group-hover:scale-110`}
+                          >
+                            <Icon className="h-6 w-6" strokeWidth={2.2} />
                           </div>
                           <span
-                            className={`rounded-full border px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase ${accent.card}`}
+                            className={`rounded-full border px-3 py-1 text-xs font-bold tracking-wider uppercase ${accent.badge}`}
                           >
                             {club.category}
                           </span>
                         </div>
 
                         {/* Title & Description */}
-                        <h3 className="mt-5 text-lg font-bold text-neutral-900 transition-colors group-hover:text-school-green">
+                        <h3 className="mt-6 text-xl font-bold text-neutral-900 transition-colors group-hover:text-school-green">
                           {club.name}
                         </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                        <p className="mt-3 text-sm leading-relaxed text-neutral-600">
                           {club.description}
                         </p>
                       </div>
 
                       {/* Bottom Info */}
-                      <div className="mt-6 border-t border-neutral-100 pt-4">
-                        <span className="text-xs font-medium text-neutral-500">
+                      <div className="mt-6 flex items-center gap-2 border-t border-neutral-100 pt-4">
+                        <div
+                          className={`h-2 w-2 rounded-full ${accent.indicator}`}
+                        />
+                        <span className="text-xs font-semibold text-neutral-600">
                           {club.meetingDay}
                         </span>
                       </div>
@@ -160,7 +183,7 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
 
           {/* Dots Indicator */}
           {count > 0 && (
-            <div className="mt-4 flex flex-wrap justify-center">
+            <div className="mt-6 flex flex-wrap justify-center">
               {Array.from({ length: count }).map((_, index) => (
                 <button
                   key={index}
@@ -171,9 +194,9 @@ export function ClubsSection({ content }: { content: ClubsContent }) {
                   className="group flex h-11 w-11 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-school-green focus-visible:outline-none"
                 >
                   <span
-                    className={`block h-2 rounded-full transition-all ${
+                    className={`block h-2 rounded-full transition-all duration-300 ${
                       current === index
-                        ? "w-8 bg-school-green"
+                        ? "w-8 bg-school-green shadow-xs"
                         : "w-2 bg-neutral-300 group-hover:bg-neutral-400"
                     }`}
                   />
