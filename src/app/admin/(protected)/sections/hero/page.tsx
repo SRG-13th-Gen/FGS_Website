@@ -10,12 +10,12 @@ export default async function AdminHeroSectionPage() {
   const initial = await heroContent.get();
 
   return (
-    <div className="space-y-1">
+    <div className="flex flex-1 flex-col space-y-4">
       <p className="text-sm text-neutral-500">
         The first thing visitors see. Fields appear in the same order as on the
         homepage.
       </p>
-      <div className="pt-5">
+      <div className="flex flex-1 flex-col">
         <HeroForm initial={initial} revision={revision} />
       </div>
     </div>

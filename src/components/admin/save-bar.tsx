@@ -15,8 +15,8 @@ export function SaveBar({
   viewHref?: string;
 }) {
   return (
-    <div className="sticky bottom-0 z-20 -mx-4 mt-8 border-t border-neutral-200 bg-white/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+    <div className="sticky bottom-0 z-20 -mx-4 mt-auto -mb-6 border-t border-neutral-200 bg-white/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
         {viewHref ? (
           <Link
             href={viewHref}

@@ -12,15 +12,15 @@ export function AreaPageHeader({
 }) {
   return (
     <header>
-      <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
+      <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
         {label}
       </span>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+      <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
         {heading}
       </h1>
-      <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
+      <div className="mt-3.5 h-1 w-20 rounded-full bg-gradient-to-r from-school-green to-school-green-light" />
       {intro && (
-        <p className="mt-3 max-w-xl text-sm text-neutral-600 sm:text-base">
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">
           {intro}
         </p>
       )}
@@ -31,7 +31,7 @@ export function AreaPageHeader({
 /** Truthful empty or unavailable message, as used by the homepage sections. */
 export function AreaNotice({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-14 text-center">
+    <div className="rounded-3xl border border-neutral-200/80 bg-neutral-50/80 px-6 py-14 text-center shadow-xs">
       <p className="text-sm font-medium text-neutral-600">{children}</p>
     </div>
   );

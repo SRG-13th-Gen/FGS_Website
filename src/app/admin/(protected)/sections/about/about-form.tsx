@@ -140,7 +140,7 @@ export function AboutForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
@@ -163,125 +163,136 @@ export function AboutForm({
         />
       ))}
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-neutral-800">
-          Montessori quote band
-        </h2>
-        <p className="mt-1 text-xs text-neutral-500">
-          Shown in a quiet band between the hero and the classroom photo banner.
-        </p>
-        <div className="mt-4 space-y-4">
-          <TextareaField
-            id="quote-text"
-            name="quoteText"
-            label="Quote"
-            rows={2}
-            value={quoteText}
-            onChange={(e) => setQuoteText(e.target.value)}
-            error={fieldErrors["quote.text"]}
-          />
-          <TextField
-            id="quote-author"
-            name="quoteAuthor"
-            label="Attributed to"
-            value={quoteAuthor}
-            onChange={(e) => setQuoteAuthor(e.target.value)}
-            error={fieldErrors["quote.author"]}
-          />
-        </div>
-      </div>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 xl:gap-8">
+        {/* Column 1: Montessori Quote Band & Classroom Feature Banner */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-neutral-800">
+              Montessori Quote Band
+            </h2>
+            <p className="mt-1 text-xs text-neutral-500">
+              Shown in a quiet band between the hero and the classroom photo
+              banner.
+            </p>
+            <div className="mt-4 space-y-4">
+              <TextareaField
+                id="quote-text"
+                name="quoteText"
+                label="Quote"
+                rows={2}
+                value={quoteText}
+                onChange={(e) => setQuoteText(e.target.value)}
+                error={fieldErrors["quote.text"]}
+              />
+              <TextField
+                id="quote-author"
+                name="quoteAuthor"
+                label="Attributed To"
+                value={quoteAuthor}
+                onChange={(e) => setQuoteAuthor(e.target.value)}
+                error={fieldErrors["quote.author"]}
+              />
+            </div>
+          </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-neutral-800">
-          Classroom feature banner
-        </h2>
-        <p className="mt-1 text-xs text-neutral-500">
-          The full-bleed photo banner shown right after the quote band.
-        </p>
-        <div className="mt-4 space-y-4">
-          <TextField
-            id="banner-heading"
-            name="bannerHeading"
-            label="Heading"
-            value={bannerHeading}
-            onChange={(e) => setBannerHeading(e.target.value)}
-            error={fieldErrors["featureBanner.heading"]}
-          />
-          <TextareaField
-            id="banner-body"
-            name="bannerBody"
-            label="Body text"
-            rows={2}
-            value={bannerBody}
-            onChange={(e) => setBannerBody(e.target.value)}
-            error={fieldErrors["featureBanner.body"]}
-          />
-          <ImageField
-            label="Banner photo"
-            recommendedSize="1600×900 or larger, landscape"
-            value={bannerImage}
-            onChange={setBannerImage}
-            error={
-              fieldErrors["featureBanner.image.mediaId"] ||
-              fieldErrors["featureBanner.image.alt"]
-            }
-          />
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-neutral-800">
+              Classroom Feature Banner
+            </h2>
+            <p className="mt-1 text-xs text-neutral-500">
+              The full-bleed photo banner shown right after the quote band.
+            </p>
+            <div className="mt-4 space-y-4">
+              <TextField
+                id="banner-heading"
+                name="bannerHeading"
+                label="Heading"
+                value={bannerHeading}
+                onChange={(e) => setBannerHeading(e.target.value)}
+                error={fieldErrors["featureBanner.heading"]}
+              />
+              <TextareaField
+                id="banner-body"
+                name="bannerBody"
+                label="Body Text"
+                rows={2}
+                value={bannerBody}
+                onChange={(e) => setBannerBody(e.target.value)}
+                error={fieldErrors["featureBanner.body"]}
+              />
+              <ImageField
+                label="Banner Photo"
+                recommendedSize="1600×900 or larger, landscape"
+                value={bannerImage}
+                onChange={setBannerImage}
+                error={
+                  fieldErrors["featureBanner.image.mediaId"] ||
+                  fieldErrors["featureBanner.image.alt"]
+                }
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-neutral-800">About Us section</h2>
-        <div className="mt-4 space-y-4">
-          <TextField
-            id="section-label"
-            name="sectionLabel"
-            label="Section label"
-            helperText="Small uppercase label above the heading."
-            value={sectionLabel}
-            onChange={(e) => setSectionLabel(e.target.value)}
-            error={fieldErrors.sectionLabel}
-          />
-          <TextField
-            id="heading"
-            name="heading"
-            label="Heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            error={fieldErrors.heading}
-          />
-          <StringListField
-            label="Story paragraphs"
-            helperText="Shown in reading order, automatically balanced into two columns."
-            values={storyParagraphs}
-            onChange={setStoryParagraphs}
-            itemLabel="Paragraph"
-            error={fieldErrors.storyParagraphs}
-          />
-        </div>
-      </div>
+        {/* Column 2: About Us Section & Mission / Vision */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <h2 className="text-sm font-bold text-neutral-800">
+              About Us Section
+            </h2>
+            <div className="mt-4 space-y-4">
+              <TextField
+                id="section-label"
+                name="sectionLabel"
+                label="Section Label"
+                helperText="Small uppercase label above the heading."
+                value={sectionLabel}
+                onChange={(e) => setSectionLabel(e.target.value)}
+                error={fieldErrors.sectionLabel}
+              />
+              <TextField
+                id="heading"
+                name="heading"
+                label="Heading"
+                value={heading}
+                onChange={(e) => setHeading(e.target.value)}
+                error={fieldErrors.heading}
+              />
+              <StringListField
+                label="Story Paragraphs"
+                helperText="Shown in reading order, automatically balanced into two columns."
+                values={storyParagraphs}
+                onChange={setStoryParagraphs}
+                itemLabel="Paragraph"
+                error={fieldErrors.storyParagraphs}
+              />
+            </div>
+          </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-          <TextareaField
-            id="mission"
-            name="mission"
-            label="Mission"
-            rows={4}
-            value={mission}
-            onChange={(e) => setMission(e.target.value)}
-            error={fieldErrors.mission}
-          />
-        </div>
-        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-          <TextareaField
-            id="vision"
-            name="vision"
-            label="Vision"
-            rows={4}
-            value={vision}
-            onChange={(e) => setVision(e.target.value)}
-            error={fieldErrors.vision}
-          />
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+              <TextareaField
+                id="mission"
+                name="mission"
+                label="Mission"
+                rows={4}
+                value={mission}
+                onChange={(e) => setMission(e.target.value)}
+                error={fieldErrors.mission}
+              />
+            </div>
+            <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+              <TextareaField
+                id="vision"
+                name="vision"
+                label="Vision"
+                rows={4}
+                value={vision}
+                onChange={(e) => setVision(e.target.value)}
+                error={fieldErrors.vision}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

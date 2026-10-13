@@ -26,4 +26,17 @@ export const SECTION_ICON_OPTIONS = {
   sparkles: Sparkles,
 } as const satisfies Record<string, LucideIcon>;
 
+export const SECTION_ICON_LABELS = {
+  "map-pin": "Location / Address",
+  phone: "Phone / Telephone",
+  mail: "Email / Inquiries",
+  blocks: "Blocks / Early Childhood",
+  "book-open": "Book / Academics",
+  palette: "Art / Creative Arts",
+  music: "Music / Performing Arts",
+  dumbbell: "Sports / Athletics",
+  monitor: "Computer / Technology",
+  sparkles: "Highlights / Special",
+} as const satisfies Record<string, string>;
+
 export { SECTION_ICON_NAMES, type SectionIconName } from "./icon-names";

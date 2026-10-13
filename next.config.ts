@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/images/logo/fgs-logo-website-1.webp",
+      },
+    ];
+  },
   experimental: { serverActions: { bodySizeLimit: "65mb" } },
 };
 export default nextConfig;

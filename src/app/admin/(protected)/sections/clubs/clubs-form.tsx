@@ -82,91 +82,98 @@ export function ClubsForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input type="hidden" name="clubsJson" value={JSON.stringify(clubs)} />
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <div className="space-y-4">
-          <TextField
-            id="section-label"
-            name="sectionLabel"
-            label="Section label"
-            value={sectionLabel}
-            onChange={(e) => setSectionLabel(e.target.value)}
-            error={fieldErrors.sectionLabel}
-          />
-          <TextField
-            id="heading"
-            name="heading"
-            label="Heading"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
-            error={fieldErrors.heading}
-          />
-          <TextareaField
-            id="intro"
-            name="intro"
-            label="Intro text"
-            rows={2}
-            value={intro}
-            onChange={(e) => setIntro(e.target.value)}
-            error={fieldErrors.intro}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3 xl:gap-8">
+        {/* Column 1: Section Heading (1/3 width) */}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-1">
+          <h2 className="text-sm font-bold text-neutral-800">
+            Section Heading
+          </h2>
+          <div className="mt-4 space-y-4">
+            <TextField
+              id="section-label"
+              name="sectionLabel"
+              label="Section Label"
+              value={sectionLabel}
+              onChange={(e) => setSectionLabel(e.target.value)}
+              error={fieldErrors.sectionLabel}
+            />
+            <TextField
+              id="heading"
+              name="heading"
+              label="Heading"
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              error={fieldErrors.heading}
+            />
+            <TextareaField
+              id="intro"
+              name="intro"
+              label="Intro Text"
+              rows={3}
+              value={intro}
+              onChange={(e) => setIntro(e.target.value)}
+              error={fieldErrors.intro}
+            />
+          </div>
+        </div>
+
+        {/* Column 2: Clubs List (2/3 width) */}
+        <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-2">
+          <RepeatableList
+            label="Clubs"
+            itemLabel="Club"
+            items={clubs}
+            onChange={setClubs}
+            minItems={1}
+            maxItems={16}
+            createItem={(): ClubItem => ({
+              name: "",
+              category: "",
+              description: "",
+              meetingDay: "",
+              icon: "sparkles",
+            })}
+            error={fieldErrors.clubs}
+            renderItem={(item, update, index) => (
+              <div className="space-y-3">
+                <TextField
+                  id={`club-name-${index}`}
+                  label="Name"
+                  value={item.name}
+                  onChange={(e) => update({ name: e.target.value })}
+                />
+                <TextField
+                  id={`club-category-${index}`}
+                  label="Category"
+                  value={item.category}
+                  onChange={(e) => update({ category: e.target.value })}
+                />
+                <TextareaField
+                  id={`club-desc-${index}`}
+                  label="Description"
+                  rows={2}
+                  value={item.description}
+                  onChange={(e) => update({ description: e.target.value })}
+                />
+                <TextField
+                  id={`club-meeting-${index}`}
+                  label="Meeting Day"
+                  value={item.meetingDay}
+                  onChange={(e) => update({ meetingDay: e.target.value })}
+                />
+                <IconPickerField
+                  label="Icon"
+                  value={item.icon}
+                  onChange={(icon) => update({ icon })}
+                />
+              </div>
+            )}
           />
         </div>
-      </div>
-
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <RepeatableList
-          label="Clubs"
-          itemLabel="Club"
-          items={clubs}
-          onChange={setClubs}
-          minItems={1}
-          maxItems={16}
-          createItem={(): ClubItem => ({
-            name: "",
-            category: "",
-            description: "",
-            meetingDay: "",
-            icon: "sparkles",
-          })}
-          error={fieldErrors.clubs}
-          renderItem={(item, update, index) => (
-            <div className="space-y-3">
-              <TextField
-                id={`club-name-${index}`}
-                label="Name"
-                value={item.name}
-                onChange={(e) => update({ name: e.target.value })}
-              />
-              <TextField
-                id={`club-category-${index}`}
-                label="Category"
-                value={item.category}
-                onChange={(e) => update({ category: e.target.value })}
-              />
-              <TextareaField
-                id={`club-desc-${index}`}
-                label="Description"
-                rows={2}
-                value={item.description}
-                onChange={(e) => update({ description: e.target.value })}
-              />
-              <TextField
-                id={`club-meeting-${index}`}
-                label="Meeting day"
-                value={item.meetingDay}
-                onChange={(e) => update({ meetingDay: e.target.value })}
-              />
-              <IconPickerField
-                label="Icon"
-                value={item.icon}
-                onChange={(icon) => update({ icon })}
-              />
-            </div>
-          )}
-        />
       </div>
 
       <SaveBar

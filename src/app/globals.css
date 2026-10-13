@@ -206,3 +206,159 @@
     animation: none;
   }
 }
+
+/*
+ * Creative 3D & Modern UI Utilities
+ */
+
+/* 3D text extrusion with soft specular ambient light */
+.text-3d-hero {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 0 rgba(255, 255, 255, 0.3),
+    0 3px 2px rgba(61, 138, 39, 0.4),
+    0 5px 6px rgba(0, 0, 0, 0.3),
+    0 10px 18px rgba(0, 0, 0, 0.4),
+    0 20px 35px rgba(0, 0, 0, 0.5);
+}
+
+.text-3d-glow {
+  text-shadow:
+    0 0 12px rgba(84, 180, 53, 0.45),
+    0 0 30px rgba(84, 180, 53, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.text-3d-tagline {
+  color: #ffffff;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.95),
+    0 3px 10px rgba(0, 0, 0, 0.9),
+    0 8px 24px rgba(0, 0, 0, 0.85),
+    0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+/* Subtle ambient pulse for the 3D tagline without hiding text fill */
+@keyframes tagline-glow {
+  0%,
+  100% {
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.95),
+      0 3px 10px rgba(0, 0, 0, 0.9),
+      0 8px 24px rgba(0, 0, 0, 0.85),
+      0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.95),
+      0 3px 10px rgba(0, 0, 0, 0.9),
+      0 8px 28px rgba(0, 0, 0, 0.9),
+      0 0 35px rgba(234, 218, 43, 0.55),
+      0 0 50px rgba(84, 180, 53, 0.4);
+  }
+}
+
+.animate-tagline-glow {
+  animation: tagline-glow 6s ease-in-out infinite;
+}
+
+/* Gentle 3D floating perspective */
+@keyframes float-hero {
+  0%,
+  100% {
+    transform: perspective(1000px) translateY(0px) rotateX(0deg);
+  }
+  50% {
+    transform: perspective(1000px) translateY(-7px) rotateX(1.2deg);
+  }
+}
+
+.animate-float-hero {
+  animation: float-hero 8s ease-in-out infinite;
+}
+
+/* Ambient pulsing light halo */
+@keyframes pulse-halo {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-halo {
+  animation: pulse-halo 5s ease-in-out infinite;
+}
+
+/* Dynamic multi-layered particle drifting */
+@keyframes particle-drift-1 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateY(-45px) translateX(15px);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-90px) translateX(-10px);
+    opacity: 0.25;
+  }
+}
+
+@keyframes particle-drift-2 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-60px) translateX(-25px);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(-120px) translateX(15px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes particle-drift-3 {
+  0% {
+    transform: translateY(0px) translateX(0px) scale(0.85);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-35px) translateX(20px) scale(1.25);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-70px) translateX(5px) scale(0.85);
+    opacity: 0.3;
+  }
+}
+
+.animate-particle-1 {
+  animation: particle-drift-1 9s ease-in-out infinite alternate;
+}
+
+.animate-particle-2 {
+  animation: particle-drift-2 13s ease-in-out infinite alternate;
+}
+
+.animate-particle-3 {
+  animation: particle-drift-3 11s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-hero,
+  .animate-pulse-halo,
+  .animate-particle-1,
+  .animate-particle-2,
+  .animate-particle-3,
+  .animate-tagline-glow {
+    animation: none !important;
+  }
+}

@@ -45,4 +45,16 @@ describe("ArticleCategoryPicker layout", () => {
       expect(button.className).not.toMatch(/col-span/);
     }
   });
+
+  it("applies a custom grid layout when gridClassName is provided", () => {
+    const { container } = render(
+      createElement(ArticleCategoryPicker, {
+        value: "announcements",
+        onChange: () => {},
+        gridClassName: "grid-cols-1 sm:grid-cols-3",
+      }),
+    );
+    const grid = container.querySelector("button")!.parentElement!;
+    expect(grid.className).toContain("grid-cols-1 sm:grid-cols-3");
+  });
 });

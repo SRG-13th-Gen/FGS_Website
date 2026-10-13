@@ -18,14 +18,14 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
         {/* Section Header with 'View More' at upper right */}
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-sm font-semibold tracking-widest text-school-green-dark uppercase">
+            <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
               News &amp; Announcements
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
               What&apos;s Happening at FGS
             </h2>
-            <div className="mt-3 h-1 w-16 rounded-full bg-school-green" />
-            <p className="mt-3 max-w-xl text-sm text-neutral-600 sm:text-base">
+            <div className="mt-3.5 h-1 w-20 rounded-full bg-gradient-to-r from-school-green to-school-green-light" />
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">
               Stay updated with the latest announcements, events, and happenings
               at Flor de Grace School.
             </p>
@@ -37,7 +37,7 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
               type="button"
               onClick={() => setExpanded((prev) => !prev)}
               aria-expanded={expanded}
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 self-start rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-800 shadow-sm transition-all hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green hover:shadow focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 sm:self-end"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 self-start rounded-full border border-neutral-200/90 bg-white px-5 py-2.5 text-xs font-bold text-neutral-800 shadow-xs transition-all hover:scale-105 hover:border-school-green/50 hover:bg-neutral-50 hover:text-school-green hover:shadow-md focus-visible:ring-2 focus-visible:ring-school-green focus-visible:ring-offset-2 focus-visible:outline-none active:scale-95 sm:self-end"
             >
               <span>{expanded ? "Show Less" : "View More"}</span>
               {expanded ? (

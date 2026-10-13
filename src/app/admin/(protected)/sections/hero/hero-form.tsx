@@ -113,7 +113,7 @@ export function HeroForm({
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="flex flex-1 flex-col justify-between">
       <input type="hidden" name="revision" value={revision} />
       <input
         type="hidden"
@@ -125,43 +125,51 @@ export function HeroForm({
         <HiddenFileField name="backgroundImageFile" file={image.pendingFile} />
       )}
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <TextareaField
-          id="hero-heading"
-          name="heading"
-          label="Heading"
-          helperText="Shown as the big heading at the top of the homepage. Press Enter for a line break."
-          rows={2}
-          value={heading}
-          onChange={(e) => setHeading(e.target.value)}
-          error={fieldErrors.heading}
-        />
-      </div>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 xl:gap-8">
+        {/* Column 1: Text Fields */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <TextareaField
+              id="hero-heading"
+              name="heading"
+              label="Heading"
+              helperText="Shown as the big heading at the top of the homepage. Press Enter for a line break."
+              rows={2}
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              error={fieldErrors.heading}
+            />
+          </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <TextField
-          id="hero-tagline"
-          name="tagline"
-          label="Tagline"
-          helperText="Shown in italics under the heading."
-          value={tagline}
-          onChange={(e) => setTagline(e.target.value)}
-          error={fieldErrors.tagline}
-        />
-      </div>
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <TextField
+              id="hero-tagline"
+              name="tagline"
+              label="Tagline"
+              helperText="Shown in italics under the heading."
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              error={fieldErrors.tagline}
+            />
+          </div>
+        </div>
 
-      <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-        <ImageField
-          label="Background image"
-          helperText="Full-bleed photo behind the hero heading."
-          recommendedSize="1920×1080 or larger, landscape"
-          value={image}
-          onChange={setImage}
-          error={
-            fieldErrors["backgroundImage.mediaId"] ||
-            fieldErrors["backgroundImage.alt"]
-          }
-        />
+        {/* Column 2: Media Asset */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
+            <ImageField
+              label="Background Image"
+              helperText="Full-bleed photo behind the hero heading."
+              recommendedSize="1920×1080 or larger, landscape"
+              value={image}
+              onChange={setImage}
+              error={
+                fieldErrors["backgroundImage.mediaId"] ||
+                fieldErrors["backgroundImage.alt"]
+              }
+            />
+          </div>
+        </div>
       </div>
 
       <SaveBar
