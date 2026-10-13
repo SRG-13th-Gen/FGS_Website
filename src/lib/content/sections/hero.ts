@@ -17,7 +17,7 @@ export interface HeroView {
 }
 
 export const HERO_DEFAULTS: HeroContent = {
-  heading: "Welcome to\nFlor de Grace School Inc.",
+  heading: "Welcome to\nFlor de Grace\nSchool, Inc.",
   tagline: "“Where Excellence Blooms and Futures Begin.”",
   backgroundImage: {
     mediaId: 0,
