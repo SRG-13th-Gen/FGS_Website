@@ -134,7 +134,7 @@ export default async function Home() {
           </div>
 
           {/* Centered content with 3D perspective and subtle floating depth */}
-          <div className="animate-float-hero relative z-10 mx-auto max-w-4xl px-4 py-20 text-center">
+          <div className="animate-float-hero relative z-10 mx-auto max-w-5xl px-4 py-20 text-center">
             {/* 3D Animated Headline */}
             <h1
               className="motion-enter text-4xl leading-tight font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
@@ -155,12 +155,25 @@ export default async function Home() {
               ))}
             </h1>
 
-            {/* 3D Tagline - Crisp, Bright White & Perfectly Legible */}
+            {/* Cool Ornamental Divider between School Name and Tagline */}
             <div
-              className="motion-enter mx-auto mt-8 max-w-3xl px-4"
+              className="motion-enter mx-auto my-5 flex items-center justify-center gap-3 sm:my-7 sm:gap-4"
               style={{ "--motion-step": 1 } as React.CSSProperties}
             >
-              <p className="text-3d-tagline animate-tagline-glow font-serif text-2xl font-normal tracking-wide italic sm:text-3xl md:text-4xl lg:text-[2.5rem]">
+              <div className="h-[1.5px] w-12 bg-gradient-to-r from-transparent via-white/80 to-school-yellow/90 sm:w-24 md:w-36" />
+              <div className="relative flex items-center justify-center">
+                <div className="absolute h-5 w-5 rounded-full bg-school-yellow/40 blur-xs" />
+                <span className="relative h-2.5 w-2.5 rotate-45 rounded-[1px] border border-white/80 bg-school-yellow shadow-[0_0_10px_rgba(255,255,255,0.7)]" />
+              </div>
+              <div className="h-[1.5px] w-12 bg-gradient-to-l from-transparent via-white/80 to-school-yellow/90 sm:w-24 md:w-36" />
+            </div>
+
+            {/* 3D Tagline - One Liner, Crisp, Bright White & Perfectly Legible */}
+            <div
+              className="motion-enter mx-auto max-w-5xl px-4"
+              style={{ "--motion-step": 2 } as React.CSSProperties}
+            >
+              <p className="text-3d-tagline animate-tagline-glow font-serif text-xl font-normal tracking-wide italic sm:text-2xl sm:whitespace-nowrap md:text-3xl lg:text-[2.25rem]">
                 {hero.tagline}
               </p>
             </div>
