@@ -10,6 +10,21 @@ export const metadata: Metadata = {
   title: "Flor de Grace School Inc.",
   description:
     "Explore learning, school life, admissions, and news at Flor de Grace School Inc.",
+  icons: {
+    icon: [
+      {
+        url: "/images/logo/fgs-logo-website-1.webp",
+        type: "image/webp",
+      },
+    ],
+    shortcut: "/images/logo/fgs-logo-website-1.webp",
+    apple: [
+      {
+        url: "/images/logo/fgs-logo-website-1.webp",
+        type: "image/webp",
+      },
+    ],
+  },
   alternates: { canonical: "/" },
   // Preview and local builds remain out of search until the root launch.
   robots: {
