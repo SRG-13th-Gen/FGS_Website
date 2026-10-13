@@ -75,7 +75,7 @@ export function ArticleCategoryPicker({
   value,
   onChange,
   error,
-  gridClassName = "grid-cols-1 sm:grid-cols-3",
+  gridClassName = "sm:grid-cols-2",
 }: {
   value: ArticleCategorySlug;
   onChange: (next: ArticleCategorySlug) => void;
