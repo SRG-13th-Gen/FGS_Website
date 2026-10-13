@@ -18,8 +18,7 @@ export function NewsSection({ result }: { result: ArticleListResult }) {
         {/* Section Header with 'View More' at upper right */}
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-school-green/20 bg-school-green/5 px-3.5 py-1 text-xs font-bold tracking-widest text-school-green-dark uppercase shadow-xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-school-green" />
+            <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
               News &amp; Announcements
             </span>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
