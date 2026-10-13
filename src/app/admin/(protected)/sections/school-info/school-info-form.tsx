@@ -145,7 +145,9 @@ export function SchoolInfoForm({
         <div className="space-y-6">
           {/* School Identity */}
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">School Identity</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              School Identity
+            </h2>
             <div className="mt-4 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <TextField
@@ -180,7 +182,9 @@ export function SchoolInfoForm({
 
           {/* Contact & Location */}
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">Contact & Location</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              Contact & Location
+            </h2>
             <div className="mt-4 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <TextField
@@ -224,7 +228,9 @@ export function SchoolInfoForm({
         {/* Column 2: Footer Settings */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">Footer Tagline</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              Footer Tagline
+            </h2>
             <div className="mt-4">
               <TextareaField
                 id="footer-tagline"
@@ -240,7 +246,9 @@ export function SchoolInfoForm({
           </div>
 
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">Footer Programs</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              Footer Programs
+            </h2>
             <div className="mt-4">
               <StringListField
                 label="Programs List"

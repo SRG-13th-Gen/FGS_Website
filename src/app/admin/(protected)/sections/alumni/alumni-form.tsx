@@ -187,7 +187,9 @@ export function AlumniForm({
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3 xl:gap-8">
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm lg:col-span-1">
-          <h2 className="text-sm font-bold text-neutral-800">Section Heading</h2>
+          <h2 className="text-sm font-bold text-neutral-800">
+            Section Heading
+          </h2>
           <div className="mt-4 space-y-4">
             <TextField
               id="section-label"
@@ -225,111 +227,113 @@ export function AlumniForm({
             items={achievements}
             onChange={setAchievements}
             maxItems={MAX_ACHIEVEMENTS}
-          emptyText="No achievements yet. Add the first one to show it on the Alumni page."
-          createItem={(): AchievementForm => ({
-            name: "",
-            batch: "",
-            title: "",
-            description: "",
-            ...NO_PHOTO,
-          })}
-          error={fieldErrors.achievements}
-          renderItem={(item, update, index) => {
-            const errorFor = (field: string) =>
-              fieldErrors[`achievements.${index}.${field}`];
-            return (
-              <div className="space-y-3">
-                <TextField
-                  id={`achievement-name-${index}`}
-                  label="Alumni Name"
-                  value={item.name}
-                  onChange={(e) => update({ name: e.target.value })}
-                  error={errorFor("name")}
-                />
-                <TextField
-                  id={`achievement-batch-${index}`}
-                  label="Batch"
-                  helperText='For example "Batch 2015" or "Class of 2015".'
-                  value={item.batch}
-                  onChange={(e) => update({ batch: e.target.value })}
-                  error={errorFor("batch")}
-                />
-                <TextField
-                  id={`achievement-title-${index}`}
-                  label="Achievement"
-                  value={item.title}
-                  onChange={(e) => update({ title: e.target.value })}
-                  error={errorFor("title")}
-                />
-                <TextareaField
-                  id={`achievement-description-${index}`}
-                  label="Description"
-                  helperText="Optional."
-                  rows={2}
-                  value={item.description}
-                  onChange={(e) => update({ description: e.target.value })}
-                  error={errorFor("description")}
-                />
-                {hasPhoto(item) ? (
-                  <div className="space-y-2">
-                    <ImageField
-                      label="Photo (optional)"
-                      helperText="Alt text is required while a photo is set."
-                      recommendedSize="4:3 landscape, at least 800px wide"
-                      value={item}
-                      onChange={(next) => update(next)}
-                      error={errorFor("image.alt") || errorFor("image.mediaId")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => update({ ...NO_PHOTO })}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span>Remove photo</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <span className="block text-sm font-bold text-neutral-800">
-                      Photo (optional)
-                    </span>
-                    <div className="mt-2">
-                      <MediaPickerDialog
-                        title="Choose a photo — Alumni achievement"
-                        onSelectExisting={(media) =>
-                          update({
-                            mediaId: media.mediaId,
-                            previewUrl: media.url,
-                            pendingFile: null,
-                          })
-                        }
-                        onSelectFiles={(files) => {
-                          const file = files[0];
-                          if (!file) return;
-                          update({
-                            mediaId: 0,
-                            previewUrl: URL.createObjectURL(file),
-                            pendingFile: file,
-                          });
-                        }}
-                        trigger={
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
-                          >
-                            <ImagePlus className="h-3.5 w-3.5" />
-                            <span>Add photo</span>
-                          </button>
+            emptyText="No achievements yet. Add the first one to show it on the Alumni page."
+            createItem={(): AchievementForm => ({
+              name: "",
+              batch: "",
+              title: "",
+              description: "",
+              ...NO_PHOTO,
+            })}
+            error={fieldErrors.achievements}
+            renderItem={(item, update, index) => {
+              const errorFor = (field: string) =>
+                fieldErrors[`achievements.${index}.${field}`];
+              return (
+                <div className="space-y-3">
+                  <TextField
+                    id={`achievement-name-${index}`}
+                    label="Alumni Name"
+                    value={item.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    error={errorFor("name")}
+                  />
+                  <TextField
+                    id={`achievement-batch-${index}`}
+                    label="Batch"
+                    helperText='For example "Batch 2015" or "Class of 2015".'
+                    value={item.batch}
+                    onChange={(e) => update({ batch: e.target.value })}
+                    error={errorFor("batch")}
+                  />
+                  <TextField
+                    id={`achievement-title-${index}`}
+                    label="Achievement"
+                    value={item.title}
+                    onChange={(e) => update({ title: e.target.value })}
+                    error={errorFor("title")}
+                  />
+                  <TextareaField
+                    id={`achievement-description-${index}`}
+                    label="Description"
+                    helperText="Optional."
+                    rows={2}
+                    value={item.description}
+                    onChange={(e) => update({ description: e.target.value })}
+                    error={errorFor("description")}
+                  />
+                  {hasPhoto(item) ? (
+                    <div className="space-y-2">
+                      <ImageField
+                        label="Photo (optional)"
+                        helperText="Alt text is required while a photo is set."
+                        recommendedSize="4:3 landscape, at least 800px wide"
+                        value={item}
+                        onChange={(next) => update(next)}
+                        error={
+                          errorFor("image.alt") || errorFor("image.mediaId")
                         }
                       />
+                      <button
+                        type="button"
+                        onClick={() => update({ ...NO_PHOTO })}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:underline"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Remove photo</span>
+                      </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          }}
-        />
+                  ) : (
+                    <div>
+                      <span className="block text-sm font-bold text-neutral-800">
+                        Photo (optional)
+                      </span>
+                      <div className="mt-2">
+                        <MediaPickerDialog
+                          title="Choose a photo — Alumni achievement"
+                          onSelectExisting={(media) =>
+                            update({
+                              mediaId: media.mediaId,
+                              previewUrl: media.url,
+                              pendingFile: null,
+                            })
+                          }
+                          onSelectFiles={(files) => {
+                            const file = files[0];
+                            if (!file) return;
+                            update({
+                              mediaId: 0,
+                              previewUrl: URL.createObjectURL(file),
+                              pendingFile: file,
+                            });
+                          }}
+                          trigger={
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                            >
+                              <ImagePlus className="h-3.5 w-3.5" />
+                              <span>Add photo</span>
+                            </button>
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
         </div>
       </div>
 

@@ -171,7 +171,8 @@ export function AboutForm({
               Montessori Quote Band
             </h2>
             <p className="mt-1 text-xs text-neutral-500">
-              Shown in a quiet band between the hero and the classroom photo banner.
+              Shown in a quiet band between the hero and the classroom photo
+              banner.
             </p>
             <div className="mt-4 space-y-4">
               <TextareaField
@@ -236,7 +237,9 @@ export function AboutForm({
         {/* Column 2: About Us Section & Mission / Vision */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">About Us Section</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              About Us Section
+            </h2>
             <div className="mt-4 space-y-4">
               <TextField
                 id="section-label"

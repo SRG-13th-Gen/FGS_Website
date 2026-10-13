@@ -175,7 +175,9 @@ export function AdmissionForm({
         {/* Column 1: Section Heading, Background Photo, Programs */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-sm">
-            <h2 className="text-sm font-bold text-neutral-800">Section Heading</h2>
+            <h2 className="text-sm font-bold text-neutral-800">
+              Section Heading
+            </h2>
             <div className="mt-4 space-y-4">
               <TextField
                 id="section-label"
