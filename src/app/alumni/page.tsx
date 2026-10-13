@@ -70,8 +70,7 @@ export default async function AlumniPage() {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal>
-              <span className="inline-flex items-center gap-2 rounded-full border border-school-green/20 bg-school-green/5 px-3.5 py-1 text-xs font-bold tracking-widest text-school-green-dark uppercase shadow-xs">
-                <span className="h-1.5 w-1.5 rounded-full bg-school-green" />
+              <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
                 Community &amp; Connections
               </span>
               <h2

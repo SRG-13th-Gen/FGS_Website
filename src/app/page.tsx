@@ -1,13 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Image from "next/image";
-import {
-  CheckCircle2,
-  Sparkles,
-  Compass,
-  Lightbulb,
-  Check,
-} from "lucide-react";
+import { CheckCircle2, Compass, Lightbulb, Check } from "lucide-react";
 
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
@@ -70,44 +64,81 @@ export default async function Home() {
             quality={90}
           />
 
-          {/* Atmospheric multi-layer dark radial overlay for visual depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/75" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.2)_0%,_rgba(0,0,0,0.6)_70%,_rgba(0,0,0,0.85)_100%)]" />
+          {/* Balanced cinematic ambient overlay - keeps graduation photo bright, vibrant, and clear */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/40" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0)_0%,_rgba(0,0,0,0.35)_100%)]" />
 
-          {/* Ambient glowing starlight / petal motes in background */}
+          {/* Ambient glowing starlight & botanical particles in background */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <span className="animate-drift-particle absolute top-1/4 left-1/5 h-2 w-2 rounded-full bg-school-yellow/50 blur-[1px]" />
+            <span className="animate-particle-1 absolute top-[15%] left-[8%] h-1.5 w-1.5 rounded-full bg-white/70 blur-[0.5px]" />
             <span
-              className="animate-drift-particle absolute top-1/3 right-1/4 h-3 w-3 rounded-full bg-school-green/50 blur-[2px]"
+              className="animate-particle-2 absolute top-[22%] left-[25%] h-2 w-2 rounded-full bg-school-yellow/60 blur-[1px]"
+              style={{ animationDelay: "1s" }}
+            />
+            <span
+              className="animate-particle-3 absolute top-[12%] right-[15%] h-2.5 w-2.5 rounded-full bg-school-green/50 blur-[1px]"
               style={{ animationDelay: "2s" }}
             />
             <span
-              className="animate-drift-particle absolute bottom-1/3 left-1/3 h-2.5 w-2.5 rounded-full bg-school-yellow/40 blur-[1px]"
+              className="animate-particle-1 absolute top-[28%] right-[32%] h-1 w-1 rounded-full bg-white/80"
+              style={{ animationDelay: "3s" }}
+            />
+            <span
+              className="animate-particle-2 absolute top-[45%] left-[12%] h-2 w-2 rounded-full bg-emerald-300/50 blur-[1px]"
               style={{ animationDelay: "4s" }}
             />
             <span
-              className="animate-drift-particle absolute top-2/3 right-1/5 h-2 w-2 rounded-full bg-emerald-400/40 blur-[1px]"
+              className="animate-particle-3 absolute top-[40%] left-[38%] h-1.5 w-1.5 rounded-full bg-school-yellow/70"
+              style={{ animationDelay: "1.5s" }}
+            />
+            <span
+              className="animate-particle-1 absolute top-[48%] right-[10%] h-2.5 w-2.5 rounded-full bg-white/60 blur-[1px]"
+              style={{ animationDelay: "5s" }}
+            />
+            <span
+              className="animate-particle-2 absolute top-[52%] right-[28%] h-2 w-2 rounded-full bg-school-yellow/60 blur-[1px]"
+              style={{ animationDelay: "2.5s" }}
+            />
+            <span
+              className="animate-particle-3 absolute bottom-[30%] left-[18%] h-3 w-3 rounded-full bg-school-green/40 blur-[2px]"
               style={{ animationDelay: "6s" }}
+            />
+            <span
+              className="animate-particle-1 absolute bottom-[25%] left-[42%] h-1.5 w-1.5 rounded-full bg-white/75"
+              style={{ animationDelay: "3.5s" }}
+            />
+            <span
+              className="animate-particle-2 absolute right-[18%] bottom-[28%] h-2 w-2 rounded-full bg-school-yellow/60 blur-[1px]"
+              style={{ animationDelay: "4.5s" }}
+            />
+            <span
+              className="animate-particle-3 absolute right-[38%] bottom-[35%] h-1 w-1 rounded-full bg-emerald-200/80"
+              style={{ animationDelay: "7s" }}
+            />
+            <span
+              className="animate-particle-1 absolute bottom-[15%] left-[10%] h-2 w-2 rounded-full bg-white/65 blur-[1px]"
+              style={{ animationDelay: "5.5s" }}
+            />
+            <span
+              className="animate-particle-2 absolute bottom-[12%] left-[28%] h-2.5 w-2.5 rounded-full bg-school-yellow/50 blur-[1.5px]"
+              style={{ animationDelay: "8s" }}
+            />
+            <span
+              className="animate-particle-3 absolute right-[12%] bottom-[18%] h-1.5 w-1.5 rounded-full bg-school-green/60"
+              style={{ animationDelay: "6.5s" }}
+            />
+            <span
+              className="animate-particle-1 absolute right-[30%] bottom-[10%] h-2 w-2 rounded-full bg-white/70 blur-[1px]"
+              style={{ animationDelay: "7.5s" }}
             />
           </div>
 
           {/* Centered content with 3D perspective and subtle floating depth */}
           <div className="animate-float-hero relative z-10 mx-auto max-w-4xl px-4 py-20 text-center">
-            {/* Top Badge Pill */}
-            <div
-              className="motion-enter inline-flex items-center gap-2 rounded-full border border-school-yellow/40 bg-black/45 px-4 py-1.5 shadow-[0_0_20px_rgba(234,218,43,0.25)] backdrop-blur-md"
-              style={{ "--motion-step": 0 } as React.CSSProperties}
-            >
-              <Sparkles className="h-3.5 w-3.5 animate-pulse text-school-yellow" />
-              <span className="text-[11px] font-bold tracking-[0.25em] text-school-yellow uppercase sm:text-xs">
-                DepEd Recognized • Preschool to Grade 6
-              </span>
-            </div>
-
             {/* 3D Animated Headline */}
             <h1
-              className="motion-enter mt-6 text-4xl leading-tight font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
-              style={{ "--motion-step": 1 } as React.CSSProperties}
+              className="motion-enter text-4xl leading-tight font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+              style={{ "--motion-step": 0 } as React.CSSProperties}
             >
               {hero.heading.split("\n").map((line, index, lines) => (
                 <span
@@ -124,24 +155,12 @@ export default async function Home() {
               ))}
             </h1>
 
-            {/* 3D Animated Filigree Crest Divider */}
+            {/* 3D Tagline - Crisp, Bright White & Perfectly Legible */}
             <div
-              className="motion-enter relative mx-auto mt-7 flex items-center justify-center gap-3"
-              style={{ "--motion-step": 2 } as React.CSSProperties}
+              className="motion-enter mx-auto mt-8 max-w-3xl px-4"
+              style={{ "--motion-step": 1 } as React.CSSProperties}
             >
-              <div className="h-[2px] w-14 bg-gradient-to-r from-transparent via-school-green to-school-green sm:w-28" />
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-full border border-school-yellow/60 bg-school-green/50 shadow-[0_0_15px_rgba(84,180,53,0.7)] backdrop-blur-sm">
-                <span className="h-2 w-2 rounded-full bg-school-yellow shadow-[0_0_8px_#eada2b]" />
-              </div>
-              <div className="h-[2px] w-14 bg-gradient-to-l from-transparent via-school-green to-school-green sm:w-28" />
-            </div>
-
-            {/* 3D Radiant Shimmer Tagline */}
-            <div
-              className="motion-enter mx-auto mt-7 max-w-2xl px-2"
-              style={{ "--motion-step": 3 } as React.CSSProperties}
-            >
-              <p className="animate-shimmer-sweep text-3d-tagline font-serif text-xl font-medium tracking-wide italic sm:text-2xl md:text-3xl">
+              <p className="text-3d-tagline animate-tagline-glow font-serif text-2xl font-normal tracking-wide italic sm:text-3xl md:text-4xl lg:text-[2.5rem]">
                 {hero.tagline}
               </p>
             </div>
@@ -205,27 +224,41 @@ export default async function Home() {
           {/* Content */}
           <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-semibold tracking-wider text-school-yellow uppercase backdrop-blur-md">
-                <Sparkles className="h-3.5 w-3.5" /> Montessori Learning
-                Environment
+              <span className="text-xs font-bold tracking-[0.2em] text-school-yellow uppercase">
+                Montessori Learning Environment
               </span>
-              <h2 className="mt-4 text-3xl leading-tight font-extrabold tracking-tight text-white drop-shadow-md sm:text-4xl lg:text-5xl">
+              <h2 className="mt-3 text-3xl leading-tight font-extrabold tracking-tight text-white drop-shadow-md sm:text-4xl lg:text-5xl">
                 {about.featureBanner.heading}
               </h2>
               <div className="mt-4 h-1 w-16 rounded-full bg-school-green" />
               <p className="mt-6 text-base leading-relaxed text-white/90 sm:max-w-xl sm:text-lg">
                 {about.featureBanner.body}
               </p>
-              <div className="mt-8 flex flex-wrap gap-2.5">
-                <span className="rounded-xl border border-white/20 bg-black/40 px-3.5 py-1.5 text-xs font-semibold text-white/95 backdrop-blur-md">
-                  ✓ Child-Centered Atmosphere
-                </span>
-                <span className="rounded-xl border border-white/20 bg-black/40 px-3.5 py-1.5 text-xs font-semibold text-white/95 backdrop-blur-md">
-                  ✓ Hands-On Discovery
-                </span>
-                <span className="rounded-xl border border-white/20 bg-black/40 px-3.5 py-1.5 text-xs font-semibold text-white/95 backdrop-blur-md">
-                  ✓ Values-Centered Formation
-                </span>
+              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="border-l-2 border-school-green pl-3.5">
+                  <span className="block text-sm font-bold text-white">
+                    Child-Centered
+                  </span>
+                  <span className="mt-0.5 block text-xs text-white/75">
+                    Atmosphere
+                  </span>
+                </div>
+                <div className="border-l-2 border-school-green pl-3.5">
+                  <span className="block text-sm font-bold text-white">
+                    Hands-On
+                  </span>
+                  <span className="mt-0.5 block text-xs text-white/75">
+                    Discovery
+                  </span>
+                </div>
+                <div className="border-l-2 border-school-green pl-3.5">
+                  <span className="block text-sm font-bold text-white">
+                    Values-Centered
+                  </span>
+                  <span className="mt-0.5 block text-xs text-white/75">
+                    Formation
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -236,7 +269,7 @@ export default async function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <Reveal className="mx-auto max-w-3xl text-center">
-              <span className="inline-block rounded-full bg-school-green-light px-4 py-1 text-xs font-bold tracking-widest text-school-green-dark uppercase shadow-xs">
+              <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
                 {about.sectionLabel}
               </span>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
@@ -362,7 +395,7 @@ export default async function Home() {
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal className="mx-auto max-w-2xl text-center">
-              <span className="inline-block rounded-full bg-school-green-light px-4 py-1 text-xs font-bold tracking-widest text-school-green-dark uppercase shadow-xs">
+              <span className="text-xs font-bold tracking-widest text-school-green-dark uppercase">
                 {admission.sectionLabel}
               </span>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
@@ -442,7 +475,7 @@ export default async function Home() {
             {/* Requirements List */}
             <div className="mt-24">
               <Reveal className="mx-auto max-w-2xl text-center">
-                <span className="inline-block rounded-full bg-neutral-200/60 px-3.5 py-1 text-xs font-bold tracking-wider text-neutral-700 uppercase">
+                <span className="text-xs font-bold tracking-wider text-neutral-600 uppercase">
                   Documentation Checklist
                 </span>
                 <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">
@@ -516,7 +549,7 @@ export default async function Home() {
             <div className="mt-24">
               <Reveal>
                 <div className="mx-auto max-w-2xl text-center">
-                  <span className="inline-block rounded-full bg-school-green-light px-3.5 py-1 text-xs font-bold tracking-wider text-school-green-dark uppercase">
+                  <span className="text-xs font-bold tracking-wider text-school-green-dark uppercase">
                     Simple 3-Step Journey
                   </span>
                   <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">
@@ -569,7 +602,7 @@ export default async function Home() {
 
           <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal className="mx-auto max-w-2xl text-center">
-              <span className="inline-block rounded-full border border-school-yellow/30 bg-school-yellow/10 px-4 py-1 text-xs font-bold tracking-widest text-school-yellow uppercase backdrop-blur-md">
+              <span className="text-xs font-bold tracking-widest text-school-yellow uppercase">
                 {contact.sectionLabel}
               </span>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
