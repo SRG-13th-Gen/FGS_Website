@@ -10,11 +10,11 @@ export default async function AdminGallerySectionPage() {
   const initial = await galleryContent.get();
 
   return (
-    <div className="space-y-1">
+    <div className="flex flex-1 flex-col space-y-4">
       <p className="text-sm text-neutral-500">
         Fields appear in the same order as on the homepage Gallery section.
       </p>
-      <div className="pt-5">
+      <div className="flex flex-1 flex-col">
         <GalleryForm initial={initial} revision={revision} />
       </div>
     </div>
